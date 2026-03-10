@@ -19,7 +19,7 @@ SRC_DIR = srcs/
 OBJ_DIR = objs/
 INCLUDES = include/
 
-SRCS = main.cpp srcs/Server.cpp
+SRCS = main.cpp srcs/Server/Server.cpp
 
 SRCS := $(addprefix $(SRC_DIR),$(SRCS))
 OBJS = $(SRCS:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
