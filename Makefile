@@ -16,10 +16,10 @@ CXX = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR = srcs/
-INCLUDES = includes/
 OBJ_DIR = objs/
+INCLUDES = include/
 
-SRCS = 
+SRCS = main.cpp srcs/Server/Server.cpp
 
 SRCS := $(addprefix $(SRC_DIR),$(SRCS))
 OBJS = $(SRCS:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)

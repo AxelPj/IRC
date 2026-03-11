@@ -1,0 +1,137 @@
+#include "../include/Server.hpp"
+
+Server::Server(int port, std::string password)
+{
+    if (port < 1024 || port > 65535)
+        throw std::invalid_argument("Error Port invalide");
+    else
+        this->_port = port;
+    if (password.empty())
+        this->_password = "default";
+    else
+        this->_password = password;
+}
+
+void    Server::init()
+{
+    // use struct sockaddr_in to bind the socket to the specified port and listen for incoming connections
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(this->_port);
+    addr.sin_addr.s_addr = INADDR_ANY;
+    int opt = 1;
+
+    // create a socket with AF_INET, SOCK_STREAM, 0,
+    // AF_INET is the address family for IPv4, SOCK_STREAM is the type of socket for TCP, and 0 is the protocol (0 is the default protocol)
+    this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (this->_sockfd == INVALID_SOCKET)
+        throw std::runtime_error("Error: with creating socket");
+    std::cout << "Socket created" << std::endl;
+    // Set socket options at socket level to allow port reuse
+    if (setsockopt(this->_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+        throw std::runtime_error("setsockopt failed");
+    std::cout << "socket is set" << std::endl;
+    //port reservation with the function bind
+    if (bind(this->_sockfd, (sockaddr*)&addr, sizeof(addr)) < 0)
+        throw std::runtime_error("Error: bind failed");
+    else
+        std::cout << "Server binded on port " << this->_port << std::endl;
+    if (listen(this->_sockfd, 5) < 0)
+        throw std::runtime_error("Error: listen failed");
+    else
+        std::cout << "Server is listening on port " << this->_port << std::endl;
+}
+
+Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
+{
+    socklen_t ptrSizestruct = sizeof(*addr);
+    newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
+    newSocketclient->events = POLLIN;
+    newSocketclient->revents = 0;
+    Client newclient(addr, this->_socketIrc[0]);
+    return (newClient);
+}
+
+bool    Server::recvClient(pollfd socketclient)
+{
+    int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
+    bool signal = false;
+    if (ret == 0)
+        return(0);
+    //else if (ret == -1)
+        //function erreur
+    //else
+        //sends to the parser will send, take the buffer and the pollfd socketclient as parametersn
+    return (signal);
+}
+
+void Server::removeClient(int fdClient, int i)
+{
+    this->_socketIrc.erase(this->_socketIrc.begin() + i);
+    this->_listClient.erase(fdClient);
+}
+
+void    Server::run()
+{
+    //init function poll (struct pollfd)
+    struct sockaddr_in addr;
+    pollfd socketServ;
+    socketServ.fd = this->_sockfd;
+    socketServ.events = POLLIN;
+    socketServ.revents = 0;
+    socketIrc.push_back(socketServ);
+    int pollAccept;
+    while (1)
+    {
+        pollAccept = poll(this->_socketIrc.data(), this->_socketIrc.size(), -1);
+        if (pollReady == -1)
+		{
+            throw std::runtime_error("Error: poll for accept");
+			break;
+		}
+        for(int i = 0; i < this->_socketIrc.size(); i++)
+        {
+            // & = binary verification in value POLLIN
+            if (this->_socketIrc[i].revents & POLLIN)
+            {
+                if (i == 0)
+                {
+                    // if socket listen is that of the Server, call acceptClient() for create NewClient and fill data map and vector
+                    pollfd newSocketClient;
+                    struct sockaddr_in addr;
+                    Client newClient = acceptClient(&addr, &newSocketClient);
+                    if (newSocketClient.fd == -1)
+                    {
+                        std::cerr << "Error: client socket aborts" << std::endl;
+                        continue ;
+                    }
+                    this->_socketIrc.push_back(newSocketClient);
+                    this->_listClient[newSocketClient.fd] = newClient;
+                }
+                //if socket listen is that of the client, call recvclient() for fill the buffer
+                //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
+                else
+                    if (recvClient(this->_socketIrc[i]) == false)
+                        removeClient(this->_socketIrc[i].fd, i);
+            }
+        }
+    }
+}
+
+Server::~Server()
+{
+    close(this->_sockfd);
+    std::cout << "Server closed madafucka" << std::endl;
+}
+
+// getters 
+int Server::get_port() const
+{
+    return (this->_port);
+}
+
+int Server::get_sockfd() const
+{
+    return (this->_sockfd);
+}
+
