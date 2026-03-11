@@ -17,12 +17,5 @@ int main(int ac, char **av)
         std::cerr << e.what() << std::endl;
         return (1);
     }
-
-    while (1)
-    {
-        
-        if (poll());
-
-    }
     return (0);
 }

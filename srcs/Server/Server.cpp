@@ -25,7 +25,7 @@ void    Server::init()
     // AF_INET is the address family for IPv4, SOCK_STREAM is the type of socket for TCP, and 0 is the protocol (0 is the default protocol)
     this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->_sockfd == INVALID_SOCKET)
-        throw std::runtime_error("Error with creating socket");
+        throw std::runtime_error("Error: with creating socket");
     std::cout << "Socket created" << std::endl;
     // Set socket options at socket level to allow port reuse
     if (setsockopt(this->_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
@@ -33,46 +33,48 @@ void    Server::init()
     std::cout << "socket is set" << std::endl;
     //port reservation with the function bind
     if (bind(this->_sockfd, (sockaddr*)&addr, sizeof(addr)) < 0)
-        throw std::runtime_error("bind failed");
+        throw std::runtime_error("Error: bind failed");
     else
         std::cout << "Server binded on port " << this->_port << std::endl;
     if (listen(this->_sockfd, 5) < 0)
-        throw std::runtime_error("Error : listen failed");
+        throw std::runtime_error("Error: listen failed");
     else
         std::cout << "Server is listening on port " << this->_port << std::endl;
 }
 
-pollfd Server::acceptClient(pollfd socketserv)
+Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
 {
-    struct sockaddr_in addr;
-    pollfd newSocketclient;
-    socklen_t ptrSizestruct = sizeof(addr);
-    newSocketclient.fd = accept(socketserv.fd, (sockaddr*)&addr, &ptrSizestruct);
-    newSocketclient.events = POLLIN;
-    newSocketclient.revents = 0;
-    return newSocketclient;
+    socklen_t ptrSizestruct = sizeof(*addr);
+    newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
+    newSocketclient->events = POLLIN;
+    newSocketclient->revents = 0;
+    Client newclient(addr, this->_socketIrc[0]);
+    return (newClient);
 }
 
-int    Server::recvClient(pollfd socketclient)
+bool    Server::recvClient(pollfd socketclient)
 {
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-    int signal;
+    bool signal = false;
     if (ret == 0)
         return(0);
-    else if (ret == -1);
+    //else if (ret == -1)
         //function erreur
-    else;
-        //envoie au parser qui prendra en parametre le buffer et le pollfd socketclient
-        //pour l'envoie au differente fonction
+    //else
+        //sends to the parser will send, take the buffer and the pollfd socketclient as parametersn
     return (signal);
+}
+
+void Server::removeClient(int fdClient, int i)
+{
+    this->_socketIrc.erase(this->_socketIrc.begin() + i);
+    this->_listClient.erase(fdClient);
 }
 
 void    Server::run()
 {
     //init function poll (struct pollfd)
     struct sockaddr_in addr;
-    std::vector<pollfd> socketIrc;
-    // maybe variable std::map<Client, pollfd> ?? 
     pollfd socketServ;
     socketServ.fd = this->_sockfd;
     socketServ.events = POLLIN;
@@ -81,38 +83,36 @@ void    Server::run()
     int pollAccept;
     while (1)
     {
-        pollAccept = poll(&socketIrc[0], socketIrc.size(), -1);
-        for(int i = 0; i < socketIrc.size(); i++)
+        pollAccept = poll(this->_socketIrc.data(), this->_socketIrc.size(), -1);
+        if (pollReady == -1)
+		{
+            throw std::runtime_error("Error: poll for accept");
+			break;
+		}
+        for(int i = 0; i < this->_socketIrc.size(); i++)
         {
             // & = binary verification in value POLLIN
-            if (socketIrc[i].revents & POLLIN)
+            if (this->_socketIrc[i].revents & POLLIN)
             {
                 if (i == 0)
                 {
-                    pollfd ret;
-                    ret = acceptClient(socketIrc[0]);
-                    if (ret.fd == -1)
+                    // if socket listen is that of the Server, call acceptClient() for create NewClient and fill data map and vector
+                    pollfd newSocketClient;
+                    struct sockaddr_in addr;
+                    Client newClient = acceptClient(&addr, &newSocketClient);
+                    if (newSocketClient.fd == -1)
                     {
                         std::cerr << "Error: client socket aborts" << std::endl;
-                        continue;
+                        continue ;
                     }
-                    socketIrc.push_back(ret);
-                    //create client (class)
-                    //other
+                    this->_socketIrc.push_back(newSocketClient);
+                    this->_listClient[newSocketClient.fd] = newClient;
                 }
+                //if socket listen is that of the client, call recvclient() for fill the buffer
+                //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
                 else
-                {
-                    int ret = recvClient(socketIrc[i]); //rajouter la classe client en raport au socket fd ?
-                    //gerer la deco d'un client?
-                    if (ret == 0)
-                    {
-                        //gestion du fd et du vector
-                    }
-                    if (ret == -1) //erreur recv
-                    {
-                        //gestion du fd et du vector
-                    }
-                }
+                    if (recvClient(this->_socketIrc[i]) == false)
+                        removeClient(this->_socketIrc[i].fd, i);
             }
         }
     }
@@ -121,7 +121,7 @@ void    Server::run()
 Server::~Server()
 {
     close(this->_sockfd);
-    std::cout << "Server closed" << std::endl;
+    std::cout << "Server closed madafucka" << std::endl;
 }
 
 // getters 
