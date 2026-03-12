@@ -1,13 +1,48 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+/*Classe Client (fd, nick, user, état auth), 
+Authentification mot de passe, Gestion pseudo, 
+Enregistrement utilisateur, Déconnexion propre, 
+Messages directs, Keepalive*/
 
+// PASS(?), USER(?), 
+// NICK = change Nickname,
+// QUIT = disconnect from the server,
+// RECONNECT = attempt to reconnect to the server,
+// PRIVMSG = send a private message to a user or channel,
+// NOTICE = send a notice to a user or channel,
+// PING, PONG = keep-alive messages (not mandatory).
+
+#pragma once
+
+#include <iostream>
 #include "Server.hpp"
 
-class Client
-{
-    private:
-        Client();
-        Client(pollfd Socketclient, sockaddr_in addrClient);
-};
+class Client {
+	public :
+		Client();
+		Client(sockaddr_in addrClient, pollfd Socketclient);
+		Client& operator=(const Client& other);
+		~Client();
 
-#endif
+		//Getters//
+		std::string getPassword();
+		std::string getAdress();
+		std::string getNick();
+		std::string getSecond();
+		std::string getThird();
+		std::string getUser();
+
+		//Commands//
+		int cmdNick(const std::string& newNick, const Client& client);
+		int cmdQuit(const Client& client);
+		int cmdReconnect(const Client& client);
+
+	private :
+		bool _ops;
+		int _fd;
+		std::string _password;
+		std::string _adress;
+		std::string _nick;
+		std::string _second;
+		std::string _third;
+		std::string _username;
+};
