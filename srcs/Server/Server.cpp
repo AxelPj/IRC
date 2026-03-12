@@ -89,7 +89,7 @@ void    Server::run()
             throw std::runtime_error("Error: poll for accept");
 			break;
 		}
-        for(int i = 0; i < this->_socketIrc.size(); i++)
+        for(unsigned long int i = 0; i < this->_socketIrc.size(); i++)
         {
             // & = binary verification in value POLLIN
             if (this->_socketIrc[i].revents & POLLIN)
