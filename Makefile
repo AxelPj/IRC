@@ -6,20 +6,20 @@
 #    By: gdelhota <gdelhota@student.42perpignan.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/06 15:31:02 by gdelhota          #+#    #+#              #
-#    Updated: 2026/03/06 15:47:52 by gdelhota         ###   ########.fr        #
+#    Updated: 2026/03/12 04:31:44 by gdelhota         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ircserv
 
 CXX = c++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98
+CPPFLAGS = -Wall -Wextra -Werror #-std=c++98
 
 SRC_DIR = srcs/
 OBJ_DIR = objs/
 INCLUDES = include/
 
-SRCS = main.cpp srcs/Server/Server.cpp
+SRCS = main.cpp Server/Server.cpp
 
 SRCS := $(addprefix $(SRC_DIR),$(SRCS))
 OBJS = $(SRCS:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)

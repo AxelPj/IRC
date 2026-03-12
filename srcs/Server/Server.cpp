@@ -48,7 +48,7 @@ Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
     newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    Client newclient(addr, this->_socketIrc[0]);
+    Client newClient(addr, this->_socketIrc[0]);
     return (newClient);
 }
 
@@ -74,22 +74,22 @@ void Server::removeClient(int fdClient, int i)
 void    Server::run()
 {
     //init function poll (struct pollfd)
-    struct sockaddr_in addr;
+    //struct sockaddr_in addr;
     pollfd socketServ;
     socketServ.fd = this->_sockfd;
     socketServ.events = POLLIN;
     socketServ.revents = 0;
-    socketIrc.push_back(socketServ);
+    _socketIrc.push_back(socketServ);
     int pollAccept;
     while (1)
     {
         pollAccept = poll(this->_socketIrc.data(), this->_socketIrc.size(), -1);
-        if (pollReady == -1)
+        if (pollAccept == -1)
 		{
             throw std::runtime_error("Error: poll for accept");
 			break;
 		}
-        for(int i = 0; i < this->_socketIrc.size(); i++)
+        for(unsigned long int i = 0; i < this->_socketIrc.size(); i++)
         {
             // & = binary verification in value POLLIN
             if (this->_socketIrc[i].revents & POLLIN)
