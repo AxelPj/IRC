@@ -1,4 +1,4 @@
-#include "../include/Server.hpp"
+#include "Server.hpp"
 
 Server::Server(int port, std::string password)
 {
@@ -48,7 +48,7 @@ Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
     newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    Client newClient(addr, this->_socketIrc[0]);
+    Client newClient(*addr, this->_socketIrc[0]);
     return (newClient);
 }
 
@@ -69,6 +69,22 @@ void Server::removeClient(int fdClient, int i)
 {
     this->_socketIrc.erase(this->_socketIrc.begin() + i);
     this->_listClient.erase(fdClient);
+}
+
+void    sendMessage(char *msg, int size, int socket)
+{
+    int ret = size;
+
+    while (ret != 0)
+    {
+        ret = send (socket, msg, size, 0);
+        if (ret == -1)
+            std::cerr << "Error: impossible send message to client";
+        else if (ret == 0)
+            break ;
+        else
+            msg += ret;
+    }
 }
 
 void    Server::run()
@@ -111,8 +127,28 @@ void    Server::run()
                 //if socket listen is that of the client, call recvclient() for fill the buffer
                 //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
                 else
+                {
                     if (recvClient(this->_socketIrc[i]) == false)
+                    {
                         removeClient(this->_socketIrc[i].fd, i);
+                        i--;
+                    }
+                }
+            }
+            else if (this->_socketIrc[i].revents & POLLERR)
+            {
+                sendMessage("Error : event POLLERR", i, this->_socketIrc[i].fd);
+                removeClient(this->_socketIrc[i].fd, i);
+                i--; 
+            }
+            else if ((this->_socketIrc[i].revents & POLLHUP) || (this->_socketIrc[i].revents & POLLNVAL))
+            {
+                removeClient(this->_socketIrc[i].fd, i);
+                i--;
+            }
+            else if (this->_socketIrc[i].revents & POLLOUT)
+            {
+
             }
         }
     }
@@ -125,13 +161,22 @@ Server::~Server()
 }
 
 // getters 
-int Server::get_port() const
+int Server::getPort() const
 {
     return (this->_port);
 }
 
-int Server::get_sockfd() const
+int Server::getSockfd() const
 {
     return (this->_sockfd);
 }
 
+char   *Server::getBuffer()
+{
+    return(this->_buffer);
+}
+
+pollfd Server::getpollfd(int i) const
+{
+    return(this->_socketIrc[i]);
+}

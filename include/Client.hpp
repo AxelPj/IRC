@@ -19,7 +19,7 @@ Messages directs, Keepalive*/
 class Client {
 	public :
 		Client();
-		Client(sockaddr_in addrClient, pollfd Socketclient);
+			Client(const sockaddr_in addrClient, const pollfd Socketclient);
 		Client& operator=(const Client& other);
 		~Client();
 

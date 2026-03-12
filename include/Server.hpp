@@ -27,14 +27,12 @@ class Server
         int                     _signal;
         std::map<int, Client>   _listClient;
         std::vector<pollfd>     _socketIrc;
-        /*         std::map<enum idChall, std::string nameChannel> _channels;
-        std::map<int idUser, std::string username> _users; */
         std::string             _password;
         void quit();
+        char    _buffer[1024];
         /*         void ping(Client user);
         */        
        public:
-        char    _buffer[1024];
         Server(int port, std::string password);
         ~Server();
         void    init();
@@ -44,13 +42,13 @@ class Server
         void    addToChannel();
         void    addChannel(std::string channel);
         void    removeChannel(std::string channel);
-		void	removeClient(int fdClient, int i);
-
+	    void	removeClient(int fdClient, int i);
+        void    sendMessage(char *msg, int size, int socket);         
         // getters
-        int     get_port() const;
-        int     get_sockfd() const;
-        char    *get_buffer() const;
-/*         void    sendMessage(std::string message, Client user);
- */};
+        int     getPort() const;
+        int     getSockfd() const;
+        char    *getBuffer();
+        pollfd  getpollfd(int i) const;
+};
 
 #endif
