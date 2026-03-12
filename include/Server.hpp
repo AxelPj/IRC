@@ -1,9 +1,13 @@
+#ifndef SERVER_HPP
+#define SERVER_HPP
+
 #include <iostream>
 #include <list>
 #include <map>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <vector>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -11,6 +15,8 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+
+class Client;
 
 class Server
 {
@@ -38,6 +44,7 @@ class Server
         void    addToChannel();
         void    addChannel(std::string channel);
         void    removeChannel(std::string channel);
+		void	removeClient(int fdClient, int i);
 
         // getters
         int     get_port() const;
@@ -46,4 +53,4 @@ class Server
 /*         void    sendMessage(std::string message, Client user);
  */};
 
-
+#endif

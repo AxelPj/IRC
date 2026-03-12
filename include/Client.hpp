@@ -1,3 +1,6 @@
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
+
 #include "Server.hpp"
 
 class Client
@@ -6,3 +9,5 @@ class Client
         Client();
         Client(pollfd Socketclient, sockaddr_in addrClient);
 };
+
+#endif
