@@ -20,6 +20,7 @@ class Channel
 		std::map<Client, bool>	_memberList;
 		//todo banlist container
 		
+		void	join(Client user);
 		void	setMode(bool isRemoved, int mask);
 		//void	setUserMode(Client user, bool isRemoved, int mask);
 		void	removeUser(Client user);
