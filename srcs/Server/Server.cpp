@@ -52,17 +52,28 @@ Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
     return (newClient);
 }
 
-bool    Server::recvClient(pollfd socketclient)
+bool    Server::recvClient(pollfd socketclient, Client &client)
 {
+    std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-    bool signal = false;
+    buffer = this->_buffer;
     if (ret == 0)
-        return(0);
-    //else if (ret == -1)
-        //function erreur
-    //else
-        //sends to the parser will send, take the buffer and the pollfd socketclient as parametersn
-    return (signal);
+        return(false);
+    else if (ret == -1)
+        return(false);
+    client.setAddBuffer(this->_buffer);
+    while (buffer.find("\r\n") != std::string::npos)
+    {
+        int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
+        buffer = this->_buffer;
+        if (ret == 0)
+            return(0);
+        else if (ret == -1)
+            return(false);
+        client.setAddBuffer(this->_buffer);
+    }
+    //sends to the parser with take client
+    return (true);
 }
 
 void Server::removeClient(int fdClient, int i)
@@ -71,21 +82,25 @@ void Server::removeClient(int fdClient, int i)
     this->_listClient.erase(fdClient);
 }
 
-void    sendMessage(char *msg, int size, int socket)
+void    Server::sendMsg(std::string msg, int socket)
 {
-    int ret = size;
-
-    while (ret != 0)
+    int ret;
+    const char *buf = msg.c_str();
+    while (strlen(buf) != 0)
     {
-        ret = send (socket, msg, size, 0);
+        ret = send(socket, buf, strlen(buf), 0);
         if (ret == -1)
+        {
             std::cerr << "Error: impossible send message to client";
+            break ;
+        }
         else if (ret == 0)
             break ;
         else
-            msg += ret;
+            buf += ret;
     }
 }
+
 
 void    Server::run()
 {
@@ -121,6 +136,7 @@ void    Server::run()
                         std::cerr << "Error: client socket aborts" << std::endl;
                         continue ;
                     }
+                    sendMsg("Welcome to Irc server" ,newSocketClient.fd);
                     this->_socketIrc.push_back(newSocketClient);
                     this->_listClient[newSocketClient.fd] = newClient;
                 }
@@ -128,16 +144,22 @@ void    Server::run()
                 //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
                 else
                 {
-                    if (recvClient(this->_socketIrc[i]) == false)
+                    if (recvClient(this->_socketIrc[i], this->_listClient[this->_socketIrc[i].fd]) == false)
                     {
                         removeClient(this->_socketIrc[i].fd, i);
                         i--;
                     }
+                    else 
+                    {
+                        processParser(this->_listClient[this->_socketIrc[i].fd]);
+                
+                    }
+            
                 }
             }
             else if (this->_socketIrc[i].revents & POLLERR)
             {
-                sendMessage("Error : event POLLERR", i, this->_socketIrc[i].fd);
+                sendMsg("Error : event POLLERR", this->_socketIrc[i].fd);
                 removeClient(this->_socketIrc[i].fd, i);
                 i--; 
             }

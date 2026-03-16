@@ -15,11 +15,31 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+enum e_cmd
+{
+    NICK,
+    JOIN,
+    PART,
+    PRIVMSG,
+    KICK,
+    INVITE,
+    TOPIC,
+    MODE,
+    QUIT,
+    PING,
+    PONG,
+    UNKNOWN
+};
 
+enum e_mode
+{
+    
+}
 class Client;
 
 class Server
 {
+    
     private:
         Server();
         int                     _port;
@@ -29,7 +49,7 @@ class Server
         std::vector<pollfd>     _socketIrc;
         std::string             _password;
         void quit();
-        char    _buffer[1024];
+        char             _buffer[1024];
         /*         void ping(Client user);
         */        
        public:
@@ -38,12 +58,17 @@ class Server
         void    init();
         void    run();
         Client  acceptClient(sockaddr_in *addr, pollfd *newSocketclient);
-        bool    recvClient(pollfd socketclient);
+        bool    recvClient(pollfd socketclient, Client &client);
         void    addToChannel();
         void    addChannel(std::string channel);
         void    removeChannel(std::string channel);
 	    void	removeClient(int fdClient, int i);
-        void    sendMessage(char *msg, int size, int socket);         
+        void    sendMsg(std::string msg, int socket);
+
+        //Parser
+        void                processParser(Client &client);
+        std::vector<std::string>  tokenParser(std::string buffer);
+        e_cmd               choiceParser(std::vector<char*> buffer);
         // getters
         int     getPort() const;
         int     getSockfd() const;

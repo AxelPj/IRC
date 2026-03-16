@@ -53,6 +53,21 @@ std::string Client::getUser() {
 	return this->_username;
 }
 
+std::string	Client::getBuffer()
+{
+	return(this->_buffer);
+}
+
+void Client::setAddBuffer(char *msg)
+{
+	this->_buffer += msg;
+}
+
+void Client::setRemoveBuffer()
+{
+	this->_buffer.clear();
+}
+
 int Client::cmdNick(const std::string& newNick, const Client& user) {
 	(void)user;
 	this->_nick = newNick.substr(0, 30);

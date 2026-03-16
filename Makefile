@@ -19,9 +19,8 @@ SRC_DIR = srcs/
 OBJ_DIR = objs/
 INCLUDES = include/
 
-SRCS = main.cpp Server/Server.cpp
+SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Client/Client.cpp
 
-SRCS := $(addprefix $(SRC_DIR),$(SRCS))
 OBJS = $(SRCS:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 
 # RULES
@@ -37,7 +36,7 @@ all: $(NAME)
 
 clean:
 	rm -rf $(OBJ_DIR)
-
+	
 fclean: clean
 	rm -f $(NAME)
 

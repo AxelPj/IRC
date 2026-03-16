@@ -12,6 +12,7 @@ int main(int ac, char **av)
 		//stoi is not part of C++98, this needs to be changed at some point
         Server serv(std::stoi(av[1]), av[2]);
         serv.init();
+        serv.run();
     }
     catch (const std::exception& e)
     {
