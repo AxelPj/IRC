@@ -30,15 +30,13 @@ class Client {
 		std::string getThird();
 		std::string getUser();
 		std::string	getBuffer();
+		int			getfd();
 
 		//Setters//
 		void setAddBuffer(char *msg);
 		void setRemoveBuffer();
 		//Commands//
-		int cmdNick(const std::string& newNick, const Client& client);
-		int cmdQuit(const Client& client);
-		int cmdReconnect(const Client& client);
-		
+
 	private :
 		Client();
 		bool _ops;
