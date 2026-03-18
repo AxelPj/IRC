@@ -77,8 +77,6 @@ void Channel::names(Client user)
 
 void Channel::kick(Client issuer, Client target)
 {
-<<<<<<< HEAD
-=======
 	if (memberList.count(issuer) == 0)
 		//ERR_NOTONCHANNEL
 	else if (!memberList[issuer])
