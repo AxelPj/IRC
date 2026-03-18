@@ -33,6 +33,7 @@ class Client {
 		int			getfd();
 
 		//Setters//
+		void setNick(std::string nick);
 		void setAddBuffer(char *msg);
 		void setRemoveBuffer();
 		//Commands//

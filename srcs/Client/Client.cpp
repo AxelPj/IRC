@@ -13,7 +13,8 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 }
 
 Client &Client::operator=(const Client &other) {
-	if (this != &other) {
+	if (this != &other) 
+	{
 		this->_ops = other._ops;
 		this->_fd = other._fd;
 		this->_password = other._password;
@@ -53,7 +54,6 @@ std::string Client::getUser() {
 	return this->_username;
 }
 
-<<<<<<< HEAD
 std::string	Client::getBuffer()
 {
 	return(this->_buffer);
@@ -69,8 +69,9 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
-int Client::cmdNick(const std::string& newNick, const Client& user) 
+void Client::setNick(std::string nick)
 {
+<<<<<<< HEAD
 	(void)user;
 	for (size_t i = 0; i < newNick.size(); ++i) {
 		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||
@@ -83,19 +84,12 @@ int Client::cmdNick(const std::string& newNick, const Client& user) {
 >>>>>>> feature/channels
 	this->_nick = newNick.substr(0, 30);
 	return 0;
+=======
+	this->_nick = nick;
+>>>>>>> feature/server-class
 }
 
 int	Client::getfd()
 {
 	return(this->_fd);
-}
-
-int Client::cmdQuit(const Client& user) {
-	(void)user;
-	return 0;
-}
-
-int Client::cmdReconnect(const Client& user) {
-	(void)user;
-	return 0;
 }
