@@ -42,14 +42,15 @@ void    Server::init()
         std::cout << "Server is listening on port " << this->_port << std::endl;
 }
 
-Client Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
+Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
 {
     socklen_t ptrSizestruct = sizeof(*addr);
     newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
+    if (newSocketclient->fd)
+        return(NULL);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    Client newClient(*addr, this->_socketIrc[0]);
-    return (newClient);
+    return (new Client(*addr, this->_socketIrc[0]));
 }
 
 bool    Server::recvClient(pollfd socketclient, Client &client)
@@ -79,6 +80,7 @@ bool    Server::recvClient(pollfd socketclient, Client &client)
 void Server::removeClient(int fdClient, int i)
 {
     this->_socketIrc.erase(this->_socketIrc.begin() + i);
+    delete this->_listClient[fdClient];
     this->_listClient.erase(fdClient);
 }
 
@@ -130,8 +132,8 @@ void    Server::run()
                     // if socket listen is that of the Server, call acceptClient() for create NewClient and fill data map and vector
                     pollfd newSocketClient;
                     struct sockaddr_in addr;
-                    Client newClient = acceptClient(&addr, &newSocketClient);
-                    if (newSocketClient.fd == -1)
+                    Client *newClient = acceptClient(&addr, &newSocketClient);
+                    if (!newClient)
                     {
                         std::cerr << "Error: client socket aborts" << std::endl;
                         continue ;
@@ -178,7 +180,10 @@ void    Server::run()
 
 Server::~Server()
 {
-    close(this->_sockfd);
+    for (std::map<int, Client*>::iterator it = _listClient.begin(); it != _listClient.end(); ++it)
+        delete it->second;
+    for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
+        delete it->second;
     std::cout << "Server closed madafucka" << std::endl;
 }
 

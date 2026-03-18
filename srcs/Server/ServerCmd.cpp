@@ -1,19 +1,39 @@
 #include "Server.hpp"
 
-int Server::cmdNick(std::vector<std::string> token)
+int Server::cmdNick(Client &client, std::vector<std::string> token)
 {
-    if (token.size() != 2) {
-        std::cerr << "Error: NICK command requires an argument." << std::endl;
-        return -1;
-    }
-    std::string nickname = token[1];
-    for (size_t i = 0, i < _listclient.size(); i++)
-    {
-        if (this->_listclient[i].getNickname() == nickname)
-        {
-            std::cerr << "Error: Nickname already in use." << std::endl;
-            return -1;
-        }
-    }
+    client.setNick(token[1]);
+    return (0);
+}
 
+int Server::cmdPart(std::vector<std::string> token, Client &client, bool reason)
+{
+    //TO DO : _listChannel[token[1]]->removeClient(client);
+    if (reason == true) {
+        sendMsg("You have left the channel" + token[1], client.getfd());
+        sendMsg("(", client.getfd());
+        for (size_t i = 2; i < token.size(); i++)
+        {
+            sendMsg(token[i], client.getfd());
+        }
+        sendMsg(")", client.getfd());
+        return (0);
+    }
+    else {
+        sendMsg("You have left the channel" + token[1] + "(Leaving)", client.getfd());
+        return (0);
+    }
+    return (1);
+}
+
+
+
+/*void   Server::removeClient(int fd)
+{
+}*/
+
+void    Server::createChannel(std::string channelName)
+{
+    Channel *newChannel = new Channel();
+    this->_listChannel[channelName] = newChannel;
 }

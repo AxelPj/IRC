@@ -75,9 +75,9 @@ void    Server::processParser(Client &client)
             case 0:
                 flag = parserCmdNick(tokens);
                 if (flag == 0)
-                    //cmdNick(client, tokens);
+                    cmdNick(client, tokens);
                 else
-                    sendMsg("Usage: NICK <nickname>", client.getfd());
+                    sendMsg("Usage: NICK <nickname>, sets your nick", client.getfd());
                 break ;
             case 1:
                 flag = parserCmdJoin(tokens);
@@ -89,9 +89,13 @@ void    Server::processParser(Client &client)
             case 2:
                 flag = parserCmdPart(tokens);
                 if (flag == 0)
-                    //cmdPart(client, tokens);
+                    cmdPart(client.getfd(), tokens, 0);
+                else if (flag == 1)
+                    cmdPart(client.getfd(), tokens, 1);
                 else if (flag == -1)
                     sendMsg("Usage: PART [<channel>] [<reason>], leaves the channel, by default the current on", client.getfd());
+                else if (flag == -2)
+                    sendMsg(tokens[1] + ": No such channel", client.getfd());
                 break ;
             case 3:
                 flag = parserCmdPrivMsg(tokens);
@@ -152,47 +156,50 @@ void    Server::processParser(Client &client)
 
 int parserCmdNick(std::vector<std::string> tokens)
 {
-    if (tokens.size() == 2)
+    if (tokens.size() == 2 && !tokens[1].empty())
     {
-        for (size_t i = 0; i < tokens.size(); ++i) 
+        const std::string ok = "[]\\`_^{}|-";
+        for (size_t i = 0; i < tokens[1].size(); ++i)
         {
-            if (tokens[i] == " " || tokens[i] == "," || tokens[i] == "*" ||
-                tokens[i] == "?" || tokens[i] == "!" || tokens[i] == "@") 
-            {
-                return (-1); // Invalid character in nickname
-            }
+            char c = tokens[1][i];
+            if (i == 0 && std::isdigit(c))
+                return -1;
+            if (!std::isalnum(c) && ok.find(c) == std::string::npos)
+                return -1;
         }
-        return (0);
+        return 0;
     }
-    else 
-        return (-1);
+    return -1;
 }
 
 int parserCmdJoin(std::vector<std::string> tokens)
 {
-    /*     if (checkChannel(tokens[1]) != 0)
+    if (checkChannel(tokens[1]))
             return(1);
-    else */
+    else 
 
     //verif channel a des mods
 }
+
 int parserCmdPart(std::vector<std::string> tokens)
 {
     if (tokens.size() > 1)
     {
         if (tokens[1][0] != '#')
             return (-1);
-        //else if (checkChannel(tokens[1]) != 0)
-            //return (-1);
-
-    }
-    else 
-        return (-1);
+        if (checkChannelExist(tokens[1]) != 0)
+            return (-2);
+        if (tokens.size() > 2)
+            return (1);
+        return (0);
 }
 
 int parserCmdPrivMsg(std::vector<std::string> tokens)
 {
-    //ouvre un channel entre les clients concernés
+    //creation d un channel private si targer == client sinon chan normal si target == chan
+    if (checkChannel(tokens[1]))
+        return(1);
+    else if ()
 }
 
 int parserCmdKick(std::vector<std::string> tokens)
@@ -235,12 +242,11 @@ int parserCmdReconnect(std::vector<std::string> tokens)
 
 }
 
-// a decommanter quand les channel sont la
-/* int Server::checkChannel(std::string channelName)
+int Server::checkChannelExist(std::string channelName)
 {
     std::map<std::string,Channel>::iterator it;
     if (this->_listchannel.find(channelName) != this->listchannel.end())
         return (0);
     else
         return(-1);
-} */
+}
