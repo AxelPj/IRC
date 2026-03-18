@@ -56,11 +56,7 @@ void Channel::topic(Client user, std::string newTopic)
 {
 	if (!_memberList.contains(user))
 		//ERR_NOTONCHANNEL
-<<<<<<< HEAD
-	else if (_modes & 2 /*&& !isChanOp(user)*/) //topic protected
-=======
 	else if (_modes & 2 && !memberList[user]) //topic protected
->>>>>>> feature/channels
 		//ERR_CHANOPRIVSNEEDED
 	else
 	{
@@ -81,8 +77,6 @@ void Channel::names(Client user)
 
 void Channel::kick(Client issuer, Client target)
 {
-<<<<<<< HEAD
-=======
 	if (memberList.count(issuer) == 0)
 		//ERR_NOTONCHANNEL
 	else if (!memberList[issuer])
@@ -107,5 +101,4 @@ void Channel::mode(Client user, std::string modes)
 	else if (modes[0] == '-')
 	else
 		//
->>>>>>> feature/channels
 }
