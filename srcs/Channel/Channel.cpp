@@ -56,7 +56,7 @@ void Channel::topic(Client user, std::string newTopic)
 {
 	if (!_memberList.contains(user))
 		//ERR_NOTONCHANNEL
-	else if (_modes & 2 /*&& !isChanOp(user)*/) //topic protected
+	else if (_modes & 2 && !memberList[user]) //topic protected
 		//ERR_CHANOPRIVSNEEDED
 	else
 	{
@@ -77,4 +77,28 @@ void Channel::names(Client user)
 
 void Channel::kick(Client issuer, Client target)
 {
+	if (memberList.count(issuer) == 0)
+		//ERR_NOTONCHANNEL
+	else if (!memberList[issuer])
+		//ERR_CHANOPRIVSNEEDED
+	else if (memberList.count(target) == 0)
+		//ERR_USERNOTINCHANNEL
+	else
+	{
+		memberList.erase(target);
+		//KICK MESSAGE
+	}
+}
+
+void Channel::mode(Client user, std::string modes)
+{
+	if (memberList.count(user) == 0)
+		//ERR_NOTONCHANNEL
+	if (!memberList[user])
+		//ERR_CHANOPRIVSNEEDED
+	//bitmask in order p/s/i/t/n/m
+	if (modes[0] == '+')
+	else if (modes[0] == '-')
+	else
+		//
 }

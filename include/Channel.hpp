@@ -23,7 +23,6 @@ class Channel
 		void	join(Client user);
 		void	setMode(bool isRemoved, int mask);
 		//void	setUserMode(Client user, bool isRemoved, int mask);
-		void	removeUser(Client user);
 		void	invite(Client user);
 
 	public:
