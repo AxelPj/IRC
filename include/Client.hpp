@@ -18,8 +18,7 @@ Messages directs, Keepalive*/
 
 class Client {
 	public :
-		Client();
-		Client(sockaddr_in addrClient, pollfd Socketclient);
+		Client(const sockaddr_in addrClient, const pollfd Socketclient);
 		Client& operator=(const Client& other);
 		~Client();
 
@@ -30,13 +29,16 @@ class Client {
 		std::string getSecond();
 		std::string getThird();
 		std::string getUser();
+		std::string	getBuffer();
+		int			getfd();
 
+		//Setters//
+		void setAddBuffer(char *msg);
+		void setRemoveBuffer();
 		//Commands//
-		int cmdNick(const std::string& newNick, const Client& client);
-		int cmdQuit(const Client& client);
-		int cmdReconnect(const Client& client);
 
 	private :
+		Client();
 		bool _ops;
 		int _fd;
 		std::string _password;
@@ -45,4 +47,5 @@ class Client {
 		std::string _second;
 		std::string _third;
 		std::string _username;
+		std::string _buffer;
 };

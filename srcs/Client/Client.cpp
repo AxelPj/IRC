@@ -53,10 +53,37 @@ std::string Client::getUser() {
 	return this->_username;
 }
 
-int Client::cmdNick(const std::string& newNick, const Client& user) {
+std::string	Client::getBuffer()
+{
+	return(this->_buffer);
+}
+
+void Client::setAddBuffer(char *msg)
+{
+	this->_buffer += msg;
+}
+
+void Client::setRemoveBuffer()
+{
+	this->_buffer.clear();
+}
+
+int Client::cmdNick(const std::string& newNick, const Client& user) 
+{
 	(void)user;
+	for (size_t i = 0; i < newNick.size(); ++i) {
+		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||
+			newNick[i] == '?' || newNick[i] == '!' || newNick[i] == '@') {
+			return -1; // Invalid character in nickname
+		}
+	}
 	this->_nick = newNick.substr(0, 30);
 	return 0;
+}
+
+int	Client::getfd()
+{
+	return(this->_fd);
 }
 
 int Client::cmdQuit(const Client& user) {
