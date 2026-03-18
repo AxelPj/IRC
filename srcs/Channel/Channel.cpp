@@ -101,5 +101,4 @@ void Channel::mode(Client user, std::string modes)
 	else if (modes[0] == '-')
 	else
 		//
->>>>>>> feature/channels
 }
