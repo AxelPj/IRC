@@ -56,11 +56,7 @@ void Channel::topic(Client user, std::string newTopic)
 {
 	if (!_memberList.contains(user))
 		//ERR_NOTONCHANNEL
-<<<<<<< HEAD
-	else if (_modes & 2 /*&& !isChanOp(user)*/) //topic protected
-=======
 	else if (_modes & 2 && !memberList[user]) //topic protected
->>>>>>> feature/channels
 		//ERR_CHANOPRIVSNEEDED
 	else
 	{
