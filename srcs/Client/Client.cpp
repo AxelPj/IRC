@@ -68,7 +68,8 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
-int Client::cmdNick(const std::string& newNick, const Client& user) {
+int Client::cmdNick(const std::string& newNick, const Client& user) 
+{
 	(void)user;
 	for (size_t i = 0; i < newNick.size(); ++i) {
 		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||

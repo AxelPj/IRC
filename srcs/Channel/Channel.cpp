@@ -1,0 +1,80 @@
+#include "Channel.hpp"
+
+Channel::Channel(Server serv, Client cli, std::string name) : _server(serv), _name(name)
+{
+	this->_userLimit = -1;	
+	this->_memberList.insert({cli, true});
+	this->_modes = 0; //bitmask in order p/s/i/t/n/m
+}
+
+Channel::~Channel()
+{
+}
+
+void Channel::join(client user, std::string password)
+{
+	if (_banlist.contains(user)
+	//ERR_BANNEDFROMCHAN
+	if (_modes & 8 && !invited)
+	//ERR_INVITEONLYCHAN
+	if (_userLimit >= 0 && _memberList.size() >= _userLimit)
+	//ERR_CHANNELISFULL
+	if (pass != _key)
+	//ERR_BADCHANNELKEY
+	
+	//Success
+	_memberList.insert({user, false});
+	//JOIN MESSAGE
+	//RPL_TOPIC
+	//RPL_TOPICTIME
+	//RPL_NAMREPLY
+	//RPL_ENDOFNAMES
+}
+
+//cannot be called on non-existent channel, needs to be addressed elsewhere
+void Channel::part(client user)
+{
+	if (_memberList.contains(user))
+	{
+		_memberList.remove(user);
+		//PART MESSAGE
+	}
+	else
+		//ERR_NOTONCHANNEL
+}
+
+void Channel::topic(Client user)
+{
+	//if topic
+	//RPL_TOPIC
+	//RPL_TOPICWHOTIME
+	//else
+	//RPL_NOTOPIC
+}
+
+void Channel::topic(Client user, std::string newTopic)
+{
+	if (!_memberList.contains(user))
+		//ERR_NOTONCHANNEL
+	else if (_modes & 2 /*&& !isChanOp(user)*/) //topic protected
+		//ERR_CHANOPRIVSNEEDED
+	else
+	{
+		_topic = newTopic;
+		//TOPIC MESSAGE
+	}
+}
+
+void Channel::names(Client user)
+{
+	if (_modes & 16 && !memberList.contains(user)) //secret channel
+	{
+		//RPL_ENDOFNAMES
+		return;
+	}
+	//iterator over member list, omit invisible if user is not in channel
+}
+
+void Channel::kick(Client issuer, Client target)
+{
+}
