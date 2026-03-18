@@ -6,7 +6,7 @@
 #    By: gdelhota <gdelhota@student.42perpignan.fr  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/06 15:31:02 by gdelhota          #+#    #+#              #
-#    Updated: 2026/03/12 04:31:44 by gdelhota         ###   ########.fr        #
+#    Updated: 2026/03/18 14:39:55 by gdelhota         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ SRC_DIR = srcs/
 OBJ_DIR = objs/
 INCLUDES = include/
 
-SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Client/Client.cpp
+SRCS = main.cpp Server/Server.cpp Client/Client.cpp
 
 OBJS = $(SRCS:$(SRC_DIR)%.cpp=$(OBJ_DIR)%.o)
 

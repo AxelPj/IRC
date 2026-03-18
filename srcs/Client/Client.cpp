@@ -53,6 +53,7 @@ std::string Client::getUser() {
 	return this->_username;
 }
 
+<<<<<<< HEAD
 std::string	Client::getBuffer()
 {
 	return(this->_buffer);
@@ -77,15 +78,22 @@ int Client::cmdNick(const std::string& newNick, const Client& user)
 			return -1; // Invalid character in nickname
 		}
 	}
+=======
+int Client::cmdNick(const std::string& newNick, const Client& user) {
+	(void)user;
+>>>>>>> feature/channels
 	this->_nick = newNick.substr(0, 30);
 	return 0;
 }
 
+<<<<<<< HEAD
 int	Client::getfd()
 {
 	return(this->_fd);
 }
 
+=======
+>>>>>>> feature/channels
 int Client::cmdQuit(const Client& user) {
 	(void)user;
 	return 0;
