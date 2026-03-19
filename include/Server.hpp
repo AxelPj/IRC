@@ -61,8 +61,8 @@ class Server
         
         //Parser general
         void                        processParser(Client &client);
-        std::vector<std::string>    tokenParser(std::string buffer);
-        std::vector<std::string>    tokenSp(std::string buffer);
+        std::vector<std::string>    tokenSpace(std::string buffer);
+        std::vector<std::string>    tokenComma(std::string buffer);
         int                         choiceParser(std::vector<std::string> tokens);
 
         //Parser commands
@@ -70,8 +70,9 @@ class Server
         int                         parserCmdJoin(std::vector<std::string> tokens, Client &client);
         int                         parserCmdJoinMulti(std::vector<std::string> tokens, Client &client);
         int                         parserCmdPart(std::vector<std::string> token);
+        int                         parserCmdPartMulti(std::vector<std::string> tokens, Client &client);
         int                         parserCmdPrivMsg(std::vector<std::string> token);
-        int                         parserCmdKick(std::vector<std::string> token);
+        int                         parserCmdKick(std::vector<std::string> tokens, Client &client);
         int                         parserCmdInvite(std::vector<std::string> token);
         int                         parserCmdTopic(std::vector<std::string> token);
         int                         parserCmdMode(std::vector<std::string> token);
