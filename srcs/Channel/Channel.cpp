@@ -11,7 +11,7 @@ Channel::~Channel()
 {
 }
 
-void Channel::join(client user, std::string password)
+void Channel::join(Client& user, std::string password)
 {
 	if (_banlist.contains(user)
 	//ERR_BANNEDFROMCHAN
@@ -20,8 +20,8 @@ void Channel::join(client user, std::string password)
 	if (_userLimit >= 0 && _memberList.size() >= _userLimit)
 	//ERR_CHANNELISFULL
 	if (pass != _key)
-	//ERR_BADCHANNELKEY
-	
+	//ERR_BADCHANNELKE
+
 	//Success
 	_memberList.insert({user, false});
 	//JOIN MESSAGE
@@ -32,7 +32,7 @@ void Channel::join(client user, std::string password)
 }
 
 //cannot be called on non-existent channel, needs to be addressed elsewhere
-void Channel::part(client user)
+void Channel::part(Client& user)
 {
 	if (_memberList.contains(user))
 	{
@@ -101,4 +101,17 @@ void Channel::mode(Client user, std::string modes)
 	else if (modes[0] == '-')
 	else
 		//
+}
+
+bool*	Channel::whichMod()
+{
+	return(this->_modList);
+}
+
+bool	Channel::isInvited(Client &client)
+{
+	if (this->_memberList[client] == 2)
+		return (true);
+	else
+		return (false);
 }

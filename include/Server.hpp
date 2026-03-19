@@ -28,10 +28,10 @@ class Server
         int                             _port;
         int                             _sockfd;
         int                             _signal;
-        std::map<int, Client*>           _listClient;
+        std::map<int, Client*>          _listClient;
         std::vector<pollfd>             _socketIrc;
         std::string                     _password;
-        std::map<std::string, Channel*>  _listChannel;
+        std::map<std::string, Channel*> _listChannel;
         void quit();
         char                            _buffer[1024];
         /*         void ping(Client user);
@@ -44,7 +44,7 @@ class Server
 
         void                        init();
         void                        run();
-        Client*                      acceptClient(sockaddr_in *addr, pollfd *newSocketclient);
+        Client*                     acceptClient(sockaddr_in *addr, pollfd *newSocketclient);
         bool                        recvClient(pollfd socketclient, Client &client);
         void                        addToChannel();
         void                        addChannel(std::string channel);
@@ -66,7 +66,7 @@ class Server
 
         //Parser commands
         int                         parserCmdNick(std::vector<std::string> token);
-        int                         parserCmdJoin(std::vector<std::string> token);
+        int                         parserCmdJoin(std::vector<std::string> tokens, Client &client);
         int                         parserCmdPart(std::vector<std::string> token);
         int                         parserCmdPrivMsg(std::vector<std::string> token);
         int                         parserCmdKick(std::vector<std::string> token);
@@ -92,7 +92,7 @@ class Server
         int                         cmdQuit(Client &client, std::vector<std::string> token);
         int                         cmdReconnect(Client &client, std::vector<std::string> token);
         //others
-        int                         createChannel(std::string channelName)
+        int                         createChannel(std::string channelName);
 		
 };
 

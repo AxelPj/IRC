@@ -8,7 +8,7 @@ int Server::cmdNick(Client &client, std::vector<std::string> token)
 
 int Server::cmdPart(std::vector<std::string> token, Client &client, bool reason)
 {
-    //TO DO : _listChannel[token[1]]->removeClient(client);
+    _listChannel[token[1]]->_memberList[client] = false;
     if (reason == true) {
         sendMsg("You have left the channel" + token[1], client.getfd());
         sendMsg("(", client.getfd());

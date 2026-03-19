@@ -146,14 +146,14 @@ void    Server::run()
                 //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
                 else
                 {
-                    if (recvClient(this->_socketIrc[i], this->_listClient[this->_socketIrc[i].fd]) == false)
+                    if (recvClient(this->_socketIrc[i], *this->_listClient[this->_socketIrc[i].fd]) == false)
                     {
                         removeClient(this->_socketIrc[i].fd, i);
                         i--;
                     }
                     else 
                     {
-                        processParser(this->_listClient[this->_socketIrc[i].fd]);
+                        processParser(*this->_listClient[this->_socketIrc[i].fd]);
                 
                     }
             

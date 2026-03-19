@@ -172,16 +172,40 @@ int parserCmdNick(std::vector<std::string> tokens)
     return -1;
 }
 
-int parserCmdJoin(std::vector<std::string> tokens)
+int Server::parserCmdJoin(std::vector<std::string> tokens, Client &client)
 {
-    if (checkChannel(tokens[1]))
+    const std::string ok = "[]\\`_^{}|-";
+    if (tokens[1][0] == '#')
+    {
+        for (size_t i = 0; i < tokens[1].size(); ++i)
+        {
+            char c = tokens[1][i];
+            if (!std::isalnum(c) && ok.find(c) == std::string::npos)
+                return -1;
+        }
+        int exist = checkChannelExist(tokens[1]);
+        if (exist == -1)
+        {
             return(1);
-    else 
-
-    //verif channel a des mods
+        }
+        else if (exist == 0)
+        {
+            bool *modes = this->_listChannel[tokens[1]]->whichMod();
+            if (modes[INVITE_ONLY])
+                if (this->_listChannel[tokens[1]]->isInvited(client) == false)
+                    return (-2);
+            if (modes[PASSWORD] && tokens[2].empty() == false)
+            {
+                if (this->_listChannel[tokens[1]]->getpassword() != tokens[2])
+                    return -3;
+            }
+            return (0);
+        }
+    }
+    return(-1);
 }
 
-int parserCmdPart(std::vector<std::string> tokens)
+int Server::parserCmdPart(std::vector<std::string> tokens)
 {
     if (tokens.size() > 1)
     {
@@ -194,50 +218,50 @@ int parserCmdPart(std::vector<std::string> tokens)
         return (0);
 }
 
-int parserCmdPrivMsg(std::vector<std::string> tokens)
+int Server::parserCmdPrivMsg(std::vector<std::string> tokens)
 {
-    //creation d un channel private si targer == client sinon chan normal si target == chan
+    //creation d un channel private si target == client sinon chan normal si target == chan
     if (checkChannel(tokens[1]))
         return(1);
     else if ()
 }
 
-int parserCmdKick(std::vector<std::string> tokens)
+int Server::parserCmdKick(std::vector<std::string> tokens)
 {
     //verif que le client est op + chan existe + client a kick dans le chan
 }
 
-int parserCmdInvite(std::vector<std::string> tokens)
+int Server::parserCmdInvite(std::vector<std::string> tokens)
 {
     //verif que le client est op + chan existe + client a inviter dans le chan
 }
 
-int parserCmdTopic(std::vector<std::string> tokens)
+int Server::parserCmdTopic(std::vector<std::string> tokens)
 {
  //verif mode + droits op + client op si droit op
 }
 
-int parserCmdMode(std::vector<std::string> tokens)
+int Server::parserCmdMode(std::vector<std::string> tokens)
 {
     //verif client est op + mode valide
 }
 
-int parserCmdPing(std::vector<std::string> tokens)
+int Server::parserCmdPing(std::vector<std::string> tokens)
 {
 
 }
 
-int parserCmdPong(std::vector<std::string> tokens)
+int Server::parserCmdPong(std::vector<std::string> tokens)
 {
 
 }
 
-int parserCmdQuit(std::vector<std::string> tokens)
+int Server::parserCmdQuit(std::vector<std::string> tokens)
 {
 
 }
 
-int parserCmdReconnect(std::vector<std::string> tokens)
+int Server::parserCmdReconnect(std::vector<std::string> tokens)
 {
 
 }
