@@ -2,14 +2,15 @@
 
 std::vector<std::string>  Server::tokenParser(std::string buffer)
 {
-    char *bufCpy = strcpy(bufCpy, buffer.c_str());
+    char *bufCpy = strdup(buffer.c_str());
     std::vector<std::string> tokens;
 
     char *token;
     token = strtok(bufCpy, " ");
     if (token == nullptr)
     {
-        return ;
+        free(bufCpy);
+        return (tokens);
     }
     tokens.push_back(token);
     while ((token = strtok(nullptr, " ")) != nullptr)
@@ -25,11 +26,13 @@ std::vector<std::string>  Server::tokenParser(std::string buffer)
                 tokens.push_back(tmp);
 
             }
+            free(bufCpy);
             return(tokens);
         }
         else
             tokens.push_back(token);
     }
+    free(bufCpy);
     return (tokens);
 }
 
@@ -65,6 +68,8 @@ void    Server::processParser(Client &client)
     int ret;
     int flag;
     std::vector<std::string> tokens = tokenParser(client.getBuffer());
+    if (tokens.empty() == true)
+        return ;
     if (tokens[0][0] == '/')
     {
         for (size_t i = 0; i < tokens[0].size(); i++)
@@ -80,14 +85,20 @@ void    Server::processParser(Client &client)
                     sendMsg("Usage: NICK <nickname>, sets your nick", client.getfd());
                 break ;
             case 1:
-                flag = parserCmdJoin(tokens);
+                if (tokens[1].find(',#'))
+                    flag = parserCmdJoinMulti(tokens);
+                else
+                    flag = parserCmdJoin(tokens);
                 if (flag == 0)
                     //cmdJoin(client, tokens);
                 else 
                     sendMsg("Usage: JOIN <channel>", client.getfd());
                 break ;
             case 2:
-                flag = parserCmdPart(tokens);
+                if (tokens[1].find(',#'))
+                    flag = parserCmdPartMulti(tokens);
+                else
+                    flag = parserCmdPart(tokens);
                 if (flag == 0)
                     cmdPart(client.getfd(), tokens, 0);
                 else if (flag == 1)
@@ -151,6 +162,8 @@ void    Server::processParser(Client &client)
                 sendMsg("Unknown command", client.getfd());
                 break;
         }
+        //else
+            //cmdPrivMsg(token);
     }
 }
 
@@ -174,7 +187,38 @@ int parserCmdNick(std::vector<std::string> tokens)
 
 int Server::parserCmdJoin(std::vector<std::string> tokens, Client &client)
 {
-    const std::string ok = "[]\\`_^{}|-";
+    const std::string ok = "\\[{`_^}-]|";
+    if (tokens[1][0] == '#')
+    {
+        for (size_t i = 0; i < tokens[1].size(); ++i)
+        {
+            char c = tokens[1][i];
+            if (!std::isalnum(c) && ok.find(c) == std::string::npos)
+                return -1;
+        }
+        int exist = checkChannelExist(tokens[1]);
+        if (exist == -1)
+            return(1);
+        else if (exist == 0)
+        {
+            bool *modes = this->_listChannel[tokens[1]]->whichMod();
+            if (modes[INVITE_ONLY])
+                if (this->_listChannel[tokens[1]]->isInvited(client) == false)
+                    return (-2);
+            if (modes[PASSWORD] && tokens[2].empty() == false)
+            {
+                if (this->_listChannel[tokens[1]]->getpassword() != tokens[2])
+                    return -3;
+            }
+            return (0);
+        }
+    }
+    return(-1);
+}
+
+int Server::parserCmdJoinMulti(std::vector<std::string> tokens, Client &client)
+{
+    const std::string ok = "\\[{`_^}-]|";
     if (tokens[1][0] == '#')
     {
         for (size_t i = 0; i < tokens[1].size(); ++i)
@@ -202,7 +246,7 @@ int Server::parserCmdJoin(std::vector<std::string> tokens, Client &client)
             return (0);
         }
     }
-    return(-1);
+    return (-1);
 }
 
 int Server::parserCmdPart(std::vector<std::string> tokens)
@@ -216,7 +260,9 @@ int Server::parserCmdPart(std::vector<std::string> tokens)
         if (tokens.size() > 2)
             return (1);
         return (0);
+    }
 }
+
 
 int Server::parserCmdPrivMsg(std::vector<std::string> tokens)
 {
@@ -226,7 +272,7 @@ int Server::parserCmdPrivMsg(std::vector<std::string> tokens)
     else if ()
 }
 
-int Server::parserCmdKick(std::vector<std::string> tokens)
+int Server::parserCmdKick(std::vector<std::string> tokens, Client &client)
 {
     //verif que le client est op + chan existe + client a kick dans le chan
 }
@@ -268,9 +314,43 @@ int Server::parserCmdReconnect(std::vector<std::string> tokens)
 
 int Server::checkChannelExist(std::string channelName)
 {
-    std::map<std::string,Channel>::iterator it;
-    if (this->_listchannel.find(channelName) != this->listchannel.end())
+    if (this->_listChannel.find(channelName) != this->_listChannel.end())
         return (0);
     else
-        return(-1);
+        return (-1);
+}
+
+std::vector<std::string>  Server::tokenSp(std::string buffer)
+{
+    char *bufCpy = strdup(buffer.c_str());
+    std::vector<std::string> tokens;
+
+    char *token;
+    token = strtok(bufCpy, " ");
+    if (token == nullptr)
+    {
+        free(bufCpy);
+        return (tokens);
+    }
+    tokens.push_back(token);
+    while ((token = strtok(nullptr, ",")) != nullptr)
+    {
+        if (token[0] == ':')
+        {
+            std::string tmp;
+            tmp = token + 1;
+            token = strtok(nullptr, "\r\n");
+            if (token != nullptr)
+            {
+                tmp += token;
+                tokens.push_back(tmp);
+            }
+            free (bufCpy);
+            return (tokens);
+        }
+        else
+            tokens.push_back(token);
+    }
+    free (bufCpy);
+    return (tokens);
 }
