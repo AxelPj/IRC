@@ -6,20 +6,27 @@
 #include <string>
 #include <map>
 
+class Server;
+class Client;
+
 enum ChannelMode
 {
-    INVITE_ONLY = 0,
-    PASSWORD    = 1,
-    OPS   		= 2,
-    LIMIT       = 3,
-    TOPIC       = 4,
+    INVITE_ONLY = 0, //i
+    PASSWORD    = 1, //k
+    OPS   		= 2, //o
+    LIMIT       = 3, //l
+    TOPIC       = 4, //t
 	LIST_MODE	= 5
 };
 
-
-
-class Server;
-class Client;
+enum ClientStatus
+{
+    NOT_CONNECTED 	= 0,
+    CONNECTED    	= 1,
+    INVITED   		= 2,
+    OP       		= 3,
+    BANNED	  		= 4
+};
 
 class Channel
 {
@@ -30,7 +37,7 @@ class Channel
 		std::string				_topic;
 		int						_modes; //bitmask in order p/s/i/t/n/m
 		int						_userLimit;
-		std::map<Client, int>	_memberList;//client 0 = not connected/ client 1 = connected/ client 2 = invited
+		std::map<Client, ClientStatus>	_memberList;//client 0 = not connected/ client 1 = connected/ client 2 = invited / client 3 = op / client 4 = ban
 		bool					_modList[LIST_MODE] = {false};
 		//todo banlist container
 		
@@ -57,6 +64,9 @@ class Channel
 		void setTopic(std::string topic);
 		bool*	whichMod();
 		bool	isInvited(Client &client);
+		int		getStatusClient(Client &client);
+		void	setStatusClient(Client &client, int status);
+		std::string		setName();
 };
 
 #endif

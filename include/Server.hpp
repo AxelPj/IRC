@@ -22,81 +22,79 @@ class channel;
 
 class Server
 {
-    
     private:
         Server();
         int                             _port;
+        std::string                     _password;
+        std::vector<pollfd>             _socketIrc;
         int                             _sockfd;
         int                             _signal;
         std::map<int, Client*>          _listClient;
-        std::vector<pollfd>             _socketIrc;
-        std::string                     _password;
         std::map<std::string, Channel*> _listChannel;
         void quit();
         char                            _buffer[1024];
-        /*         void ping(Client user);
-        */        
 
     public:
-        //constru / destru
-        Server(int port, std::string password);
+        Server(int port, const std::string &password);
         ~Server();
 
         void                        init();
         void                        run();
         Client*                     acceptClient(sockaddr_in *addr, pollfd *newSocketclient);
-        bool                        recvClient(pollfd socketclient, Client &client);
+        bool                        recvClient(const pollfd &socketclient, Client &client);
         void                        addToChannel();
-        void                        addChannel(std::string channel);
-        void                        removeChannel(std::string channel);
-	    void	                    removeClient(int fdClient, int i);
-        void                        sendMsg(std::string msg, int socket);
-        int                         checkChannelExist(std::string channelName);
+        void                        addChannel(const std::string &channel);
+        void                        removeChannel(const std::string &channel);
+        void                        removeClient(int fdClient, int i);
+        void                        sendMsg(const std::string &msg, int socket);
+        bool                        checkChannelExist(const std::string &channelName);
+        bool                        checkUserExist(const std::string &userName);
 
         // getters
         int                         getPort() const;
         int                         getSockfd() const;
         char                        *getBuffer();
         pollfd                      getpollfd(int i) const;
-        
-        //Parser general
+        Client&                     getClient(const std::string &nameClient);
+
+        // Parser general
         void                        processParser(Client &client);
-        std::vector<std::string>    tokenSpace(std::string buffer);
-        std::vector<std::string>    tokenComma(std::string buffer);
-        int                         choiceParser(std::vector<std::string> tokens);
+        std::vector<std::string>    tokenSpace(const std::string &buffer);
+        std::vector<std::string>    tokenComma(const std::string &buffer);
+        int                         choiceParser(const std::vector<std::string> &tokens);
 
-        //Parser commands
-        int                         parserCmdNick(std::vector<std::string> token);
-        int                         parserCmdJoin(std::vector<std::string> tokens, Client &client);
-        int                         parserCmdJoinMulti(std::vector<std::string> tokens, Client &client);
-        int                         parserCmdPart(std::vector<std::string> token);
-        int                         parserCmdPartMulti(std::vector<std::string> tokens, Client &client);
-        int                         parserCmdPrivMsg(std::vector<std::string> token);
-        int                         parserCmdKick(std::vector<std::string> tokens, Client &client);
-        int                         parserCmdInvite(std::vector<std::string> token);
-        int                         parserCmdTopic(std::vector<std::string> token);
-        int                         parserCmdMode(std::vector<std::string> token);
-        int                         parserCmdPing(std::vector<std::string> token);
-        int                         parserCmdPong(std::vector<std::string> token);
-		int                         parserCmdQuit(std::vector<std::string> token);
-		int                         parserCmdReconnect(std::vector<std::string> token);
+        // Parser commands
+        int                         parserCmdNick(const std::vector<std::string> &token);
+        int                         parserCmdJoin(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdPart(const std::vector<std::string> &tokens);
+        int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdPrivMsg(const std::vector<std::string> &token);
+        int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdInvite(const std::vector<std::string> &tokens);
+        int                         parserCmdTopic(const std::vector<std::string> &tokens);
+        int                         parserCmdMode(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdQuit(const std::vector<std::string> &tokens);
+        int                         parserCmdReconnect(const std::vector<std::string> &tokens);
 
-        //commands
-        int                         cmdJoin(Client &client, std::vector<std::string> token);
-        int                         cmdPart(Client &client, std::vector<std::string> token, bool reason);
-        int                         cmdNick(Client &client, std::vector<std::string> token);
-        int                         cmdPrivMsg(Client &client, std::vector<std::string> token);
-        int                         cmdKick(Client &client, std::vector<std::string> token);
-        int                         cmdInvite(Client &client, std::vector<std::string> token);
-        int                         cmdTopic(Client &client, std::vector<std::string> token);
-        int                         cmdMode(Client &client, std::vector<std::string> token);
-        int                         cmdPing(Client &client, std::vector<std::string> token);
-        int                         cmdPong(Client &client, std::vector<std::string> token);
-        int                         cmdQuit(Client &client, std::vector<std::string> token);
-        int                         cmdReconnect(Client &client, std::vector<std::string> token);
-        //others
-        int                         createChannel(std::string channelName);
-		
+        // commands
+        int                         cmdJoin(Client &client, Channel &channel, bool setOps);
+        int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
+        int                         cmdNick(Client &client, const std::vector<std::string> &token);
+        int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
+        int                         cmdKick(Client &client, Channel &channel);
+        int                         cmdInvite(Client &client, const std::vector<std::string> &token);
+        int                         cmdTopic(Client &client, const std::vector<std::string> &token);
+        int                         cmdMode(Client &client, const std::vector<std::string> &token);
+        void                        cmdPing(Client &client, const std::vector<std::string> &token);
+        void                        cmdPong(Client &client, const std::vector<std::string> &token);
+        int                         cmdQuit(Client &client, const std::vector<std::string> &token);
+        int                         cmdReconnect(Client &client, const std::vector<std::string> &token);
+
+        // others
+        void                         createChannel(const std::string &channelName);
+        void                         addMode(Channel *channel, char mode, const std::string &param);
+        void                         removeMode(Channel *channel, char mode, const std::string &param);
 };
 
 #endif

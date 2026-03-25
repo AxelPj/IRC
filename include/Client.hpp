@@ -30,7 +30,7 @@ class Client {
 		std::string getThird();
 		std::string getUser();
 		std::string	getBuffer();
-		int			getfd();
+		int			getFd();
 
 		//Setters//
 		void setNick(std::string nick);
@@ -40,7 +40,6 @@ class Client {
 
 	private :
 		Client();
-		bool _ops;
 		int _fd;
 		std::string _password;
 		std::string _adress;

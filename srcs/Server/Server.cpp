@@ -114,6 +114,7 @@ void    Server::run()
     socketServ.revents = 0;
     _socketIrc.push_back(socketServ);
     int pollAccept;
+    //time_t now = time(nullptr);
     while (1)
     {
         pollAccept = poll(this->_socketIrc.data(), this->_socketIrc.size(), -1);
@@ -206,4 +207,13 @@ char   *Server::getBuffer()
 pollfd Server::getpollfd(int i) const
 {
     return(this->_socketIrc[i]);
+}
+
+Client& Server::getClient(const std::string &nameClient)
+{
+    for (std::map<int, Client*>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
+    {
+        if (it->second->getUser() == nameClient)
+            return (*it->second);
+    }
 }

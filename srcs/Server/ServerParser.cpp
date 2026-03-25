@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-int    Server::choiceParser(std::vector<std::string> tokens)
+int    Server::choiceParser(const std::vector<std::string> &tokens)
 {
     std::string cmdString[12] =
     {
@@ -26,109 +26,109 @@ int    Server::choiceParser(std::vector<std::string> tokens)
     return(-1);
 }
 
-
 void    Server::processParser(Client &client)
 {
-    int ret;
     int flag;
     std::vector<std::string> tokens = tokenSpace(client.getBuffer());
     if (tokens.empty() == true)
         return ;
-    if (tokens[0][0] == '/')
+    for (size_t i = 0; i < tokens[0].size(); i++)
+        tokens[0][i] = toupper(tokens[0][i]); 
+    switch(choiceParser(tokens))
     {
-        for (size_t i = 0; i < tokens[0].size(); i++)
-            tokens[0][i] = toupper(tokens[0][i]);
-        ret = choiceParser(tokens);
-        switch(ret)
-        {
-            case 0:
-                flag = parserCmdNick(tokens);
-                if (flag == 0)
-                    cmdNick(client, tokens);
-                else
-                    sendMsg("Usage: NICK <nickname>, sets your nick", client.getfd());
-                break ;
-            case 1:
-                if (tokens[1].find(',#'))
-                    flag = parserCmdJoinMulti(tokens, client);
-                else
-                    flag = parserCmdJoin(tokens, client);
-                if (flag == -2)
-                    sendMsg(":server 473 " + client.getNick() + " :Cannot join channel (+i)\r\n", client.getfd());
-                else if (flag == -3)
-                    sendMsg(":server 475 " + client.getNick() + " :Cannot join channel (+k)\r\n", client.getfd());
-                break;
-            case 2:
-                if (tokens[1].find(',#'))
-                    flag = parserCmdPartMulti(tokens, client);
-                else
-                    flag = parserCmdPart(tokens);
-                if (flag == 0)
-                    cmdPart(client, tokens, 0);
-                else if (flag == 1)
-                    cmdPart(client, tokens, 1);
-                else if (flag == -1)
-                    sendMsg(":server 461 " + client.getNick() + " PART :Not enough parameters\r\n", client.getfd());
-                else if (flag == -2)
-                    sendMsg(":server 403 " + client.getNick() + " " + tokens[1] + " :No such channel\r\n", client.getfd());
-                break ;
-            case 3:
-                flag = parserCmdPrivMsg(tokens);
-                if (flag == 0)
-                    //cmdPrivMsg(client, tokens);
-                else
-                    sendMsg("Usage: PRIVMSG <target> <message>", client.getfd());
-                break ;
-            case 4:
-                flag = parserCmdKick(tokens);
-                if (flag == 0)
-                    //cmdKick(client, tokens);
-                else
-                    sendMsg("Usage: KICK <channel> <user> [<reason>]", client.getfd());
-                break ;
-            case 5:
-                flag = parserCmdInvite(tokens);
-                if (flag == 0)
-                    //cmdInvite(client, tokens);
-                else
-                    sendMsg("Usage: INVITE <user> <channel>", client.getfd());
-                break ;
-            case 6:
-                flag = parserCmdTopic(tokens);
-                if (flag == 0)
-                    //cmdTopic(client, tokens);
-                else
-                    sendMsg("Usage: TOPIC <channel> [<topic>]", client.getfd());
-                break ;
-            case 7:
-                flag = parserCmdMode(tokens);
-                if (flag == 0)
-                    //cmdMode(client, tokens);
-                else
-                    sendMsg("Usage: MODE <channel> <modes>", client.getfd());
-                break ;
-            case 8:
-                flag = parserCmdQuit(tokens);
-                if (flag == 0)
-                    //cmdQuit(client, tokens);
-                break ;
-            case 9:
-                flag = parserCmdPing(tokens);
-                if (flag == 0)
-                    //cmdPing(client, tokens);
-                break ;
-            case 10:
-                flag = parserCmdPong(tokens);
-                if (flag == 0)
-                    //cmdPong(client, tokens);
-                break ;
-            default:
-                sendMsg("Unknown command", client.getfd());
-                break;
-        }
+        case 0:
+            flag = parserCmdNick(tokens);
+            if (flag == 0)
+                cmdNick(client, tokens);
+            else
+                sendMsg("Usage: NICK <nickname>, sets your nick", client.getFd());
+            break ;
+        case 1:
+            if (tokens[1].find(',') != std::string::npos)
+                flag = parserCmdJoinMulti(tokens, client);
+            else
+                flag = parserCmdJoin(tokens, client);
+            if (flag == -2)
+                sendMsg(":server 473 " + client.getNick() + " :Cannot join channel (+i)\r\n", client.getFd());
+            else if (flag == -3)
+                sendMsg(":server 475 " + client.getNick() + " :Cannot join channel (+k)\r\n", client.getFd());
+            break;
+        case 2:
+            if (tokens[1].find(',#'))
+                flag = parserCmdPartMulti(tokens, client);
+            else
+                flag = parserCmdPart(tokens);
+            if (flag == 0)
+                cmdPart(client, tokens, 0);
+            else if (flag == 1)
+                cmdPart(client, tokens, 1);
+            else if (flag == -1)
+                sendMsg(":server 461 " + client.getNick() + " PART :Not enough parameters\r\n", client.getFd());
+            else if (flag == -2)
+                sendMsg(":server 403 " + client.getNick() + " " + tokens[1] + " :No such channel\r\n", client.getFd());
+            break ;
+        case 3:
+            flag = parserCmdPrivMsg(tokens);
+            if (flag == 0)
+                cmdPrivMsg(client, tokens);
+            else if (flag == -1)
+                sendMsg("Usage: PRIVMSG <target> <message>", client.getFd());
+            else if (flag == -2)
+                sendMsg("Error: the user does not exist", client.getFd());
+            break ;
+        case 4:
+            flag = parserCmdKick(tokens, client);
+            if (flag == 0)
+                cmdKick(client, this->_listChannel[tokens[2]]);
+/*          else if (flag == -1) 
+                si le channel n existe pas
+            else if (flag == -2) 
+                si le client n est pas op */
+            break ;
+        case 5:
+            flag = parserCmdInvite(tokens);
+            if (flag == 0)
+            {
+                sendMsg("You've invited " + tokens[1] + " to the channel " + tokens[2], client.getFd());
+                //a faire : sendMsgChan(client.getNick() + "has invited " + tokens[1] + " to the channel " + tokens[2], client.getFd());
+                sendMsg("You have been invited to the channel " + tokens[2] + " by " + client.getNick(), getClient(tokens[1]).getFd());
+            }
+            else if (flag == -1)
+                sendMsg(":server 401 " + client.getNick() + " " + tokens[1] + " :No such nick/channel", client.getFd());
+            else
+                sendMsg("Usage: INVITE <user> <channel>", client.getFd());
+            break ;
+        case 6:
+            flag = parserCmdTopic(tokens);
+            if (flag == 0)
+                //cmdTopic(client, tokens);
+            else
+                sendMsg("Usage: TOPIC <channel> [<topic>]", client.getFd());
+            break ;
+        case 7:
+            flag = parserCmdMode(tokens);
+            if (flag == 0)
+                //cmdMode(client, tokens);
+            else
+                sendMsg("Usage: MODE <channel> <modes>", client.getFd());
+            break ;
+        case 8:
+            flag = parserCmdQuit(tokens);
+            if (flag == 0)
+                //cmdQuit(client, tokens);
+            break ;
+        case 9:
+            cmdPing(client, tokens);
+            break ;
+        case 10:
+            cmdPong(client, tokens);
+            break ;
+        default:
+            sendMsg("Unknown command", client.getFd());
+            break;
+    }
         //else
             //cmdPrivMsg(token);
-    }
 }
 
 int parserCmdNick(std::vector<std::string> tokens)
@@ -149,21 +149,14 @@ int parserCmdNick(std::vector<std::string> tokens)
     return -1;
 }
 
-int Server::parserCmdJoin(std::vector<std::string> tokens, Client &client)
+int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
 {
-    const std::string ok = "\\[{`_^}-]|";
-    if (tokens[1][0] == '#')
+    if (tokens[1][0] == '#' && tokens[1].size() <= 50)
     {
-        for (size_t i = 0; i < tokens[1].size(); ++i)
-        {
-            char c = tokens[1][i];
-            if (!std::isalnum(c) && ok.find(c) == std::string::npos)
-                return -1;
-        }
-        int exist = checkChannelExist(tokens[1]);
-        if (exist == -1)
+        bool exist = checkChannelExist(tokens[1]);
+        if (exist == false)
             return(1);
-        else if (exist == 0)
+        else if (exist == true)
         {
             bool *modes = this->_listChannel[tokens[1]]->whichMod();
             if (modes[INVITE_ONLY])
@@ -180,12 +173,12 @@ int Server::parserCmdJoin(std::vector<std::string> tokens, Client &client)
     return(-1);
 }
 
-int Server::parserCmdJoinMulti(std::vector<std::string> tokens, Client &client)
+int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)
 {
     if (tokens.size() < 2)
         return -1;
-    std::vector<std::string> channels = tokenComma(tokens[1]);
     std::vector<std::string> passwords;
+    std::vector<std::string> channels = tokenComma(tokens[1]);
     if (tokens.size() > 2)
         passwords = tokenComma(tokens[2]);
     size_t i = 0;
@@ -200,44 +193,45 @@ int Server::parserCmdJoinMulti(std::vector<std::string> tokens, Client &client)
         if (chan.empty() || chan[0] != '#')
             return -1;
         int exist = checkChannelExist(chan);
-        if (exist == -1)
-        {
-            //create channel
-        }
-        else if (exist == 0)
+        if (exist == false)
+            if (chan.size() <= 50)
+            {
+                createChannel(chan, client);
+                return(0);
+                //good return, call cmd JOIN
+            }
+        else if (exist == true)
         {
             bool *modes = this->_listChannel[chan]->whichMod();
             if (modes[INVITE_ONLY])
             {
                 if (this->_listChannel[chan]->isInvited(client) == false)
-                {
-                    sendMsg(":server 473 " + client.getNick() + " " + chan + " :Cannot join channel (+i)\r\n", client.getfd());
-                    i++;
-                    continue ;
-                }
+                    sendMsg(":server 473 " + client.getNick() + " " + chan + " :Cannot join channel (+i)\r\n", client.getFd());
             }
             if (modes[PASSWORD] && !pwd.empty())
             {
                 if (this->_listChannel[chan]->getpassword() != pwd)
                 {
-                    sendMsg(":server 475 " + client.getNick() + " " + chan + " :Cannot join channel (+k)\r\n", client.getfd());
+                    sendMsg(":server 475 " + client.getNick() + " " + chan + " :Cannot join channel (+k)\r\n", client.getFd());
                     i++;
                     continue ;
                 }
             }
+            /* Channel *newChannel = new Channel(*this, client, channels[i]);
+            this->_listChannel[channels[i]] = newChannel; */
         }
         i++;
     }
     return (0);
 }
 
-int Server::parserCmdPart(std::vector<std::string> tokens)
+int Server::parserCmdPart(const std::vector<std::string> &tokens)
 {
     if (tokens.size() > 1)
     {
         if (tokens[1][0] != '#')
             return (-1);
-        if (checkChannelExist(tokens[1]) != 0)
+        if (checkChannelExist(tokens[1]) != true)
             return (-2);
         if (tokens.size() > 2)
             return (1);
@@ -245,50 +239,95 @@ int Server::parserCmdPart(std::vector<std::string> tokens)
     }
 }
 
-int Server::parserCmdPrivMsg(std::vector<std::string> tokens)
+int Server::parserCmdPrivMsg(const std::vector<std::string> &tokens)
 {
-    //creation d un channel private si target == client sinon chan normal si target == chan
-    if (checkChannelExist(tokens[1]))
-        return(1);
+    if (checkUserExist(tokens[2]) == false)
+        return (-1);
+    bool channelExist = checkChannelExist(tokens[1]);
+    //creation d un channel private si target == client sinon chan normal si target == cha
+    //if (exist == false)
     //else if ()
 }
 
-int Server::parserCmdKick(std::vector<std::string> tokens, Client &client)
+int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client)
 {
-    //verif que le client est op + chan existe + client a kick dans le chan
+    if (checkChannelExist(tokens[2]) == false)
+        return (-1);
+    else
+    {
+        if (this->_listChannel[tokens[2]]->getStatusClient(client) == OP)
+            return (0);
+        else
+            return (-2);
+    }
 }
 
-int Server::parserCmdInvite(std::vector<std::string> tokens)
+int Server::parserCmdInvite(const std::vector<std::string> &tokens)
 {
-    //verif que le client est op + chan existe + client a inviter dans le chan
+    if (checkUserExist(tokens[2]) == false)
+        return (-1);
+    bool channelExist = checkChannelExist(tokens[1]);
+    if (channelExist == false)
+        return(-1);
+    else
+    {
+        this->_listChannel[tokens[1]]->setStatusClient(getClient(tokens[2]), 2);
+        return (0);
+    }
 }
 
-int Server::parserCmdTopic(std::vector<std::string> tokens)
+int Server::parserCmdTopic(const std::vector<std::string> &tokens)
 {
- //verif mode + droits op + client op si droit op
+    //verif mode + droits op + client op si droit op
+};
+
+int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client)
+{
+    if (tokens.size() < 3)
+        return (-1);
+    const std::string &channelName = tokens[1];
+    if (!checkChannelExist(channelName))
+        return (-1);
+    Channel *channel = getChannel(channelName);
+    if (!channel)
+        return (-1);
+    std::string modes = tokens[2];
+    size_t paramIndex = 3;
+    char sign = 0;
+
+    for (size_t i = 0; i < modes.size(); i++)
+    {
+        if (modes[i] == '+' || modes[i] == '-')
+        {
+            sign = modes[i];
+            continue;
+        }
+        char mode = modes[i];
+        std::string param;
+        if (mode == 'o' || mode == 'k' || mode == 'l')
+        {
+            if (paramIndex >= tokens.size())
+                return (-2);
+            param = tokens[paramIndex++];
+        }
+
+        if (sign == '+')
+            addMode(channel, mode, param);
+        else if (sign == '-')
+            removeMode(channel, mode, param);
+        else
+            return (-2);
+    }
+
+    return (0);
 }
 
-int Server::parserCmdMode(std::vector<std::string> tokens)
-{
-    //verif client est op + mode valide
-}
-
-int Server::parserCmdPing(std::vector<std::string> tokens)
+int Server::parserCmdQuit(const std::vector<std::string> &tokens)
 {
 
 }
 
-int Server::parserCmdPong(std::vector<std::string> tokens)
-{
-
-}
-
-int Server::parserCmdQuit(std::vector<std::string> tokens)
-{
-
-}
-
-int Server::parserCmdReconnect(std::vector<std::string> tokens)
+int Server::parserCmdReconnect(const std::vector<std::string> &tokens)
 {
 
 }

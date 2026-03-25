@@ -1,11 +1,10 @@
 #include "Client.hpp"
 #include <arpa/inet.h>
 
-Client::Client() : _ops(false), _fd(-1) {
-}
+Client::Client() : _fd(-1) {}
 
 Client::Client(sockaddr_in addrClient, pollfd Socketclient)
-	: _ops(false), _fd(Socketclient.fd) {
+	: _fd(Socketclient.fd) {
 	this->_adress = inet_ntoa(addrClient.sin_addr);
 	std::cout << "New client connected: " << this->_adress << std::endl;
 	std::cout << "Client fd: " << this->_fd << std::endl;
@@ -15,7 +14,6 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 Client &Client::operator=(const Client &other) {
 	if (this != &other) 
 	{
-		this->_ops = other._ops;
 		this->_fd = other._fd;
 		this->_password = other._password;
 		this->_adress = other._adress;
@@ -64,32 +62,26 @@ void Client::setAddBuffer(char *msg)
 	this->_buffer += msg;
 }
 
-void Client::setRemoveBuffer()
+void Client::setRemoveBuffer() 
 {
 	this->_buffer.clear();
 }
 
-void Client::setNick(std::string nick)
+void Client::setNick(std::string newNick)
 {
-<<<<<<< HEAD
-	(void)user;
 	for (size_t i = 0; i < newNick.size(); ++i) {
 		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||
 			newNick[i] == '?' || newNick[i] == '!' || newNick[i] == '@') {
-			return -1; // Invalid character in nickname
+			return (-1); // Invalid character in nickname
 		}
 	}
-int Client::cmdNick(const std::string& newNick, const Client& user) {
-	(void)user;
->>>>>>> feature/channels
-	this->_nick = newNick.substr(0, 30);
-	return 0;
-=======
-	this->_nick = nick;
->>>>>>> feature/server-class
+	if (newNick.size() <= 30)
+		this->_nick = newNick;
+	else
+		this->_nick = (newNick.substr(0, 30));
 }
 
-int	Client::getfd()
+int	Client::getFd() 
 {
 	return(this->_fd);
 }

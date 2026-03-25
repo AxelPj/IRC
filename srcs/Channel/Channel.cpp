@@ -115,3 +115,18 @@ bool	Channel::isInvited(Client &client)
 	else
 		return (false);
 }
+
+int	Channel::getStatusClient(Client &client)
+{
+	return(this->_memberList.find(client) != this->_memberList.end());
+}
+
+void	Channel::setStatusClient(Client &client, ClientStatus status)
+{
+	this->_memberList[client] = status;
+}
+
+std::string	Channel::setName()
+{
+	return(this->_name);
+}
