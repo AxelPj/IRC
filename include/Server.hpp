@@ -54,7 +54,7 @@ class Server
         int                         getPort() const;
         int                         getSockfd() const;
         char                        *getBuffer();
-        pollfd                      getpollfd(int i) const;
+        pollfd&                      getpollfd(int i) const;
         Client&                     getClient(const std::string &nameClient);
 
         // Parser general

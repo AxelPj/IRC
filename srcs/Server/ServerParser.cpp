@@ -106,9 +106,9 @@ void    Server::processParser(Client &client)
                 sendMsg("Usage: TOPIC <channel> [<topic>]", client.getFd());
             break ;
         case 7:
-            flag = parserCmdMode(tokens);
+            flag = parserCmdMode(tokens, client);
             if (flag == 0)
-                //cmdMode(client, tokens);
+                cmdMode(client, tokens);
             else
                 sendMsg("Usage: MODE <channel> <modes>", client.getFd());
             break ;
