@@ -81,12 +81,12 @@ std::vector<std::string> Server::tokenSpace(const std::string &buffer)
 
 void    Server::createChannel(const std::string &channelName, Client *client)
 {
-    Channel *newChannel = new Channel();
-    cmdJoin(newChannel, client, 1);
+    Channel *newChannel = new Channel(*client, channelName);  // ← Passer les params
+    cmdJoin(*client, *newChannel, true);
     this->_listChannel[channelName] = newChannel;
 }
 
-void Server::addMode(Channel *channel, char mode, const std::string &param)
+void Server::addMode(Channel *channel, char mode, const std::string &param, Client& client)
 {
     if (mode == 'i')
         channel->setInviteOnly(true);
@@ -97,14 +97,10 @@ void Server::addMode(Channel *channel, char mode, const std::string &param)
     else if (mode == 'l')
         channel->setUserLimit(atoi(param.c_str()));
     else if (mode == 'o')
-    {
-        Client *target = getClientByName(param);
-        if (target)
-            channel->setStatusClient(*target, OP);
-    }
+        channel->setStatusClient(client, OP);
 }
 
-void Server::removeMode(Channel *channel, char mode, const std::string &param)
+void Server::removeMode(Channel *channel, char mode, Client& client)
 {
     if (mode == 'i')
         channel->setInviteOnly(false);
@@ -115,9 +111,42 @@ void Server::removeMode(Channel *channel, char mode, const std::string &param)
     else if (mode == 'l')
         channel->setUserLimit(0);
     else if (mode == 'o')
+        channel->setStatusClient(client, CONNECTED);
+}
+
+void    Server::sendMsg(const std::string& msg, int socket)
+{
+    int ret;
+    
+    const char *buf = msg.c_str();
+    while (strlen(buf) != 0)
     {
-        Client *target = getClientByName(param);
-        if (target)
-            channel->setStatusClient(*target, CONNECTED);
+        ret = send(socket, buf, strlen(buf), 0);
+        if (ret == -1)
+        {
+            std::cerr << "Error: impossible send message to client";
+            break ;
+        }
+        else if (ret == 0)
+            break ;
+        else
+            buf += ret;
+    }
+}
+
+void Server::sendMsgChan(const std::string& msg, Channel& channel, int senderFd)
+{
+    std::map<const Client*, ClientStatus>& members = channel.getMemberList();
+
+    for (std::map<const Client*, ClientStatus>::const_iterator i = members.begin();i != members.end();++i)
+    {
+        const Client* client = i->first;
+        ClientStatus status = i->second;
+
+        if (status != CONNECTED && status != OP)
+            continue;
+        if (client->getFd() == senderFd)
+            continue;
+        sendMsg(msg, client->getFd());
     }
 }

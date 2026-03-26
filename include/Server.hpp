@@ -46,7 +46,6 @@ class Server
         void                        addChannel(const std::string &channel);
         void                        removeChannel(const std::string &channel);
         void                        removeClient(int fdClient, int i);
-        void                        sendMsg(const std::string &msg, int socket);
         bool                        checkChannelExist(const std::string &channelName);
         bool                        checkUserExist(const std::string &userName);
 
@@ -86,17 +85,19 @@ class Server
         int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
         int                         cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
         int                         cmdInvite(Client &client, const std::vector<std::string> &token);
-        int                         cmdTopic(Client &client, const std::vector<std::string> &token);
+        int                         cmdTopic(const std::vector<std::string> &token);
         int                         cmdMode(Client &client, const std::vector<std::string> &token);
         void                        cmdPing(Client &client, const std::vector<std::string> &token);
         void                        cmdPong(Client &client, const std::vector<std::string> &token);
-        int                         cmdQuit(Client &client, const std::vector<std::string> &token);
+        int                         cmdQuit(Client& client, const std::string& reason);
         int                         cmdReconnect(Client &client, const std::vector<std::string> &token);
 
         // others
-        void                         createChannel(const std::string &channelName);
-        void                         addMode(Channel *channel, char mode, const std::string &param);
-        void                         removeMode(Channel *channel, char mode, const std::string &param);
+        void                        sendMsg(const std::string &msg, int socket);
+        void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
+        void                        createChannel(const std::string &channelName, Client *client);
+        void                        addMode(Channel *channel, char mode, const std::string &param, Client& client);
+        void                        removeMode(Channel *channel, char mode, Client& client);
 };
 
 #endif

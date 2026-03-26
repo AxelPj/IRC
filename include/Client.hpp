@@ -30,7 +30,7 @@ class Client {
 		std::string getThird();
 		std::string getUser();
 		std::string	getBuffer();
-		int			getFd();
+		int			getFd() const;
 
 		//Setters//
 		void setNick(std::string nick);

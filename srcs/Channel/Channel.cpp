@@ -1,13 +1,13 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _server(nullptr), _userLimit(-1)
+Channel::Channel() : _userLimit(-1)
 {
     for (int i = 0; i < LIST_MODE; i++)
         this->_modList[i] = false;
 }
 
-Channel::Channel(Server *serv, Client &cli, const std::string &name)
-    : _server(serv), _name(name), _userLimit(-1)
+Channel::Channel(Client &cli, const std::string &name)
+    : _name(name), _userLimit(-1)
 {
     for (int i = 0; i < LIST_MODE; i++)
         this->_modList[i] = false;
@@ -47,13 +47,13 @@ bool *Channel::getModList()
 
 int Channel::getStatusClient(const Client &client) const
 {
-    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
         return (it->second);
     return (NOT_CONNECTED);
 }
 
-std::map<Client*, ClientStatus> &Channel::getMemberList()
+std::map<const Client*, ClientStatus> &Channel::getMemberList()
 {
     return (this->_memberList);
 }
@@ -108,7 +108,7 @@ bool Channel::setTopicResctriction(bool active)
 
 bool Channel::isInvited(Client &client) const
 {
-    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
         return (it->second == INVITED);
     return (false);
@@ -116,7 +116,7 @@ bool Channel::isInvited(Client &client) const
 
 bool Channel::isMember(Client &client) const
 {
-    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
         return (it->second == CONNECTED || it->second == OP);
     return (false);
@@ -124,7 +124,7 @@ bool Channel::isMember(Client &client) const
 
 bool Channel::isOp(Client &client) const
 {
-    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
         return (it->second == OP);
     return (false);
@@ -180,7 +180,7 @@ void Channel::topic(Client &user, const std::string &newTopic)
 {
     if (!this->_memberList.count(&user))
         return ; // ERR_NOTONCHANNEL
-    if (this->_modList[TOPIC] && !isOp(user))
+    if (this->_modList[TOPIC_OPE] && !isOp(user))
         return ; // ERR_CHANOPRIVSNEEDED
     this->_topic = newTopic;
     // TOPIC MESSAGE

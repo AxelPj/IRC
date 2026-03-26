@@ -34,6 +34,8 @@ void    Server::processParser(Client &client)
         return ;
     for (size_t i = 0; i < tokens[0].size(); i++)
         tokens[0][i] = toupper(tokens[0][i]); 
+    if (tokens.size() == 1 && tokens[0] != "TOPIC" && tokens[0] != "QUIT")
+                return ;
     switch(choiceParser(tokens))
     {
         case 0:
@@ -104,7 +106,7 @@ void    Server::processParser(Client &client)
         case 6:
             flag = parserCmdTopic(tokens, client);
             if (flag == 0)
-                cmdTopic(client, tokens);
+                cmdTopic(tokens);
             else if (flag == -1)
                 sendMsg("does not exist\r\n", client.getFd());
             else if (flag == -2)
@@ -118,7 +120,7 @@ void    Server::processParser(Client &client)
                 sendMsg("Usage: MODE <channel> <modes>\r\n", client.getFd());
             break ;
         case 8:
-            flag = parserCmdQuit(tokens);
+            flag = parserCmdQuit(tokens, client);
             if (flag == 0)
                 //cmdQuit(client, tokens);
             break ;
@@ -199,13 +201,15 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
             return -1;
         int exist = checkChannelExist(chan);
         if (exist == false)
+        {
             if (chan.size() <= 50)
             {
-                createChannel(chan, client);
+                createChannel(chan, &client);
                 return(0);
                 //good return, call cmd JOIN
             }
-        else if (exist == true)
+        }
+        else
         {
             bool *modes = this->_listChannel[chan]->whichMod();
             if (modes[INVITE_ONLY])
@@ -245,10 +249,11 @@ int Server::parserCmdPrivMsg(const std::vector<std::string> &tokens)
 {
     if (checkUserExist(tokens[2]) == false)
         return (-1);
-    bool channelExist = checkChannelExist(tokens[1]);
+    //bool channelExist = checkChannelExist(tokens[1]);
     //creation d un channel private si target == client sinon chan normal si target == cha
     //if (exist == false)
     //else if ()
+    return(0);
 };
 
 int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client)
@@ -333,22 +338,18 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
         }
 
         if (sign == '+')
-            addMode(&channel, mode, param);
+            addMode(&channel, mode, param, client);
         else if (sign == '-')
-            removeMode(&channel, mode, param);
+            removeMode(&channel, mode, client);
         else
             return (-2);
     }
     return (0);
 }
 
-int Server::parserCmdQuit(const std::vector<std::string> &tokens, const Client &client)
+/* int Server::parserCmdQuit(const std::vector<std::string> &tokens, const Client &client)
 {
-    this
-}
-
-int Server::parserCmdReconnect(const std::vector<std::string> &tokens)
-{
-
-}
-
+    //msg general a tout les channel ou est co le client pour ndiquer le leave
+    //int fd = client.getFd();
+    //close (fd);
+} */

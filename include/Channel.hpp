@@ -28,21 +28,19 @@ enum ClientStatus
 class Channel
 {
     private:
-        Server                          *_server;
         std::string                     _name;
         std::string                     _password;
         std::string                     _topic;
         int                             _userLimit;
         bool                            _modList[LIST_MODE];
-        std::map<Client*, ClientStatus> _memberList;
-
+        std::map<const Client*, ClientStatus> _memberList;
         void    						join(Client &user);
         void    						setMode(bool isRemoved, int mask);
         void    						invite(Client &user);
 
     public:
         								Channel();
-        								Channel(Server *serv, Client &cli, const std::string &name);
+        								Channel(Client &cli, const std::string &name);
         								~Channel();
 
         // Cmds
@@ -61,7 +59,7 @@ class Channel
         int                             getUserLimit() const;
         bool                            *getModList();
         int                             getStatusClient(const Client &client) const;
-        std::map<Client*, ClientStatus> &getMemberList();
+        std::map<const Client*, ClientStatus> &getMemberList();
 
         // setters
         void    						setName(const std::string &name);

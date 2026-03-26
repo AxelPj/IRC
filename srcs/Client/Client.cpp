@@ -69,19 +69,13 @@ void Client::setRemoveBuffer()
 
 void Client::setNick(std::string newNick)
 {
-	for (size_t i = 0; i < newNick.size(); ++i) {
-		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||
-			newNick[i] == '?' || newNick[i] == '!' || newNick[i] == '@') {
-			return (-1); // Invalid character in nickname
-		}
-	}
 	if (newNick.size() <= 30)
 		this->_nick = newNick;
 	else
 		this->_nick = (newNick.substr(0, 30));
 }
 
-int	Client::getFd() 
+int	Client::getFd() const
 {
 	return(this->_fd);
 }

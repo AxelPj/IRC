@@ -84,27 +84,6 @@ void Server::removeClient(int fdClient, int i)
     this->_listClient.erase(fdClient);
 }
 
-void    Server::sendMsg(const std::string& msg, int socket)
-{
-    int ret;
-    
-    const char *buf = msg.c_str();
-    while (strlen(buf) != 0)
-    {
-        ret = send(socket, buf, strlen(buf), 0);
-        if (ret == -1)
-        {
-            std::cerr << "Error: impossible send message to client";
-            break ;
-        }
-        else if (ret == 0)
-            break ;
-        else
-            buf += ret;
-    }
-}
-
-
 void    Server::run()
 {
     //init function poll (struct pollfd)
@@ -217,6 +196,7 @@ Client& Server::getClient(const std::string &nameClient)
         if (it->second->getUser() == nameClient)
             return (*it->second);
     }
+    throw std::runtime_error("Client not found");
 }
 
 Channel&    Server::getChannel(const std::string &name)
