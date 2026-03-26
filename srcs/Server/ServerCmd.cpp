@@ -33,14 +33,26 @@ int Server::cmdJoin(Client &client, Channel &channel, bool setOps)
         channel.setStatusClient(client, 3);
     else if (setOps == false)
         channel.setStatusClient(client, 1);
-    sendMsg("You have joined the channel" + channel.setName(), client.getFd());
+    sendMsg("You have joined the channel" + channel.getName(), client.getFd());
     return (0);
 }
 
-int Server::cmdKick(Client &client, Channel &channel)
+int Server::cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
 {
     channel.setStatusClient(client, 4);
-    sendMsg("You have been kicked from the channel " + channel.setName() + " ", client.getFd());
+    if(reason == true)
+    {
+        sendMsg("You have been kicked from the channel " + channel.getName(), client.getFd());
+        sendMsg("(", client.getFd());
+        for (size_t i = 2; i < token.size(); i++)
+        {
+            sendMsg(token[i], client.getFd());
+        }
+        sendMsg(")", client.getFd());
+        return (0);
+    }
+    else
+        sendMsg("You have been kicked from the channel " + channel.getName() + " " + "(Kicked)", client.getFd());
     return (0);
 
 }
@@ -53,6 +65,12 @@ void Server::cmdPong(Client &client, const std::vector<std::string> &token)
 void Server::cmdPing(Client &client, const std::vector<std::string> &token)
 {
     sendMsg("PING :" + token[1] + "\r\n", client.getFd());
+}
+
+int Server::cmdTopic(Client &client, const std::vector<std::string> &tokens)
+{
+    Channel chan = getChannel(tokens[1]);
+    chan.setTopic(tokens[2]);
 }
 
 /* int Server::cmdInvite(Client &client, const std::vector<std::string> &token)

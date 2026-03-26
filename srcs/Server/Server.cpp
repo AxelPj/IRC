@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password)
+Server::Server(int port, const std::string& password)
 {
     if (port < 1024 || port > 65535)
         throw std::invalid_argument("Error Port invalide");
@@ -53,7 +53,7 @@ Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
     return (new Client(*addr, this->_socketIrc[0]));
 }
 
-bool    Server::recvClient(pollfd socketclient, Client &client)
+bool    Server::recvClient(const pollfd &socketclient, Client &client)
 {
     std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
@@ -84,9 +84,10 @@ void Server::removeClient(int fdClient, int i)
     this->_listClient.erase(fdClient);
 }
 
-void    Server::sendMsg(std::string msg, int socket)
+void    Server::sendMsg(const std::string& msg, int socket)
 {
     int ret;
+    
     const char *buf = msg.c_str();
     while (strlen(buf) != 0)
     {
@@ -216,4 +217,9 @@ Client& Server::getClient(const std::string &nameClient)
         if (it->second->getUser() == nameClient)
             return (*it->second);
     }
+}
+
+Channel&    Server::getChannel(const std::string &name)
+{
+    return(*this->_listChannel[name]);
 }

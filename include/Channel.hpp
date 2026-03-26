@@ -11,10 +11,9 @@ enum ChannelMode
 {
     INVITE_ONLY = 0, // i
     PASSWORD    = 1, // k
-    OPS         = 2, // o
-    LIMIT       = 3, // l
-    TOPIC       = 4, // t
-    LIST_MODE   = 5
+    LIMIT       = 2, // l
+    TOPIC_OPE   = 3, // t
+    LIST_MODE   = 4
 };
 
 enum ClientStatus
@@ -36,25 +35,24 @@ class Channel
         int                             _userLimit;
         bool                            _modList[LIST_MODE];
         std::map<Client*, ClientStatus> _memberList;
-        // todo: banlist container
 
-        void    join(Client &user);
-        void    setMode(bool isRemoved, int mask);
-        void    invite(Client &user);
+        void    						join(Client &user);
+        void    						setMode(bool isRemoved, int mask);
+        void    						invite(Client &user);
 
     public:
-        Channel();
-        Channel(Server *serv, Client &cli, const std::string &name);
-        ~Channel();
+        								Channel();
+        								Channel(Server *serv, Client &cli, const std::string &name);
+        								~Channel();
 
-        // actions
-        void    kick(Client &issuer, Client &target);
-        void    mode(Client &user, const std::string &modes);
-        void    names(Client &user);
-        void    topic(Client &user, const std::string &newTopic);
-        void    topic(Client &user);
-        void    part(Client &user);
-        void    join(Client &user, const std::string &password);
+        // Cmds
+        void    						kick(Client &issuer, Client &target);
+        void    						mode(Client &user, const std::string &modes);
+        void    						names(Client &user);
+        void    						topic(Client &user, const std::string &newTopic);
+        void    						topic(Client &user);
+        void    						part(Client &user);
+        void    						join(Client &user, const std::string &password);
 
         // getters
         const std::string               &getName() const;
@@ -62,20 +60,23 @@ class Channel
         const std::string               &getPassword() const;
         int                             getUserLimit() const;
         bool                            *getModList();
-        int                             getClientStatus(Client &client) const;
+        int                             getStatusClient(const Client &client) const;
         std::map<Client*, ClientStatus> &getMemberList();
 
         // setters
-        void    setName(const std::string &name);
-        void    setTopic(const std::string &topic);
-        void    setPassword(const std::string &password);
-        void    setUserLimit(int limit);
-        void    setClientStatus(Client &client, ClientStatus status);
+        void    						setName(const std::string &name);
+        void    						setTopic(const std::string &topic);
+        void    						setPassword(const std::string &password);
+        void    						setUserLimit(int limit);
+        void    						setStatusClient(Client &client, ClientStatus status);
+        bool                            setInviteOnly(bool active);
+        bool                            setTopicResctriction(bool active);
 
         // utils
-        bool    isInvited(Client &client) const;
-        bool    isMember(Client &client) const;
-        bool    isOp(Client &client) const;
+        bool    						isInvited(Client &client) const;
+        bool    						isMember(Client &client) const;
+        bool    						isOp(Client &client) const;
+		bool    						*whichMod();
 };
 
 #endif

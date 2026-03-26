@@ -89,51 +89,35 @@ void    Server::createChannel(const std::string &channelName, Client *client)
 void Server::addMode(Channel *channel, char mode, const std::string &param)
 {
     if (mode == 'i')
-    {
         channel->setInviteOnly(true);
-    }
     else if (mode == 't')
-    {
-        channel->setTopicRestricted(true);
-    }
+        channel->setTopicResctriction(true);
     else if (mode == 'k')
-    {
-        channel->setKey(param);
-    }
+        channel->setPassword(param);
     else if (mode == 'l')
-    {
-        channel->setLimit(atoi(param.c_str()));
-    }
+        channel->setUserLimit(atoi(param.c_str()));
     else if (mode == 'o')
     {
-        Client *target = this->getClientByName(param);
+        Client *target = getClientByName(param);
         if (target)
-            channel->addOp(target);
+            channel->setStatusClient(*target, OP);
     }
 }
 
 void Server::removeMode(Channel *channel, char mode, const std::string &param)
 {
-    (void)param; 
-
     if (mode == 'i')
-    {
         channel->setInviteOnly(false);
-    }
     else if (mode == 't')
-    {
-        channel->setTopicRestricted(false);
-    }
+        channel->setTopicResctriction(false);
     else if (mode == 'k')
-    {
-        channel->setKey("");
-    }
+        channel->setPassword("");
     else if (mode == 'l')
-    {
-        channel->setLimit(0);
-    }
+        channel->setUserLimit(0);
     else if (mode == 'o')
     {
-        setStatusClient(getClient(target), 3);
+        Client *target = getClientByName(param);
+        if (target)
+            channel->setStatusClient(*target, CONNECTED);
     }
 }

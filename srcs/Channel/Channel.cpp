@@ -1,132 +1,238 @@
 #include "Channel.hpp"
 
-Channel::Channel(Server serv, Client cli, std::string name) : _server(serv), _name(name)
+Channel::Channel() : _server(nullptr), _userLimit(-1)
 {
-	this->_userLimit = -1;	
-	this->_memberList.insert({cli, true});
-	this->_modes = 0; //bitmask in order p/s/i/t/n/m
+    for (int i = 0; i < LIST_MODE; i++)
+        this->_modList[i] = false;
+}
+
+Channel::Channel(Server *serv, Client &cli, const std::string &name)
+    : _server(serv), _name(name), _userLimit(-1)
+{
+    for (int i = 0; i < LIST_MODE; i++)
+        this->_modList[i] = false;
+    this->_memberList[&cli] = CONNECTED;
 }
 
 Channel::~Channel()
 {
 }
 
-void Channel::join(Client& user, std::string password)
-{
-	if (_banlist.contains(user)
-	//ERR_BANNEDFROMCHAN
-	if (_modes & 8 && !invited)
-	//ERR_INVITEONLYCHAN
-	if (_userLimit >= 0 && _memberList.size() >= _userLimit)
-	//ERR_CHANNELISFULL
-	if (pass != _key)
-	//ERR_BADCHANNELKE
+// ─── GETTERS ────────────────────────────────────────────────────────────────
 
-	//Success
-	_memberList.insert({user, false});
-	//JOIN MESSAGE
-	//RPL_TOPIC
-	//RPL_TOPICTIME
-	//RPL_NAMREPLY
-	//RPL_ENDOFNAMES
+const std::string &Channel::getName() const
+{
+    return (this->_name);
 }
 
-//cannot be called on non-existent channel, needs to be addressed elsewhere
-void Channel::part(Client& user)
+const std::string &Channel::getTopic() const
 {
-	if (_memberList.contains(user))
-	{
-		_memberList.remove(user);
-		//PART MESSAGE
-	}
-	else
-		//ERR_NOTONCHANNEL
+    return (this->_topic);
 }
 
-void Channel::topic(Client user)
+const std::string &Channel::getPassword() const
 {
-	//if topic
-	//RPL_TOPIC
-	//RPL_TOPICWHOTIME
-	//else
-	//RPL_NOTOPIC
+    return (this->_password);
 }
 
-void Channel::topic(Client user, std::string newTopic)
+int Channel::getUserLimit() const
 {
-	if (!_memberList.contains(user))
-		//ERR_NOTONCHANNEL
-	else if (_modes & 2 && !memberList[user]) //topic protected
-		//ERR_CHANOPRIVSNEEDED
-	else
-	{
-		_topic = newTopic;
-		//TOPIC MESSAGE
-	}
+    return (this->_userLimit);
 }
 
-void Channel::names(Client user)
+bool *Channel::getModList()
 {
-	if (_modes & 16 && !memberList.contains(user)) //secret channel
-	{
-		//RPL_ENDOFNAMES
-		return;
-	}
-	//iterator over member list, omit invisible if user is not in channel
+    return (this->_modList);
 }
 
-void Channel::kick(Client issuer, Client target)
+int Channel::getStatusClient(const Client &client) const
 {
-	if (memberList.count(issuer) == 0)
-		//ERR_NOTONCHANNEL
-	else if (!memberList[issuer])
-		//ERR_CHANOPRIVSNEEDED
-	else if (memberList.count(target) == 0)
-		//ERR_USERNOTINCHANNEL
-	else
-	{
-		memberList.erase(target);
-		//KICK MESSAGE
-	}
+    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    if (it != this->_memberList.end())
+        return (it->second);
+    return (NOT_CONNECTED);
 }
 
-void Channel::mode(Client user, std::string modes)
+std::map<Client*, ClientStatus> &Channel::getMemberList()
 {
-	if (memberList.count(user) == 0)
-		//ERR_NOTONCHANNEL
-	if (!memberList[user])
-		//ERR_CHANOPRIVSNEEDED
-	//bitmask in order p/s/i/t/n/m
-	if (modes[0] == '+')
-	else if (modes[0] == '-')
-	else
-		//
+    return (this->_memberList);
 }
 
-bool*	Channel::whichMod()
+// ─── SETTERS ────────────────────────────────────────────────────────────────
+
+void Channel::setName(const std::string &name)
 {
-	return(this->_modList);
+    this->_name = name;
 }
 
-bool	Channel::isInvited(Client &client)
+void Channel::setTopic(const std::string &topic)
 {
-	if (this->_memberList[client] == 2)
-		return (true);
-	else
-		return (false);
+    this->_topic = topic;
 }
 
-int	Channel::getStatusClient(Client &client)
+void Channel::setPassword(const std::string &password)
 {
-	return(this->_memberList.find(client) != this->_memberList.end());
+    this->_password = password;
 }
 
-void	Channel::setStatusClient(Client &client, ClientStatus status)
+void Channel::setUserLimit(int limit)
 {
-	this->_memberList[client] = status;
+    this->_userLimit = limit;
 }
 
-std::string	Channel::setName()
+void Channel::setStatusClient(Client &client, ClientStatus status)
 {
-	return(this->_name);
+    this->_memberList[&client] = status;
+}
+
+
+bool Channel::setInviteOnly(bool active)
+{
+    if (active)
+        this->_modList[INVITE_ONLY] = true;
+    else
+        this->_modList[INVITE_ONLY] = false;
+    return (this->_modList[INVITE_ONLY]);
+}
+
+bool Channel::setTopicResctriction(bool active)
+{
+    if(active)
+        this->_modList[TOPIC_OPE] = true;
+    else
+        this->_modList[TOPIC_OPE] = false;
+    return (this->_modList[TOPIC_OPE]);
+}
+
+// ─── UTILS ──────────────────────────────────────────────────────────────────
+
+bool Channel::isInvited(Client &client) const
+{
+    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    if (it != this->_memberList.end())
+        return (it->second == INVITED);
+    return (false);
+}
+
+bool Channel::isMember(Client &client) const
+{
+    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    if (it != this->_memberList.end())
+        return (it->second == CONNECTED || it->second == OP);
+    return (false);
+}
+
+bool Channel::isOp(Client &client) const
+{
+    std::map<Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
+    if (it != this->_memberList.end())
+        return (it->second == OP);
+    return (false);
+}
+
+bool *Channel::whichMod()
+{
+    return (this->_modList);
+}
+
+// ─── ACTIONS ────────────────────────────────────────────────────────────────
+
+void Channel::join(Client &user, const std::string &password)
+{
+    // ERR_BANNEDFROMCHAN
+    if (this->_memberList.count(&user) && this->_memberList[&user] == BANNED)
+        return ;
+    // ERR_INVITEONLYCHAN
+    if (this->_modList[INVITE_ONLY] && !isInvited(user))
+        return ;
+    // ERR_CHANNELISFULL
+    if (this->_userLimit >= 0 && (int)this->_memberList.size() >= this->_userLimit)
+        return ;
+    // ERR_BADCHANNELKEY
+    if (this->_modList[PASSWORD] && password != this->_password)
+        return ;
+    this->_memberList[&user] = CONNECTED;
+    // JOIN MESSAGE
+    // RPL_TOPIC
+    // RPL_TOPICTIME
+    // RPL_NAMREPLY
+    // RPL_ENDOFNAMES
+}
+
+void Channel::part(Client &user)
+{
+    if (this->_memberList.count(&user))
+    {
+        this->_memberList.erase(&user);
+        // PART MESSAGE
+    }
+    // else ERR_NOTONCHANNEL
+}
+
+void Channel::topic(Client &user)
+{
+    // if topic    → RPL_TOPIC + RPL_TOPICWHOTIME
+    // else        → RPL_NOTOPIC
+    (void)user;
+}
+
+void Channel::topic(Client &user, const std::string &newTopic)
+{
+    if (!this->_memberList.count(&user))
+        return ; // ERR_NOTONCHANNEL
+    if (this->_modList[TOPIC] && !isOp(user))
+        return ; // ERR_CHANOPRIVSNEEDED
+    this->_topic = newTopic;
+    // TOPIC MESSAGE
+}
+
+void Channel::names(Client &user)
+{
+    // secret channel → RPL_ENDOFNAMES only if not member
+    if (!isMember(user))
+        return ;
+    // iterate over memberList
+    // RPL_NAMREPLY + RPL_ENDOFNAMES
+}
+
+void Channel::kick(Client &issuer, Client &target)
+{
+    if (!this->_memberList.count(&issuer))
+        return ; // ERR_NOTONCHANNEL
+    if (!isOp(issuer))
+        return ; // ERR_CHANOPRIVSNEEDED
+    if (!this->_memberList.count(&target))
+        return ; // ERR_USERNOTINCHANNEL
+    this->_memberList.erase(&target);
+    // KICK MESSAGE
+}
+
+void Channel::mode(Client &user, const std::string &modes)
+{
+    if (!this->_memberList.count(&user))
+        return ; // ERR_NOTONCHANNEL
+    if (!isOp(user))
+        return ; // ERR_CHANOPRIVSNEEDED
+    if (modes.empty())
+        return ;
+    // TODO: parser les modes +/- i k o l t
+    (void)modes;
+}
+
+void Channel::invite(Client &user)
+{
+    this->_memberList[&user] = INVITED;
+}
+
+void Channel::join(Client &user)
+{
+    this->_memberList[&user] = CONNECTED;
+}
+
+void Channel::setMode(bool isRemoved, int mask)
+{
+    if (isRemoved)
+        this->_modList[mask] = false;
+    else
+        this->_modList[mask] = true;
 }
