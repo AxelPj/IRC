@@ -6,7 +6,7 @@ Channel::Channel() : _userLimit(-1)
         this->_modList[i] = false;
 }
 
-Channel::Channel(Client &cli, const std::string &name)
+Channel::Channel(const Client &cli, const std::string &name)
     : _name(name), _userLimit(-1)
 {
     for (int i = 0; i < LIST_MODE; i++)
@@ -14,9 +14,7 @@ Channel::Channel(Client &cli, const std::string &name)
     this->_memberList[&cli] = CONNECTED;
 }
 
-Channel::~Channel()
-{
-}
+Channel::~Channel(){}
 
 // ─── GETTERS ────────────────────────────────────────────────────────────────
 
@@ -80,7 +78,7 @@ void Channel::setUserLimit(int limit)
     this->_userLimit = limit;
 }
 
-void Channel::setStatusClient(Client &client, ClientStatus status)
+void Channel::setStatusClient(const Client &client, ClientStatus status)
 {
     this->_memberList[&client] = status;
 }
@@ -139,9 +137,6 @@ bool *Channel::whichMod()
 
 void Channel::join(Client &user, const std::string &password)
 {
-    // ERR_BANNEDFROMCHAN
-    if (this->_memberList.count(&user) && this->_memberList[&user] == BANNED)
-        return ;
     // ERR_INVITEONLYCHAN
     if (this->_modList[INVITE_ONLY] && !isInvited(user))
         return ;

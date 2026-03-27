@@ -31,7 +31,6 @@ class Server
         int                             _signal;
         std::map<int, Client*>          _listClient;
         std::map<std::string, Channel*> _listChannel;
-        void quit();
         char                            _buffer[1024];
 
     public:
@@ -71,6 +70,7 @@ class Server
         int                         parserCmdPart(const std::vector<std::string> &tokens);
         int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
+        int                         parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdNick(const std::vector<std::string> &tokens) const;
         int                         parserCmdInvite(const std::vector<std::string> &tokens);
         int                         parserCmdTopic(const std::vector<std::string> &tokens, const Client& client);
@@ -79,7 +79,7 @@ class Server
         int                         parserCmdReconnect(const std::vector<std::string> &tokens);
 
         // commands
-        int                         cmdJoin(Client &client, Channel &channel, bool setOps);
+        int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
         int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
         int                         cmdNick(Client &client, const std::vector<std::string> &token);
         int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
@@ -95,7 +95,7 @@ class Server
         // others
         void                        sendMsg(const std::string &msg, int socket);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
-        void                        createChannel(const std::string &channelName, Client *client);
+        Channel&                    createChannel(const std::string &channelName, const Client *client);
         void                        addMode(Channel *channel, char mode, const std::string &param, Client& client);
         void                        removeMode(Channel *channel, char mode, Client& client);
 };

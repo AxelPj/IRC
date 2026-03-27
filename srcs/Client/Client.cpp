@@ -28,31 +28,31 @@ Client &Client::operator=(const Client &other) {
 Client::~Client() {
 }
 
-std::string Client::getPassword() {
+std::string Client::getPassword() const {
 	return this->_password;
 }
 
-std::string Client::getAdress() {
+std::string Client::getAdress() const {
 	return this->_adress;
 }
 
-std::string Client::getNick() {
+std::string Client::getNick() const {
 	return this->_nick;
 }
 
-std::string Client::getSecond() {
+std::string Client::getSecond() const {
 	return this->_second;
 }
 
-std::string Client::getThird() {
+std::string Client::getThird() const {
 	return this->_third;
 }
 
-std::string Client::getUser() {
+std::string Client::getUser() const {
 	return this->_username;
 }
 
-std::string	Client::getBuffer()
+std::string	Client::getBuffer() const
 {
 	return(this->_buffer);
 }
@@ -67,7 +67,7 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
-void Client::setNick(std::string newNick)
+void Client::setNick(const std::string &newNick)
 {
 	if (newNick.size() <= 30)
 		this->_nick = newNick;
