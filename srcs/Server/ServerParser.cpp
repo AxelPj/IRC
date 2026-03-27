@@ -94,16 +94,16 @@ void    Server::processParser(Client &client)
         case 4:
             flag = parserCmdKick(tokens, client);
             if (flag == 0)
-                cmdKick(tokens, client, *this->_listChannel[tokens[1]], false); 
+                cmdKick(tokens, getClient(tokens[1]), *this->_listChannel[tokens[1]], false); 
             else if (flag == 1)
-                cmdKick(tokens, client, *this->_listChannel[tokens[1]], true);
+                cmdKick(tokens, getClient(tokens[1]), *this->_listChannel[tokens[1]], true);
             else if (flag == -1) 
                 sendMsg(":server 401 " + client.getNick() + " " + tokens[1] + " :No such nick/channel\r\n", client.getFd());
             else if (flag == -2)
                 sendMsg(":server 482 " + client.getNick() + " " + tokens[1] + " :You are not channel operator\r\n", client.getFd());
             break ;
         case 5:
-            flag = parserCmdInvite(tokens);
+            flag = parserCmdInvite(tokens, client);
             if (flag == 0)
                 cmdInvite(client, tokens);
             else if (flag == -1)
@@ -137,10 +137,10 @@ void    Server::processParser(Client &client)
                 cmdQuit(client, tokens[1]);
             break ;
         case 9:
-            cmdPing(client, tokens);
+            cmdPong(client, tokens);
             break ;
         case 10:
-            cmdPong(client, tokens);
+            cmdPing(client, tokens);
             break ;
         default:
             sendMsg("Unknown command\r\n", client.getFd());
@@ -183,7 +183,7 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
                     return (-2);
             if (modes[PASSWORD] && tokens.size() > 2 && tokens[2].empty() == false)
             {
-                if (this->_listChannel[tokens[1]]->getPassword() != tokens[2])
+                if (this->_listChannel[tokens[1]]->getPassword( ) != tokens[2])
                     return -3;
             }
             return (0);
@@ -294,16 +294,16 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
 
 int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client)
 {
-    if (checkChannelExist(tokens[1]) == false)
-        return (-2);
-    else if (getChannel(tokens[1]).isMember(getClient(tokens[1])) == false)
-        return(-1);
-    else    
+    if (checkChannelExist(tokens[1]) == false || getChannel(tokens[1]).isMember(getClient(tokens[2])) == false)
+        return (-1);
+    else
     {
         if (this->_listChannel[tokens[1]]->getStatusClient(client) == OP && tokens.size() == 3)
             return (0);
         else if (this->_listChannel[tokens[1]]->getStatusClient(client) == OP && tokens.size() > 3)
             return (1);
+        else
+            return (-2);
     }
 }
 

@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "Client.hpp"
 
 Channel::Channel() : _userLimit(-1)
 {
@@ -131,6 +132,18 @@ bool Channel::isOp(Client &client) const
 bool *Channel::whichMod()
 {
     return (this->_modList);
+}
+
+void Channel::removeMember(Client &client)
+{
+    for (std::map<const Client*, ClientStatus>::iterator it = _memberList.begin(); it != _memberList.end(); it++)
+    {
+        if (it->first->getNick() == client.getNick())
+        {
+            _memberList.erase(it);
+            return ;
+        }
+    }
 }
 
 // ─── ACTIONS ────────────────────────────────────────────────────────────────

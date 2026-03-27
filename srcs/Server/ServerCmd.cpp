@@ -11,32 +11,32 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
     _listChannel[token[1]]->setStatusClient(client, NOT_CONNECTED);
     if (reason == true) 
     {
-        sendMsg("You have left the channel" + token[1], client.getFd());
-        sendMsg("(", client.getFd());
+        std::string msg = "You have left the channel " + token[1] + " (";
         for (size_t i = 2; i < token.size(); i++)
-            sendMsg(token[i], client.getFd());
-        sendMsg(")", client.getFd());
+            msg += token[i];
+        msg += ")\r\n";
+        sendMsg(msg, client.getFd());
         return (0);
     }
-    else {
-        sendMsg("You have left the channel" + token[1] + "(Leaving)", client.getFd());
+    else 
+    {
+        sendMsg("You have left the channel " + token[1] + " (Leaving)\r\n", client.getFd());
         return (0);
     }
-    return (1);
 }
 
 int Server::cmdJoin(const Client &client, const std::string &channel, bool setOps)
 {
     if (setOps == true)
     {
-        Channel newchan = createChannel(channel, &client);
+        createChannel(channel, &client);
         this->_listChannel[channel]->setStatusClient(client, OP);
-        sendMsg("You have joined the channel" + channel, client.getFd());
+        sendMsg("You have joined the channel " + channel + "\r\n", client.getFd());
     }
     else if (setOps == false)
     {
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
-        sendMsgChan(client.getNick() + " joined the channel " + channel, getChannel(channel), client.getFd());
+        sendMsgChan(client.getNick() + " joined the channel " + channel + "\r\n", getChannel(channel), client.getFd());
     }
     return (0);
 }
@@ -45,16 +45,15 @@ int Server::cmdKick(const std::vector<std::string> token, Client &client, Channe
 {   
     if(reason == true)
     {
-        sendMsg("You have been kicked from the channel " + channel.getName(), client.getFd());
-        sendMsg("(", client.getFd());
+        std::string msg = "You have been kicked from the channel " + channel.getName() + " (";
         for (size_t i = 2; i < token.size(); i++)
-            sendMsg(token[i], client.getFd());
-        sendMsg(")", client.getFd());
-        return (0);
+            msg += token[i];
+        msg += ")\r\n";
+        sendMsg(msg, client.getFd());
     }
     else
-        sendMsg("You have been kicked from the channel " + channel.getName() + " " + "(Kicked)", client.getFd());
-    channel.setStatusClient(client, NOT_CONNECTED);
+        sendMsg("You have been kicked from the channel " + channel.getName() + " " + "(Kicked)\r\n", client.getFd());
+    channel.removeMember(client);
     return (0);
 }
 
@@ -70,33 +69,29 @@ void Server::cmdPing(Client &client, const std::vector<std::string> &token)
 
 int Server::cmdTopic(const std::vector<std::string> &tokens)
 {
-    Channel chan = getChannel(tokens[1]);
+    Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
     return(0);
 }
 
 int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 {
-    Client &invitedClient = getClient(token[1]);
+    Client *invitedClient = &getClient(token[1]);
     
     sendMsg("You've invited " + token[1] + " to the channel " + token[2] + "\r\n", client.getFd());
-    sendMsg(client.getNick() + " has invited " + token[1] + " to the channel " + token[2] + "\r\n", client.getFd());
-    sendMsg("You have been invited to the channel " + token[2] + " by " + client.getNick() + "\r\n", invitedClient.getFd());
+    sendMsg("You have been invited to the channel " + token[2] + " by " + client.getNick() + "\r\n", invitedClient->getFd());
+    sendMsgChan(client.getNick() + " has invited " + token[1] + " to the channel " + token[2] + "\r\n", getChannel(token[2]), client.getFd());
     return (0);
 }
 
 int Server::cmdQuit(Client& client, const std::string& reason)
 {   
-    for (std::map<std::string, Channel*>::const_iterator it = this->_listChannel.begin(); it != this->_listChannel.end(); it++)
+    for (std::map<std::string, Channel*>::iterator it = this->_listChannel.begin(); it != this->_listChannel.end(); it++)
     {
-        std::map<const Client*, ClientStatus> listClient = it->second->getMemberList();
-        for(std::map<const Client*, ClientStatus>::const_iterator it2 = listClient.begin(); it2 != listClient.end(); it2++)
+        if (it->second->isMember(client))
         {
-            if (client.getNick() == it2->first->getNick())
-            {
-                sendMsgChan(reason, *it->second, client.getFd());
-                it2 = listClient.erase(it2);
-            }
+            sendMsgChan(reason + "\r\n", *it->second, client.getFd());
+            it->second->removeMember(client);
         }
     }
     return (0);

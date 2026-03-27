@@ -74,6 +74,8 @@ class Channel
 		bool    						        isMember(Client &client) const;
 		bool    						        isOp(Client &client) const;
 		bool    						        *whichMod();
+		void                        			removeMember(Client &client);
+
 };
 
 #endif

@@ -79,11 +79,10 @@ std::vector<std::string> Server::tokenSpace(const std::string &buffer)
     return (tokens);
 }
 
-Channel&     Server::createChannel(const std::string &channelName, const Client *client)
+void    Server::createChannel(const std::string &channelName, const Client *client)
 {
     Channel *newChannel = new Channel(*client, channelName);
     this->_listChannel[channelName] = newChannel;
-    return (*newChannel);
 }
 
 void Server::addMode(Channel *channel, char mode, const std::string &param, Client& client)

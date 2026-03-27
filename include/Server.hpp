@@ -95,9 +95,10 @@ class Server
         // others
         void                        sendMsg(const std::string &msg, int socket);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
-        Channel&                    createChannel(const std::string &channelName, const Client *client);
+        void                        createChannel(const std::string &channelName, const Client *client);
         void                        addMode(Channel *channel, char mode, const std::string &param, Client& client);
         void                        removeMode(Channel *channel, char mode, Client& client);
+        void                        removeClient(Client &client);
 };
 
 #endif
