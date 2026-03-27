@@ -37,6 +37,7 @@ class Client {
 		void setAddBuffer(char *msg);
 		void setRemoveBuffer();
 
+
 	private :
 		Client();
 		int _fd;

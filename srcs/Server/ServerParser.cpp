@@ -4,17 +4,17 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
 {
     std::string cmdString[12] =
     {
-        "NICK",
-        "JOIN",
-        "PART",
-        "PRIVMSG",
-        "KICK",
-        "INVITE",
-        "TOPIC",
-        "MODE",
-        "QUIT",
-        "PING",
-        "PONG",
+        "/NICK",
+        "/JOIN",
+        "/PART",
+        "/PRIVMSG",
+        "/KICK",
+        "/INVITE",
+        "/TOPIC",
+        "/MODE",
+        "/QUIT",
+        "/PING",
+        "/PONG",
         "UNKNOWN"
     };
 
@@ -29,7 +29,11 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
 void    Server::processParser(Client &client)
 {
     int flag;
-    std::vector<std::string> tokens = tokenSpace(client.getBuffer());
+    std::string buffer = client.getBuffer();
+    client.setRemoveBuffer();
+    while (!buffer.empty() && (buffer.back() == '\r' || buffer.back() == '\n'))
+        buffer.pop_back();
+    std::vector<std::string> tokens = tokenSpace(buffer);
     if (tokens.empty() == true)
         return ;
     for (size_t i = 0; i < tokens[0].size(); i++)

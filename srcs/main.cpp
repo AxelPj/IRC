@@ -9,11 +9,10 @@ int main(int ac, char **av)
     }
     try
     {
-		//stoi is not part of C++98, this needs to be changed at some point
-        if (ac == 2)
-            Server serv(std::stoi(av[1]), "");
-        else    
-            Server serv(std::stoi(av[1]), av[2]);
+        std::string password = "";
+        if (ac == 3)
+            password = av[2];
+        Server serv(std::stoi(av[1]), password);
         serv.init();
         serv.run();
     }

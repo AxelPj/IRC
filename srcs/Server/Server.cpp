@@ -7,7 +7,7 @@ Server::Server(int port, const std::string& password)
     else
         this->_port = port;
     if (password.empty())
-        this->_password = "default";
+        this->_password = "";
     else
         this->_password = password;
 }
@@ -46,11 +46,11 @@ Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
 {
     socklen_t ptrSizestruct = sizeof(*addr);
     newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
-    if (newSocketclient->fd)
+    if (newSocketclient->fd < 0)
         return(NULL);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    return (new Client(*addr, this->_socketIrc[0]));
+    return (new Client(*addr, *newSocketclient));
 }
 
 bool    Server::recvClient(const pollfd &socketclient, Client &client)
