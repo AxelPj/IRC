@@ -137,6 +137,8 @@ bool *Channel::whichMod()
 
 void Channel::join(Client &user, const std::string &password)
 {
+    if (this->_memberList.count(&user))
+        return ;
     // ERR_INVITEONLYCHAN
     if (this->_modList[INVITE_ONLY] && !isInvited(user))
         return ;

@@ -14,9 +14,7 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
         sendMsg("You have left the channel" + token[1], client.getFd());
         sendMsg("(", client.getFd());
         for (size_t i = 2; i < token.size(); i++)
-        {
             sendMsg(token[i], client.getFd());
-        }
         sendMsg(")", client.getFd());
         return (0);
     }
@@ -44,22 +42,20 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
 }
 
 int Server::cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
-{
+{   
     if(reason == true)
     {
         sendMsg("You have been kicked from the channel " + channel.getName(), client.getFd());
         sendMsg("(", client.getFd());
         for (size_t i = 2; i < token.size(); i++)
-        {
             sendMsg(token[i], client.getFd());
-        }
         sendMsg(")", client.getFd());
         return (0);
     }
     else
         sendMsg("You have been kicked from the channel " + channel.getName() + " " + "(Kicked)", client.getFd());
+    channel.setStatusClient(client, NOT_CONNECTED);
     return (0);
-
 }
 
 void Server::cmdPong(Client &client, const std::vector<std::string> &token)

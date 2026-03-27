@@ -36,7 +36,6 @@ class Client {
 		void setNick(const std::string &nick);
 		void setAddBuffer(char *msg);
 		void setRemoveBuffer();
-		//Commands//
 
 	private :
 		Client();

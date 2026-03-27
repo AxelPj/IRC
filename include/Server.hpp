@@ -72,7 +72,7 @@ class Server
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
         int                         parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdNick(const std::vector<std::string> &tokens) const;
-        int                         parserCmdInvite(const std::vector<std::string> &tokens);
+        int                         parserCmdInvite(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdTopic(const std::vector<std::string> &tokens, const Client& client);
         int                         parserCmdMode(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdQuit(const std::vector<std::string> &tokens, const Client &client);

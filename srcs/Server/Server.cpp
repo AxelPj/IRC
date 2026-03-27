@@ -3,7 +3,7 @@
 Server::Server(int port, const std::string& password)
 {
     if (port < 1024 || port > 65535)
-        throw std::invalid_argument("Error Port invalide");
+        throw std::invalid_argument("Error: invalid port");
     else
         this->_port = port;
     if (password.empty())
