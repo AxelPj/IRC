@@ -21,7 +21,7 @@ class Channel
 		//todo banlist container
 		
 		void	join(Client user);
-		void	setMode(bool isRemoved, int mask);
+		void	setMode(bool isRemoved, char mode);
 		//void	setUserMode(Client user, bool isRemoved, int mask);
 		void	invite(Client user);
 

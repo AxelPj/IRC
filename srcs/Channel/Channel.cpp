@@ -26,7 +26,7 @@ void Channel::join(client user, std::string password)
 	_memberList.insert({user, false});
 	//JOIN MESSAGE
 	//RPL_TOPIC
-	//RPL_TOPICTIME
+	//RPL_TOPICWHOTIME
 	//RPL_NAMREPLY
 	//RPL_ENDOFNAMES
 }
@@ -92,13 +92,21 @@ void Channel::kick(Client issuer, Client target)
 
 void Channel::mode(Client user, std::string modes)
 {
+	int		i = 0;
+	bool	isRemoved = true;
+
 	if (memberList.count(user) == 0)
 		//ERR_NOTONCHANNEL
 	if (!memberList[user])
 		//ERR_CHANOPRIVSNEEDED
 	//bitmask in order p/s/i/t/n/m
-	if (modes[0] == '+')
-	else if (modes[0] == '-')
-	else
-		//
+	while (modes[i])
+	{
+		if (modes[i] == '+' || modes[i] == '-')
+			isRemoved = (modes[i++] == '-');
+		else if (i == 0)
+			//wrong usage
+		else
+			setMode(isRemoved, modes[i])
+	}
 }
