@@ -16,11 +16,17 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
             msg += token[i];
         msg += ")\r\n";
         sendMsg(msg, client.getFd());
+        std::string channelMsg = client.getNick() + " has left the channel " + token[1] + " (";
+        for (size_t i = 2; i < token.size(); i++)
+            channelMsg += token[i];
+        channelMsg += ")\r\n";
+        sendMsgChan(channelMsg, getChannel(token[1]), client.getFd());
         return (0);
     }
     else 
     {
         sendMsg("You have left the channel " + token[1] + " (Leaving)\r\n", client.getFd());
+        sendMsgChan(client.getNick() + " has left the channel " + token[1] + " (Leaving)\r\n", getChannel(token[1]), client.getFd());
         return (0);
     }
 }

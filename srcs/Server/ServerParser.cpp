@@ -124,13 +124,15 @@ void    Server::processParser(Client &client)
             break ;
         case 7:
             flag = parserCmdMode(tokens, client);
-            if (flag == 0)
-                cmdMode(client, tokens);
+            if (flag == -3)
+                sendMsg(":server 482 " + client.getNick() + " " + tokens[1] + " :You are not channel operator\r\n", client.getFd());
+            else if (flag == -1)
+                sendMsg(":server 403 " + client.getNick() + " " + tokens[1] + " :No such channel\r\n", client.getFd());
             else
                 sendMsg("Usage: MODE <channel> <modes>\r\n", client.getFd());
-            break ;
+            break;
         case 8:
-            flag = parserCmdQuit(tokens, client);
+            flag = parserCmdQuit(tokens);
             if (flag == 0)
                 cmdQuit(client, "");
             if (flag == 1)
@@ -176,7 +178,7 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
         else if (exist == true)
         {
             bool *modes = this->_listChannel[tokens[1]]->whichMod();
-            if (modes[LIMIT] && this->_listChannel[tokens[1]]->getMemberList().size() >= this->_listChannel[tokens[1]]->getUserLimit())
+            if (modes[LIMIT] && static_cast<int>(this->_listChannel[tokens[1]]->getMemberList().size()) >= this->_listChannel[tokens[1]]->getUserLimit())
                 return(-4);
             if (modes[INVITE_ONLY])
                 if (this->_listChannel[tokens[1]]->isInvited(client) == false)
@@ -228,7 +230,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
                     continue ;
                 }
             }
-            if (modes[LIMIT] && this->_listChannel[chan]->getMemberList().size() >= this->_listChannel[chan]->getUserLimit())
+            if (modes[LIMIT] && static_cast<int>(this->_listChannel[chan]->getMemberList().size()) >= this->_listChannel[chan]->getUserLimit())
                 sendMsg(":server 471 " + client.getNick() + " " + chan + " :Cannot join channel (+l)\r\n", client.getFd());
             if (modes[PASSWORD] && !pwd.empty())
             {
@@ -254,6 +256,23 @@ int Server::parserCmdPart(const std::vector<std::string> &tokens)
         return (-2);
     if (tokens.size() > 2)
         return (1);
+    return (0);
+}
+
+int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client)
+{
+    std::vector<std::string> channels = tokenComma(tokens[1]);
+    for (size_t i = 0; i < channels.size(); i++)
+    {
+        std::vector<std::string> chan;
+        chan.push_back(channels[i]);
+        if (chan[0].empty() || chan[0][0] != '#')
+            continue ;
+        if (checkChannelExist(chan[0]) == false)
+            sendMsg(":server 403 " + client.getNick() + " " + chan[0] + " :No such channel\r\n", client.getFd());
+        else
+            cmdPart(client, chan, 1);
+    }
     return (0);
 }
 
@@ -382,7 +401,7 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     return (0);
 }
 
-int Server::parserCmdQuit(const std::vector<std::string> &tokens, const Client &client)
+int Server::parserCmdQuit(const std::vector<std::string> &tokens)
 {
     if (tokens.size() < 2)
         return(0);

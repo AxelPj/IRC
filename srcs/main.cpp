@@ -2,7 +2,7 @@
 
 int main(int ac, char **av)
 {
-    if (ac != 3)
+    if (ac < 2 || ac > 3)
     {
         std::cerr << "Usage: " << av[0] << " <port> <password>" << std::endl;
         return (1);
@@ -10,7 +10,10 @@ int main(int ac, char **av)
     try
     {
 		//stoi is not part of C++98, this needs to be changed at some point
-        Server serv(std::stoi(av[1]), av[2]);
+        if (ac == 2)
+            Server serv(std::stoi(av[1]), "");
+        else    
+            Server serv(std::stoi(av[1]), av[2]);
         serv.init();
         serv.run();
     }
