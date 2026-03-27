@@ -30,10 +30,12 @@ void    Server::processParser(Client &client)
 {
     int flag;
     std::string buffer = client.getBuffer();
-    client.setRemoveBuffer();
+    // Enlever \r\n
     while (!buffer.empty() && (buffer.back() == '\r' || buffer.back() == '\n'))
         buffer.pop_back();
+    std::cout << buffer;
     std::vector<std::string> tokens = tokenSpace(buffer);
+    client.setRemoveBuffer();
     if (tokens.empty() == true)
         return ;
     for (size_t i = 0; i < tokens[0].size(); i++)
@@ -156,7 +158,7 @@ void    Server::processParser(Client &client)
 
 int Server::parserCmdNick(const std::vector<std::string> &tokens) const
 {
-    if (tokens.size() == 2 && !tokens[1].empty())
+    if (tokens.size() == 2 && tokens[1].empty() == false)
     {
         const std::string ok = "[]\\`_^{}|-";
         for (size_t i = 0; i < tokens[1].size(); ++i)
