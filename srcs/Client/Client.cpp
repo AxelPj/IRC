@@ -10,7 +10,9 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	std::cout << "Client fd: " << this->_fd << std::endl;
 	std::cout << "Client port: " << ntohs(addrClient.sin_port) << std::endl;
 	this->_buffer = "";
-	this->_user = "";
+	this->_username = "";
+	this->_nick = "";
+	this->_registered = false;
 }
 
 Client &Client::operator=(const Client &other) {
@@ -23,6 +25,7 @@ Client &Client::operator=(const Client &other) {
 		this->_second = other._second;
 		this->_third = other._third;
 		this->_username = other._username;
+		this->_registered = other._registered;
 	}
 	return *this;
 }
@@ -59,6 +62,16 @@ std::string	Client::getBuffer() const
 	return(this->_buffer);
 }
 
+int	Client::getFd() const
+{
+	return(this->_fd);
+}
+
+bool	Client::getRegistered() const
+{
+	return (this->_registered);
+}
+
 void Client::setAddBuffer(char *msg)
 {
 	this->_buffer += msg;
@@ -69,11 +82,6 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
-void Client::setUser(const std::string& user) 
-{
-	this->_user = user;
-}
-
 void Client::setNick(const std::string &newNick)
 {
 	if (newNick.size() <= 30)
@@ -82,12 +90,12 @@ void Client::setNick(const std::string &newNick)
 		this->_nick = (newNick.substr(0, 30));
 }
 
-int	Client::getFd() const
+void	Client::setUser(const std::string& user)
 {
-	return(this->_fd);
+	this->_username = user;
 }
 
-std::string Client::getUser() const
+void	Client::setRegistered(bool registered)
 {
-	return(this->_user);
+	this->_registered = registered;
 }

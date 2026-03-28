@@ -16,8 +16,6 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
     return (0);
 }
 
-c------------------------------
-c------------------------------
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
     _listChannel[token[1]]->setStatusClient(client, NOT_CONNECTED);

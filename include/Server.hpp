@@ -66,9 +66,9 @@ class Server
         int                         parserCmdUser(const std::vector<std::string> &tokens, const Client &client);
         int                         parserCmdNick(const std::vector<std::string> &token);
         int                         parserCmdJoin(const std::vector<std::string> &tokens, Client &client);
-        int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
-        int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPart(const std::vector<std::string> &tokens, const Client& client);
         int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
@@ -78,8 +78,6 @@ class Server
         int                         parserCmdMode(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdQuit(const std::vector<std::string> &tokens);
         int                         parserCmdReconnect(const std::vector<std::string> &tokens);
-        int                         parserCmdUser(const std::vector<std::string> &tokens);
-        int                         parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client);
         // commands
         int                         cmdUser(Client &client, const std::vector<std::string> &token);
         int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
