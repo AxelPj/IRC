@@ -18,7 +18,7 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
         "USER"
     };
 
-    for(int i = 0; i < 11; i++)
+    for(int i = 0; i < 12; i++)
     {
         if (tokens[0] == cmdString[i])
             return (i);
@@ -38,23 +38,29 @@ void    Server::processParser(Client &client)
         return ;
     for (size_t i = 0; i < tokens[0].size(); i++)
         tokens[0][i] = toupper(tokens[0][i]); 
+    std::string nick = client.getNick().empty() ? "*" : client.getNick();
     if (tokens.size() == 1 && tokens[0] != "TOPIC" && tokens[0] != "QUIT")
                 return ;
+    if(client.getRegistered() == false && tokens[0] != "NICK" && tokens[0] != "USER")
+    {
+        sendMsg(ERR_NOTREGISTERED("server", nick), client.getFd());
+        return ;
+    }
     for (size_t i = 0; i < tokens.size(); i++)
         std::cout << tokens[i] << std::endl;
     switch(choiceParser(tokens))
     {
         case 0: //NICK
             flag = parserCmdNick(tokens);
-			if (flag == -1)
-				sendMsg(ERR_NONICKNAMEGIVEN("server", client.getNick()), client.getFd());
-			if (flag == -2)
-				sendMsg(ERR_ERRONEUSNICKNAME("server", client.getNick()), client.getFd());
-			if (flag == -3)
-				sendMsg(ERR_NICKNAMEINUSE("server", client.getNick(), tokens[1]), client.getFd());
+            if (flag == -1)
+                sendMsg(ERR_NONICKNAMEGIVEN("server", nick), client.getFd());
+            else if (flag == -2)
+                sendMsg(ERR_ERRONEUSNICKNAME("server", nick), client.getFd());
+            else if (flag == -3)
+                sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd());
             if (flag == 0)
                 cmdNick(client, tokens);
-            else
+            else if (flag != -1 && flag != -2 && flag != -3)
                 sendMsg("Usage: NICK <nickname>, sets your nick\r\n", client.getFd());
             break ;
         case 1: //JOIN
@@ -107,9 +113,19 @@ void    Server::processParser(Client &client)
                 flag = parserCmdPrivMsg(tokens);
                 //TODO gerer si le message = plusieur tokens (return (2) par exemple)
                 if (flag == 0)
+                {
+                    if (tokens.size() > 3)
+                        for (int i = 2; i < tokens.size(); i++)
+                            tokens[2] += tokens[i];
                     sendMsg(tokens[2], getClient(tokens[1]).getFd());
-                else if (flag == 1) //TODO Add 404 CANNOTSENDTOCHAN somehow
+                }
+                else if (flag == 1)
+                {
+                    if (tokens.size() > 3)
+                        for (int i = 2; i < tokens.size(); i++)
+                            tokens[2] += tokens[i];
                     sendMsgChan(tokens[2], *this->_listChannel[tokens[1]], client.getFd());
+                }
                 else if (flag == -1)
                     sendMsg(ERR_NORECIPIENT("server", client.getNick()), client.getFd());
                 else if (flag == -2)
@@ -119,22 +135,26 @@ void    Server::processParser(Client &client)
             }
             break ;
         case 4: //KICK
-				//TODO parserCmdKickMulti
-            flag = parserCmdKick(tokens, client);
-			if (flag == -1)
-				sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client.getFd());
-            else if (flag == -2) 
-				sendMsg(ERR_NOSUCHCHANNEL("server", tokens[1]), client.getFd());
-            else if (flag == -3) 
-				sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), tokens[1]), client.getFd());
-			else if (flag == -4)
-				sendMsg(ERR_USERNOTINCHANNEL("server", tokens[2], tokens[1]), client.getFd());
-            else if (flag == -5)
-                sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), tokens[1]), client.getFd());
-            if (flag == 0)
-                cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], false);
-            else // (flag == 1)
-                cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], true);
+            if (tokens[1].find(',') != std::string::npos)
+                parserCmdKickMulti(tokens, client);
+            else
+            {
+                flag = parserCmdKick(tokens, client);
+                if (flag == -1)
+                    sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client.getFd());
+                else if (flag == -2) 
+                    sendMsg(ERR_NOSUCHCHANNEL("server", tokens[1]), client.getFd());
+                else if (flag == -3) 
+                    sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), tokens[1]), client.getFd());
+                else if (flag == -4)
+                    sendMsg(ERR_USERNOTINCHANNEL("server", tokens[2], tokens[1]), client.getFd());
+                else if (flag == -5)
+                    sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), tokens[1]), client.getFd());
+                if (flag == 0)
+                    cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], false);
+                else if (flag == 1)
+                    cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], true);
+            }
             break ;
         case 5: //INVITE
             flag = parserCmdInvite(tokens, client);
@@ -189,7 +209,18 @@ void    Server::processParser(Client &client)
             cmdPing(client, tokens);
             break ;
         case 11: //USER
-            cmdUser(tokens[1]);
+            flag = parserCmdUser(tokens, client);
+            if (flag == 0)
+                cmdUser(client, tokens);
+            else if (flag == -1)
+                sendMsg(ERR_NEEDMOREPARAMS("server", nick, "USER"), client.getFd());
+            else if (flag == -2)
+                sendMsg(ERR_ALREADYREGISTERED("server", nick), client.getFd());
+            else if (flag == -3)
+                sendMsg(ERR_INVALIDUSERNAME("server", nick), client.getFd());
+            else if (flag == -4)
+                sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd());
+            break;
         default: //UNKNOWN
             sendMsg(ERR_UNKNOWNCOMMAND("server", tokens[0]), client.getFd());
             break;
@@ -200,24 +231,20 @@ int Server::parserCmdUser(const std::vector<std::string> &tokens, const Client &
 {
     // USER <username> <hostname> <servername> :<realname>
     if (tokens.size() < 5 || tokens[1].empty())
-        return -1; // not enough params
-
-    // Optionnel: refuser USER si deja enregistre
+        return -1;
     if (!client.getUser().empty())
-        return -2; // already registered
-
+        return -2;
     const std::string ok = "[]\\`_^{}|-";
     for (size_t i = 0; i < tokens[1].size(); i++)
     {
         unsigned char c = static_cast<unsigned char>(tokens[1][i]);
         if (i == 0 && std::isdigit(c))
-            return -3; // bad username
+            return -3;
         if (!std::isalnum(c) && ok.find(c) == std::string::npos)
-            return -3; // bad username
+            return -3;
     }
-
     if (checkUserExist(tokens[1]))
-        return -4; // username already used (si tu veux l'unicite)
+        return -4;
     return 0;
 }
 
@@ -272,7 +299,11 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
 int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)
 {
     if (tokens.size() < 2)
+    {
+        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client.getFd());
         return -1;
+    }
     std::vector<std::string> passwords;
     std::vector<std::string> channels = tokenComma(tokens[1]);
     if (tokens.size() > 2)
@@ -306,7 +337,10 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
                 }
             }
             if (modes[LIMIT] && static_cast<int>(this->_listChannel[chan]->getMemberList().size()) >= this->_listChannel[chan]->getUserLimit())
+            {
 				sendMsg(ERR_CHANNELISFULL("server", client.getNick(), chan), client.getFd());
+                continue ;
+            }
             if (modes[PASSWORD] && !pwd.empty())
             {
                 if (this->_listChannel[chan]->getPassword() != pwd)
@@ -336,6 +370,12 @@ int Server::parserCmdPart(const std::vector<std::string> &tokens, const Client& 
 
 int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client)
 {
+    if (tokens.size() < 2)
+    {
+        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client.getFd());
+        return (-1);
+    }
     std::vector<std::string> channels = tokenComma(tokens[1]);
     for (size_t i = 0; i < channels.size(); i++)
     {
@@ -343,8 +383,10 @@ int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &c
         chan.push_back(channels[i]);
         if (chan[0].empty() || chan[0][0] != '#')
             continue ;
-        if (checkChannelExist(chan[0]) == false || this->_listChannel[tokens[1]]->isMember(client) == false)
+        if (checkChannelExist(chan[0]) == false)
 			sendMsg(ERR_NOSUCHCHANNEL("server", chan[0]), client.getFd());
+        else if (this->_listChannel[chan[0]]->isMember(client) == false)
+            sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan[0]), client.getFd());
         else
             cmdPart(client, chan, 1);
     }
@@ -366,6 +408,18 @@ int Server::parserCmdPrivMsg(const std::vector<std::string> &tokens)
 
 int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client)
 {
+    if (tokens.size() < 2)
+    {
+        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        sendMsg(ERR_NORECIPIENT("server", nick), client.getFd());
+        return (-1);
+    }
+    if (tokens.size() < 3)
+    {
+        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        sendMsg(ERR_NOTEXTOSEND("server", nick), client.getFd());
+        return (-2);
+    }
     std::vector<std::string> targets = tokenComma(tokens[1]);   
     for (size_t i = 0; i < targets.size(); i++)
     {
@@ -378,7 +432,7 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
 			sendMsg(ERR_NOSUCHNICK("server", target), client.getFd());
         else if (userExist)
             sendMsg(tokens[2], getClient(target).getFd());
-        else //TODO Add 404 CANNOTSENDTOCHAN somehow
+        else
             sendMsgChan(tokens[2], *this->_listChannel[target], client.getFd());
     }
     return (0);
@@ -403,6 +457,57 @@ int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client
         else
             return (-5);
     }
+}
+
+int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client)
+{
+    if (tokens.size() < 3)
+    {
+        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client.getFd());
+        return (-1);
+    }
+    std::vector<std::string> channels = tokenComma(tokens[1]);
+    std::vector<std::string> users = tokenComma(tokens[2]);
+    for (size_t i = 0; i < channels.size(); i++)
+    {
+        const std::string& chan = channels[i];
+        if (chan.empty() || chan[0] != '#')
+            continue ;
+        if (checkChannelExist(chan) == false)
+        {
+            sendMsg(ERR_NOSUCHCHANNEL("server", chan), client.getFd());
+            continue ;
+        }
+        if (this->_listChannel[chan]->isMember(client) == false)
+        {
+            sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan), client.getFd());
+            continue ;
+        }
+        for (size_t j = 0; j < users.size(); j++)
+        {
+            const std::string& user = users[j];
+            if (user.empty())
+                continue ;
+            if (checkUserExist(user) == false)
+            {
+                sendMsg(ERR_NOSUCHNICK("server", user), client.getFd());
+                continue ;
+            }
+            if (this->_listChannel[chan]->isMember(getClient(user)) == false)
+            {
+                sendMsg(ERR_USERNOTINCHANNEL("server", user, chan), client.getFd());
+                continue ;
+            }
+            if (this->_listChannel[chan]->getStatusClient(client) != OP)
+            {
+                sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), chan), client.getFd());
+                continue ;
+            }
+            cmdKick(tokens, getClient(user), *this->_listChannel[chan], false);
+        }
+    }
+    return (0);
 }
 
 int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &client)
@@ -459,7 +564,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     Channel &channel = getChannel(tokens[1]);
 	if (tokens.size() == 2)
 	{
-		//TODO implement these replies with Channel:: getters
         sendMsg(RPL_CHANNELMODEIS("server", client.getNick(), tokens[1], "+"), client.getFd());
         sendMsg(RPL_CREATIONTIME("server", client.getNick(), tokens[1], "0"), client.getFd());
 		return (1);

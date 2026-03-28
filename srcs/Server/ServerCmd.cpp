@@ -3,10 +3,21 @@
 int Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
     client.setNick(token[1]);
+    if (client.getUser().empty() == false)
+        client.setRegistered(true);
     return (0);
 }
 
-// TODO format messages in pseudo BNF
+int Server::cmdUser(Client &client, const std::vector<std::string> &token)
+{
+    client.setUser(token[1]);
+    if (client.getNick().empty() == false)
+        client.setRegistered(true);
+    return (0);
+}
+
+c------------------------------
+c------------------------------
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
     _listChannel[token[1]]->setStatusClient(client, NOT_CONNECTED);

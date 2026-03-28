@@ -3,6 +3,20 @@
 
 #include <string>
 
+#define RPL_WELCOME(server, nick, user, host) (std::string(":") + server + " 001 " + nick + " :Welcome to the IRC Network " + nick + "!" + user + "@" + host + "\r\n")
+#define RPL_YOURHOST(server, nick, version) (std::string(":") + server + " 002 " + nick + " :Your host is " + server + ", running version " + version + "\r\n")
+#define RPL_CREATED(server, nick, createdAt) (std::string(":") + server + " 003 " + nick + " :This server was created " + createdAt + "\r\n")
+#define RPL_MYINFO(server, nick, version, userModes, chanModes) (std::string(":") + server + " 004 " + nick + " " + server + " " + version + " " + userModes + " " + chanModes + "\r\n")
+#define RPL_MOTDSTART(server, nick) (std::string(":") + server + " 375 " + nick + " :- " + server + " Message of the Day -\r\n")
+#define RPL_MOTD(server, nick, text) (std::string(":") + server + " 372 " + nick + " :- " + text + "\r\n")
+#define RPL_ENDOFMOTD(server, nick) (std::string(":") + server + " 376 " + nick + " :End of /MOTD command.\r\n")
+#define ERR_NOMOTD(server, nick) (std::string(":") + server + " 422 " + nick + " :MOTD File is missing\r\n")
+
+#define MSG_JOIN(nick, user, host, channel) (std::string(":") + nick + "!" + user + "@" + host + " JOIN " + channel + "\r\n")
+#define MSG_PART(nick, user, host, channel, reason) (std::string(":") + nick + "!" + user + "@" + host + " PART " + channel + " :" + reason + "\r\n")
+#define MSG_QUIT(nick, user, host, reason) (std::string(":") + nick + "!" + user + "@" + host + " QUIT :" + reason + "\r\n")
+#define MSG_NICK(oldNick, user, host, newNick) (std::string(":") + oldNick + "!" + user + "@" + host + " NICK :" + newNick + "\r\n")
+
 #define RPL_NOTOPIC(server, client, channel) (std::string(":") + server + " 331 " + client + " " + channel + " :No topic is set\r\n")
 #define RPL_TOPIC(server, client, channel, topic) (std::string(":") + server + " 332 " + client + " " + channel + " " + topic + "\r\n")
 #define RPL_INVITING(server, client, nick, channel) (std::string(":") + server + " 341 " + client + " " + nick + " " + channel + "\r\n")
@@ -19,9 +33,11 @@
 #define ERR_NICKNAMEINUSE(server, client, nick) (std::string(":") + server + " 433 " + client + " " + nick + " :Nickname is already in use\r\n")
 #define ERR_USERNOTINCHANNEL(server, nick, channel) (std::string(":") + server + " 441 " + nick + " " + channel + " :They aren't on that channel\r\n")
 #define ERR_NOTONCHANNEL(server, client, channel) (std::string(":") + server + " 442 " + client + " " + channel + " :You're not on that channel\r\n")
-#define ERR_NEEDMOREPARAMS(server, client, command) (std::string(":") + server + " 461 " + command + " :Not enough parameters\r\n")
+#define ERR_NOTREGISTERED(server, client) (std::string(":") + server + " 451 " + client + " :You have not registered\r\n")
+#define ERR_NEEDMOREPARAMS(server, client, command) (std::string(":") + server + " 461 " + client + " " + command + " :Not enough parameters\r\n")
 #define ERR_NORECIPIENT(server, client) (std::string(":") + server + " 411 " + client + " :No recipient given (PRIVMSG)\r\n")
 #define ERR_NOTEXTOSEND(server, client) (std::string(":") + server + " 412 " + client + " :No text to send\r\n")
+#define ERR_CANNOTSENDTOCHAN(server, client, channel) (std::string(":") + server + " 404 " + client + " " + channel + " :Cannot send to channel\r\n")
 #define ERR_CHANNELISFULL(server, client, channel) (std::string(":") + server + " 471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_UNKNOWNMODE(server, client, mode) (std::string(":") + server + " 472 " + client + " " + mode + " :is unknown mode char to me\r\n")
 #define ERR_INVITEONLYCHAN(server, client, channel) (std::string(":") + server + " 473 " + client + " " + channel + " :Cannot join channel (+i)\r\n")
@@ -30,5 +46,6 @@
 #define ERR_CHANOPRIVSNEEDED(server, client, channel) (std::string(":") + server + " 482 " + client + " " + channel + " :You're not channel operator\r\n")
 #define ERR_USERONCHANNEL(server, client, nick, channel) (std::string(":") + server + " 443 " + client + " " + nick + " " + channel + " :is already on channel\r\n")
 #define ERR_INVALIDMODEPARAM() (std::string(":server 696 :Invalid mode parameter\r\n"))
-
+#define ERR_ALREADYREGISTERED(server, client) (std::string(":") + server + " 462 " + client + " :You may not reregister\r\n")
+#define ERR_INVALIDUSERNAME(server, client) (std::string(":") + server + " 468 " + client + " :Erroneous username\r\n")
 #endif
