@@ -74,7 +74,7 @@ void Server::cmdPing(Client &client, const std::vector<std::string> &token)
     sendMsg("PING :" + token[1] + "\r\n", client.getFd());
 }
 
-int Server::cmdTopic(const std::vector<std::string> &tokens)
+int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& client)
 {
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);

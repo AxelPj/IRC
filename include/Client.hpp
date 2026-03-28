@@ -31,11 +31,13 @@ class Client {
 		std::string getUser()const ;
 		std::string	getBuffer()const ;
 		int			getFd() const;
+		std::string getUser() const;
 
 		//Setters//
 		void setNick(const std::string &nick);
 		void setAddBuffer(char *msg);
 		void setRemoveBuffer();
+		void setUser(const std::string& user) ;
 
 
 	private :
@@ -48,4 +50,5 @@ class Client {
 		std::string _third;
 		std::string _username;
 		std::string _buffer;
+		std::string	_user;
 };

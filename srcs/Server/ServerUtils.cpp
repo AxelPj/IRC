@@ -52,15 +52,14 @@ std::vector<std::string> Server::tokenSpace(const std::string &buffer)
     char *bufCpy = strdup(buffer.c_str());
     std::vector<std::string> tokens;
     char *token;
-
-    token = strtok(bufCpy, " ");
+    token = strtok(bufCpy, " \r\n");
     if (token == nullptr)
     {
         free(bufCpy);
         return (tokens);
     }
     tokens.push_back(token);
-    while ((token = strtok(nullptr, " ")) != nullptr)
+    while ((token = strtok(nullptr, " \r\n")) != nullptr)
     {
         if (token[0] == ':')
         {
@@ -115,7 +114,7 @@ void Server::removeMode(Channel *channel, char mode, Client& client)
 
 void    Server::sendMsg(const std::string& msg, int socket)
 {
-    int ret;
+    int ret = 0;
     
     const char *buf = msg.c_str();
     while (strlen(buf) != 0)

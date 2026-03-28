@@ -9,6 +9,8 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	std::cout << "New client connected: " << this->_adress << std::endl;
 	std::cout << "Client fd: " << this->_fd << std::endl;
 	std::cout << "Client port: " << ntohs(addrClient.sin_port) << std::endl;
+	this->_buffer = "";
+	this->_user = "";
 }
 
 Client &Client::operator=(const Client &other) {
@@ -67,6 +69,11 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
+void Client::setUser(const std::string& user) 
+{
+	this->_user = user;
+}
+
 void Client::setNick(const std::string &newNick)
 {
 	if (newNick.size() <= 30)
@@ -78,4 +85,9 @@ void Client::setNick(const std::string &newNick)
 int	Client::getFd() const
 {
 	return(this->_fd);
+}
+
+std::string Client::getUser() const
+{
+	return(this->_user);
 }

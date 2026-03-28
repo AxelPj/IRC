@@ -70,11 +70,11 @@ class Channel
 		bool                                    setTopicResctriction(bool active);
 
 		// utils
-		bool    						        isInvited(Client &client) const;
-		bool    						        isMember(Client &client) const;
-		bool    						        isOp(Client &client) const;
+		bool    						        isInvited(const Client &client) const;
+		bool    						        isMember(const Client &client) const;
+		bool    						        isOp(const Client &client) const;
 		bool    						        *whichMod();
-		void                        			removeMember(Client &client);
+		void                        			removeMember(const Client &client);
 
 };
 

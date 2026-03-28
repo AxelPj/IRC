@@ -11,9 +11,9 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <cstring>
 #include "Client.hpp"
 #include "Channel.hpp"
-#include <cstring>
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 
@@ -31,7 +31,7 @@ class Server
         int                             _signal;
         std::map<int, Client*>          _listClient;
         std::map<std::string, Channel*> _listChannel;
-        char                            _buffer[1024];
+        char                            _buffer[1025];
 
     public:
         Server(int port, const std::string &password);
@@ -63,11 +63,11 @@ class Server
         int                         choiceParser(const std::vector<std::string> &tokens);
 
         // Parser commands
-        int                         parserCmdNick(const std::vector<std::string> &token) const;
+        int                         parserCmdNick(const std::vector<std::string> &token);
         int                         parserCmdJoin(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client);
-        int                         parserCmdPart(const std::vector<std::string> &tokens);
+        int                         parserCmdPart(const std::vector<std::string> &tokens, const Client& client);
         int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
         int                         parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client);
@@ -76,7 +76,7 @@ class Server
         int                         parserCmdMode(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdQuit(const std::vector<std::string> &tokens);
         int                         parserCmdReconnect(const std::vector<std::string> &tokens);
-
+        int                         parserCmdUser(const std::vector<std::string> &tokens);
         // commands
         int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
         int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
@@ -84,13 +84,13 @@ class Server
         int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
         int                         cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
         int                         cmdInvite(Client &client, const std::vector<std::string> &token);
-        int                         cmdTopic(const std::vector<std::string> &token);
+        int                         cmdTopic(const std::vector<std::string> &token, const Client& client);
         int                         cmdMode(Client &client, const std::vector<std::string> &token);
         void                        cmdPing(Client &client, const std::vector<std::string> &token);
         void                        cmdPong(Client &client, const std::vector<std::string> &token);
         int                         cmdQuit(Client& client, const std::string& reason);
         int                         cmdReconnect(Client &client, const std::vector<std::string> &token);
-
+        int                         parserCmdUser(const std::vector<std::string> &tokens);
         // others
         void                        sendMsg(const std::string &msg, int socket);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);

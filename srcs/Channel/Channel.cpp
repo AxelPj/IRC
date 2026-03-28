@@ -105,7 +105,7 @@ bool Channel::setTopicResctriction(bool active)
 
 // ─── UTILS ──────────────────────────────────────────────────────────────────
 
-bool Channel::isInvited(Client &client) const
+bool Channel::isInvited(const Client &client) const
 {
     std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
@@ -113,7 +113,7 @@ bool Channel::isInvited(Client &client) const
     return (false);
 }
 
-bool Channel::isMember(Client &client) const
+bool Channel::isMember(const Client &client) const
 {
     std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
@@ -121,7 +121,7 @@ bool Channel::isMember(Client &client) const
     return (false);
 }
 
-bool Channel::isOp(Client &client) const
+bool Channel::isOp(const Client &client) const
 {
     std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
@@ -134,7 +134,7 @@ bool *Channel::whichMod()
     return (this->_modList);
 }
 
-void Channel::removeMember(Client &client)
+void Channel::removeMember(const Client &client)
 {
     for (std::map<const Client*, ClientStatus>::iterator it = _memberList.begin(); it != _memberList.end(); it++)
     {

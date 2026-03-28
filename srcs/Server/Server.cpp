@@ -57,16 +57,17 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 {
     std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
+	this->_buffer[ret] = '\0';
     if (ret == 0)
         return(false);
     else if (ret == -1)
         return(false);
-	this->_buffer[ret] = '\0';
     buffer = this->_buffer;
     client.setAddBuffer(this->_buffer);
     while (buffer.find("\r\n") != std::string::npos)
     {
         int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
+	    this->_buffer[ret] = '\0';
         buffer = this->_buffer;
         if (ret == 0)
             return(false);
@@ -120,7 +121,7 @@ void    Server::run()
                         std::cerr << "Error: client socket aborts" << std::endl;
                         continue ;
                     }
-                    sendMsg("Welcome to Irc server" ,newSocketClient.fd);
+                    sendMsg("Welcome to Irc server\n" ,newSocketClient.fd);
                     this->_socketIrc.push_back(newSocketClient);
                     this->_listClient[newSocketClient.fd] = newClient;
                 }
@@ -143,7 +144,7 @@ void    Server::run()
             }
             else if (this->_socketIrc[i].revents & POLLERR)
             {
-                sendMsg("Error : event POLLERR", this->_socketIrc[i].fd);
+                sendMsg("Error : event POLLERR\r\n", this->_socketIrc[i].fd);
                 removeClient(this->_socketIrc[i].fd, i);
                 i--; 
             }
@@ -166,7 +167,7 @@ Server::~Server()
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
         delete it->second;
-    std::cout << "Server closed madafucka" << std::endl;
+    std::cout << "Server closed madafucka\n" << std::endl;
 }
 
 // getters 
