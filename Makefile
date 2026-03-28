@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gdelhota <gdelhota@student.42perpignan.fr  +#+  +:+       +#+         #
+#    By: lesalmon <lesalmon@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/06 15:31:02 by gdelhota          #+#    #+#              #
-#    Updated: 2026/03/18 14:39:55 by gdelhota         ###   ########.fr        #
+#    Updated: 2026/03/28 15:45:59 by lesalmon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
