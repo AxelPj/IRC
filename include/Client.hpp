@@ -23,24 +23,25 @@ class Client {
 		~Client();
 
 		//Getters//
-		std::string getPassword();
-		std::string getAdress();
-		std::string getNick();
-		std::string getSecond();
-		std::string getThird();
-		std::string getUser();
-		std::string	getBuffer();
-		int			getfd();
-
+		std::string getPassword()const;
+		std::string getAdress()const;
+		std::string getNick()const;
+		std::string getSecond()const;
+		std::string getThird()const;
+		std::string getUser()const;
+		std::string	getBuffer()const;
+		int			getFd() const;
+		bool		getRegistered() const;
 		//Setters//
-		void setNick(std::string nick);
-		void setAddBuffer(char *msg);
-		void setRemoveBuffer();
-		//Commands//
+		void		setNick(const std::string &nick);
+		void		setAddBuffer(char *msg);
+		void		setRemoveBuffer();
+		void		setUser(const std::string& user);
+		void		setRegistered(bool registered);
+
 
 	private :
 		Client();
-		bool _ops;
 		int _fd;
 		std::string _password;
 		std::string _adress;
@@ -49,4 +50,5 @@ class Client {
 		std::string _third;
 		std::string _username;
 		std::string _buffer;
+		bool		_registered;
 };

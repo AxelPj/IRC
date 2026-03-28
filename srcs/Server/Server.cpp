@@ -1,13 +1,13 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password)
+Server::Server(int port, const std::string& password)
 {
     if (port < 1024 || port > 65535)
-        throw std::invalid_argument("Error Port invalide");
+        throw std::invalid_argument("Error: invalid port");
     else
         this->_port = port;
     if (password.empty())
-        this->_password = "default";
+        this->_password = "";
     else
         this->_password = password;
 }
@@ -46,29 +46,31 @@ Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
 {
     socklen_t ptrSizestruct = sizeof(*addr);
     newSocketclient->fd = accept(this->_socketIrc[0].fd, (sockaddr*)addr, &ptrSizestruct);
-    if (newSocketclient->fd)
+    if (newSocketclient->fd < 0)
         return(NULL);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    return (new Client(*addr, this->_socketIrc[0]));
+    return (new Client(*addr, *newSocketclient));
 }
 
-bool    Server::recvClient(pollfd socketclient, Client &client)
+bool    Server::recvClient(const pollfd &socketclient, Client &client)
 {
     std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-    buffer = this->_buffer;
+	this->_buffer[ret] = '\0';
     if (ret == 0)
         return(false);
     else if (ret == -1)
         return(false);
+    buffer = this->_buffer;
     client.setAddBuffer(this->_buffer);
     while (buffer.find("\r\n") != std::string::npos)
     {
         int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
+	    this->_buffer[ret] = '\0';
         buffer = this->_buffer;
         if (ret == 0)
-            return(0);
+            return(false);
         else if (ret == -1)
             return(false);
         client.setAddBuffer(this->_buffer);
@@ -84,26 +86,6 @@ void Server::removeClient(int fdClient, int i)
     this->_listClient.erase(fdClient);
 }
 
-void    Server::sendMsg(std::string msg, int socket)
-{
-    int ret;
-    const char *buf = msg.c_str();
-    while (strlen(buf) != 0)
-    {
-        ret = send(socket, buf, strlen(buf), 0);
-        if (ret == -1)
-        {
-            std::cerr << "Error: impossible send message to client";
-            break ;
-        }
-        else if (ret == 0)
-            break ;
-        else
-            buf += ret;
-    }
-}
-
-
 void    Server::run()
 {
     //init function poll (struct pollfd)
@@ -114,6 +96,7 @@ void    Server::run()
     socketServ.revents = 0;
     _socketIrc.push_back(socketServ);
     int pollAccept;
+    //time_t now = time(nullptr);
     while (1)
     {
         pollAccept = poll(this->_socketIrc.data(), this->_socketIrc.size(), -1);
@@ -138,7 +121,7 @@ void    Server::run()
                         std::cerr << "Error: client socket aborts" << std::endl;
                         continue ;
                     }
-                    sendMsg("Welcome to Irc server" ,newSocketClient.fd);
+                    sendMsg("Welcome to Irc server\n" ,newSocketClient.fd);
                     this->_socketIrc.push_back(newSocketClient);
                     this->_listClient[newSocketClient.fd] = newClient;
                 }
@@ -146,14 +129,14 @@ void    Server::run()
                 //and call the parser for redistribute at the function commande Client and receve bool to know deconnect client so call removeClient() 
                 else
                 {
-                    if (recvClient(this->_socketIrc[i], this->_listClient[this->_socketIrc[i].fd]) == false)
+                    if (recvClient(this->_socketIrc[i], *this->_listClient[this->_socketIrc[i].fd]) == false)
                     {
                         removeClient(this->_socketIrc[i].fd, i);
                         i--;
                     }
                     else 
                     {
-                        processParser(this->_listClient[this->_socketIrc[i].fd]);
+                        processParser(*this->_listClient[this->_socketIrc[i].fd]);
                 
                     }
             
@@ -161,7 +144,7 @@ void    Server::run()
             }
             else if (this->_socketIrc[i].revents & POLLERR)
             {
-                sendMsg("Error : event POLLERR", this->_socketIrc[i].fd);
+                sendMsg("Error : event POLLERR\r\n", this->_socketIrc[i].fd);
                 removeClient(this->_socketIrc[i].fd, i);
                 i--; 
             }
@@ -184,7 +167,7 @@ Server::~Server()
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
         delete it->second;
-    std::cout << "Server closed madafucka" << std::endl;
+    std::cout << "Server closed madafucka\n" << std::endl;
 }
 
 // getters 
@@ -206,4 +189,19 @@ char   *Server::getBuffer()
 pollfd Server::getpollfd(int i) const
 {
     return(this->_socketIrc[i]);
+}
+
+Client& Server::getClient(const std::string &nameClient)
+{
+    for (std::map<int, Client*>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
+    {
+        if (it->second->getUser() == nameClient)
+            return (*it->second);
+    }
+    throw std::runtime_error("Client not found");
+}
+
+Channel&    Server::getChannel(const std::string &name)
+{
+    return(*this->_listChannel[name]);
 }

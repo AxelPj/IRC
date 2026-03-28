@@ -1,21 +1,23 @@
 #include "Client.hpp"
 #include <arpa/inet.h>
 
-Client::Client() : _ops(false), _fd(-1) {
-}
+Client::Client() : _fd(-1) {}
 
 Client::Client(sockaddr_in addrClient, pollfd Socketclient)
-	: _ops(false), _fd(Socketclient.fd) {
+	: _fd(Socketclient.fd) {
 	this->_adress = inet_ntoa(addrClient.sin_addr);
 	std::cout << "New client connected: " << this->_adress << std::endl;
 	std::cout << "Client fd: " << this->_fd << std::endl;
 	std::cout << "Client port: " << ntohs(addrClient.sin_port) << std::endl;
+	this->_buffer = "";
+	this->_username = "";
+	this->_nick = "";
+	this->_registered = false;
 }
 
 Client &Client::operator=(const Client &other) {
 	if (this != &other) 
 	{
-		this->_ops = other._ops;
 		this->_fd = other._fd;
 		this->_password = other._password;
 		this->_adress = other._adress;
@@ -23,6 +25,7 @@ Client &Client::operator=(const Client &other) {
 		this->_second = other._second;
 		this->_third = other._third;
 		this->_username = other._username;
+		this->_registered = other._registered;
 	}
 	return *this;
 }
@@ -30,33 +33,43 @@ Client &Client::operator=(const Client &other) {
 Client::~Client() {
 }
 
-std::string Client::getPassword() {
+std::string Client::getPassword() const {
 	return this->_password;
 }
 
-std::string Client::getAdress() {
+std::string Client::getAdress() const {
 	return this->_adress;
 }
 
-std::string Client::getNick() {
+std::string Client::getNick() const {
 	return this->_nick;
 }
 
-std::string Client::getSecond() {
+std::string Client::getSecond() const {
 	return this->_second;
 }
 
-std::string Client::getThird() {
+std::string Client::getThird() const {
 	return this->_third;
 }
 
-std::string Client::getUser() {
+std::string Client::getUser() const {
 	return this->_username;
 }
 
-std::string	Client::getBuffer()
+std::string	Client::getBuffer() const
 {
 	return(this->_buffer);
+}
+
+int	Client::getFd() const
+{
+	return(this->_fd);
+}
+
+bool	Client::getRegistered() const
+{
+	return (this->_registered);
 }
 
 void Client::setAddBuffer(char *msg)
@@ -64,32 +77,25 @@ void Client::setAddBuffer(char *msg)
 	this->_buffer += msg;
 }
 
-void Client::setRemoveBuffer()
+void Client::setRemoveBuffer() 
 {
 	this->_buffer.clear();
 }
 
-void Client::setNick(std::string nick)
+void Client::setNick(const std::string &newNick)
 {
-<<<<<<< HEAD
-	(void)user;
-	for (size_t i = 0; i < newNick.size(); ++i) {
-		if (newNick[i] == ' ' || newNick[i] == ',' || newNick[i] == '*' ||
-			newNick[i] == '?' || newNick[i] == '!' || newNick[i] == '@') {
-			return -1; // Invalid character in nickname
-		}
-	}
-int Client::cmdNick(const std::string& newNick, const Client& user) {
-	(void)user;
->>>>>>> feature/channels
-	this->_nick = newNick.substr(0, 30);
-	return 0;
-=======
-	this->_nick = nick;
->>>>>>> feature/server-class
+	if (newNick.size() <= 30)
+		this->_nick = newNick;
+	else
+		this->_nick = (newNick.substr(0, 30));
 }
 
-int	Client::getfd()
+void	Client::setUser(const std::string& user)
 {
-	return(this->_fd);
+	this->_username = user;
+}
+
+void	Client::setRegistered(bool registered)
+{
+	this->_registered = registered;
 }
