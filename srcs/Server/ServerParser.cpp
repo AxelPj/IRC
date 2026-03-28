@@ -196,6 +196,31 @@ void    Server::processParser(Client &client)
     }
 }
 
+int Server::parserCmdUser(const std::vector<std::string> &tokens, const Client &client)
+{
+    // USER <username> <hostname> <servername> :<realname>
+    if (tokens.size() < 5 || tokens[1].empty())
+        return -1; // not enough params
+
+    // Optionnel: refuser USER si deja enregistre
+    if (!client.getUser().empty())
+        return -2; // already registered
+
+    const std::string ok = "[]\\`_^{}|-";
+    for (size_t i = 0; i < tokens[1].size(); i++)
+    {
+        unsigned char c = static_cast<unsigned char>(tokens[1][i]);
+        if (i == 0 && std::isdigit(c))
+            return -3; // bad username
+        if (!std::isalnum(c) && ok.find(c) == std::string::npos)
+            return -3; // bad username
+    }
+
+    if (checkUserExist(tokens[1]))
+        return -4; // username already used (si tu veux l'unicite)
+    return 0;
+}
+
 int Server::parserCmdNick(const std::vector<std::string> &tokens)
 {
 	if (tokens.size() <= 1 || tokens[1].empty())
