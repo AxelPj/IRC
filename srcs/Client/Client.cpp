@@ -82,6 +82,11 @@ void Client::setRemoveBuffer()
 	this->_buffer.clear();
 }
 
+void Client::setBuffer(const std::string &buffer)
+{
+	this->_buffer = buffer;
+}
+
 void Client::setNick(const std::string &newNick)
 {
 	if (newNick.size() <= 30)

@@ -114,7 +114,7 @@ void Server::removeMode(Channel *channel, char mode, Client& client)
 
 void    Server::sendMsg(const std::string& msg, int socket)
 {
-    int ret = 0;
+    int ret;
     
     const char *buf = msg.c_str();
     while (strlen(buf) != 0)

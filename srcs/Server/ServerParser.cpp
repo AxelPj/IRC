@@ -28,8 +28,9 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
 
 void    Server::processParser(Client &client)
 {
-    int flag;
+    const std::string buffer2 = client.getBuffer() + "\n";
     std::string buffer = client.getBuffer();
+    int flag;
     while (!buffer.empty() && (buffer.back() == '\r' || buffer.back() == '\n'))
         buffer.pop_back();
     std::vector<std::string> tokens = tokenSpace(buffer);
@@ -43,15 +44,19 @@ void    Server::processParser(Client &client)
                 return ;
     if(client.getRegistered() == false && tokens[0] != "NICK" && tokens[0] != "USER")
     {
+        sendMsg("je suis passer une seul fois :", client.getFd());
+        sendMsg(buffer2, client.getFd());
         sendMsg(ERR_NOTREGISTERED("server", nick), client.getFd());
         return ;
     }
     for (size_t i = 0; i < tokens.size(); i++)
         std::cout << tokens[i] << std::endl;
+    
     switch(choiceParser(tokens))
     {
         case 0: //NICK
             flag = parserCmdNick(tokens);
+            sendMsg("Welcome to nick =", client.getFd());
             if (flag == -1)
                 sendMsg(ERR_NONICKNAMEGIVEN("server", nick), client.getFd());
             else if (flag == -2)
@@ -60,8 +65,6 @@ void    Server::processParser(Client &client)
                 sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd());
             if (flag == 0)
                 cmdNick(client, tokens);
-            else if (flag != -1 && flag != -2 && flag != -3)
-                sendMsg("Usage: NICK <nickname>, sets your nick\r\n", client.getFd());
             break ;
         case 1: //JOIN
             if (tokens[1].find(',') != std::string::npos)
@@ -73,8 +76,6 @@ void    Server::processParser(Client &client)
                     cmdJoin(client, tokens[1], false);
                 else if (flag == 1)
                     cmdJoin(client, tokens[1], true);
-                else if (flag == 2)
-                    ;
                 else if (flag == -2)
                     sendMsg(ERR_INVITEONLYCHAN("server", client.getNick(), tokens[1]), client.getFd());
                 else if (flag == -3)
@@ -83,8 +84,6 @@ void    Server::processParser(Client &client)
 					sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client.getFd());
                 else if (flag == -1)
                     sendMsg(ERR_CHANNELISFULL("server", client.getNick(), tokens[1]), client.getFd());
-				else //Wrong channel name
-					sendMsg(ERR_NOSUCHCHANNEL("server", tokens[1]), client.getFd());
             }
             break;
         case 2: //PART
@@ -213,6 +212,7 @@ void    Server::processParser(Client &client)
             break ;
         case 11: //USER
             flag = parserCmdUser(tokens, client);
+            sendMsg("Welcome to user =", client.getFd());
             if (flag == 0)
                 cmdUser(client, tokens);
             else if (flag == -1)
@@ -221,8 +221,6 @@ void    Server::processParser(Client &client)
                 sendMsg(ERR_ALREADYREGISTERED("server", nick), client.getFd());
             else if (flag == -3)
                 sendMsg(ERR_INVALIDUSERNAME("server", nick), client.getFd());
-            else if (flag == -4)
-                sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd());
             break;
         default: //UNKNOWN
             sendMsg(ERR_UNKNOWNCOMMAND("server", tokens[0]), client.getFd());

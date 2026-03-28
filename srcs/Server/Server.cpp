@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include <cerrno>
 
 Server::Server(int port, const std::string& password)
 {
@@ -55,27 +56,16 @@ Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
 
 bool    Server::recvClient(const pollfd &socketclient, Client &client)
 {
-    std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-	this->_buffer[ret] = '\0';
     if (ret == 0)
-        return(false);
-    else if (ret == -1)
-        return(false);
-    buffer = this->_buffer;
-    client.setAddBuffer(this->_buffer);
-    while (buffer.find("\r\n") != std::string::npos)
     {
-        int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-	    this->_buffer[ret] = '\0';
-        buffer = this->_buffer;
-        if (ret == 0)
-            return(false);
-        else if (ret == -1)
-            return(false);
-        client.setAddBuffer(this->_buffer);
+        std::cerr << "[RECV] client disconnected fd=" << socketclient.fd << std::endl;
+        return (false);
     }
-    //sends to the parser with take client
+    if (ret < 0)
+        return (false);
+    this->_buffer[ret] = '\0';
+    client.setAddBuffer(this->_buffer);
     return (true);
 }
 
@@ -110,7 +100,7 @@ void    Server::run()
             // & = binary verification in value POLLIN
             if (this->_socketIrc[i].revents & POLLIN)
             {
-                if (i == 0)
+                if (this->_socketIrc[i].fd == this->_sockfd)
                 {
                     // if socket listen is that of the Server, call acceptClient() for create NewClient and fill data map and vector
                     pollfd newSocketClient;
@@ -121,7 +111,7 @@ void    Server::run()
                         std::cerr << "Error: client socket aborts" << std::endl;
                         continue ;
                     }
-                    sendMsg("Welcome to Irc server\n" ,newSocketClient.fd);
+                    std::cerr << "[POLL] accepted client fd=" << newSocketClient.fd << std::endl;
                     this->_socketIrc.push_back(newSocketClient);
                     this->_listClient[newSocketClient.fd] = newClient;
                 }
@@ -136,8 +126,9 @@ void    Server::run()
                     }
                     else 
                     {
+                        std::cerr << "[POLL] processing client fd=" << this->_socketIrc[i].fd << std::endl;
                         processParser(*this->_listClient[this->_socketIrc[i].fd]);
-                
+                        
                     }
             
                 }

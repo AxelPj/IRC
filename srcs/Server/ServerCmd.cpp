@@ -1,18 +1,33 @@
 #include "Server.hpp"
+#include "IRCNumerics.hpp"
 
 int Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
     client.setNick(token[1]);
-    if (client.getUser().empty() == false)
+    if (client.getUser().empty() == false && client.getRegistered() == false)
+    {
         client.setRegistered(true);
+        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd());
+        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd());
+        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd());
+        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd());
+        sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd());
+    }
     return (0);
 }
 
 int Server::cmdUser(Client &client, const std::vector<std::string> &token)
 {
     client.setUser(token[1]);
-    if (client.getNick().empty() == false)
+    if (client.getNick().empty() == false && client.getRegistered() == false)
+    {
         client.setRegistered(true);
+        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd());
+        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd());
+        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd());
+        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd());
+        sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd());
+    }
     return (0);
 }
 

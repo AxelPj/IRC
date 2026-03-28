@@ -17,14 +17,12 @@ int Server::parserCmdUser(const std::vector<std::string> &tokens, const Client &
         if (!std::isalnum(c) && ok.find(c) == std::string::npos)
             return -3;
     }
-    if (checkUserExist(tokens[1]))
-        return -4;
     return 0;
 }
 
 int Server::parserCmdNick(const std::vector<std::string> &tokens)
 {
-	if (tokens.size() <= 1 || tokens[1].empty())
+	if (tokens.size() == 1 || tokens[1].empty())
 		return -1;
 	const std::string ok = "[]\\`_^{}|-";
 	for (size_t i = 0; i < tokens[1].size(); i++)
@@ -67,7 +65,7 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
 		return (2);
 	if (tokens.size() == 1)
 		return(-4);
-    return(-5);
+    return(0);
 }
 
 int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)

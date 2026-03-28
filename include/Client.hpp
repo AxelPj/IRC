@@ -36,6 +36,7 @@ class Client {
 		void		setNick(const std::string &nick);
 		void		setAddBuffer(char *msg);
 		void		setRemoveBuffer();
+		void		setBuffer(const std::string &buffer);
 		void		setUser(const std::string& user);
 		void		setRegistered(bool registered);
 
