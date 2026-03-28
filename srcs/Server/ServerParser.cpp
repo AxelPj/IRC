@@ -451,6 +451,7 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     Channel &channel = getChannel(tokens[1]);
 	if (tokens.size() == 2)
 	{
+		//TODO implement these replies with Channel:: getters
 		sendMsg(RPL_CHANNELMODEIS(), client.getFd());
 		sendMsg(RPL_CREATIONTIME(), client.getFd());
 		return (1);

@@ -57,18 +57,19 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 {
     std::string buffer;
     int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
-    buffer = this->_buffer;
     if (ret == 0)
         return(false);
     else if (ret == -1)
         return(false);
+	this->_buffer[ret] = '\0';
+    buffer = this->_buffer;
     client.setAddBuffer(this->_buffer);
     while (buffer.find("\r\n") != std::string::npos)
     {
         int ret = recv(socketclient.fd, this->_buffer, 1024, 0);
         buffer = this->_buffer;
         if (ret == 0)
-            return(0);
+            return(false);
         else if (ret == -1)
             return(false);
         client.setAddBuffer(this->_buffer);
