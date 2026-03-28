@@ -14,7 +14,7 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
         "MODE",
         "QUIT",
         "PING",
-        "PONG"
+        "PONG",
     };
 
     for(int i = 0; i < 11; i++)
@@ -28,7 +28,13 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
 void    Server::processParser(Client &client)
 {
     int flag;
-    std::vector<std::string> tokens = tokenSpace(client.getBuffer());
+    std::string buffer = client.getBuffer();
+    // Enlever \r\n
+    while (!buffer.empty() && (buffer.back() == '\r' || buffer.back() == '\n'))
+        buffer.pop_back();
+    std::cout << buffer;
+    std::vector<std::string> tokens = tokenSpace(buffer);
+    client.setRemoveBuffer();
     if (tokens.empty() == true)
         return ;
     for (size_t i = 0; i < tokens[0].size(); i++)
@@ -189,6 +195,7 @@ void    Server::processParser(Client &client)
 
 int Server::parserCmdNick(const std::vector<std::string> &tokens) const
 {
+<<<<<<< HEAD
 	if (tokens.size() <= 1 || tokens[1].empty())
 		return -1;
 	const std::string ok = "[]\\`_^{}|-";
@@ -203,6 +210,22 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens) const
 	if checkUserExist(tokens[1])
 		return -3;
 	return 0;
+=======
+    if (tokens.size() == 2 && tokens[1].empty() == false)
+    {
+        const std::string ok = "[]\\`_^{}|-";
+        for (size_t i = 0; i < tokens[1].size(); ++i)
+        {
+            char c = tokens[1][i];
+            if (i == 0 && std::isdigit(c))
+                return -1;
+            if (!std::isalnum(c) && ok.find(c) == std::string::npos)
+                return -1;
+        }
+        return 0;
+    }
+    return -1;
+>>>>>>> 6a51387a485f0341aacf4e9f059cca2f52e77f88
 }
 
 int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
