@@ -6,6 +6,7 @@ int Server::cmdNick(Client &client, const std::vector<std::string> &token)
     return (0);
 }
 
+// TODO format messages in pseudo BNF
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
     _listChannel[token[1]]->setStatusClient(client, NOT_CONNECTED);
@@ -77,6 +78,7 @@ int Server::cmdTopic(const std::vector<std::string> &tokens)
 {
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
+	sendMsgChan("TOPIC " + tokens[1] + " :" + tokens[2] + "\r\n", getChannel(tokens[1]), client.getFd());
     return(0);
 }
 
@@ -96,7 +98,7 @@ int Server::cmdQuit(Client& client, const std::string& reason)
     {
         if (it->second->isMember(client))
         {
-            sendMsgChan(reason + "\r\n", *it->second, client.getFd());
+            sendMsgChan("Quit: " + reason + "\r\n", *it->second, client.getFd());
             it->second->removeMember(client);
         }
     }
