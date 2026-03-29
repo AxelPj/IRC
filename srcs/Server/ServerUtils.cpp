@@ -111,8 +111,7 @@ void Server::removeMode(Channel *channel, char mode, Client& client)
     else if (mode == 'o')
         channel->setStatusClient(client, CONNECTED);
 }
-
-void    Server::sendMsg(const std::string& msg, int socket)
+void    Server::sendMsg(const std::string& msg, int socket, const std::string& ipHost)
 {
     int ret;
     
@@ -122,7 +121,7 @@ void    Server::sendMsg(const std::string& msg, int socket)
         ret = send(socket, buf, strlen(buf), 0);
         if (ret == -1)
         {
-            std::cerr << "Error: impossible send message to client";
+            std::cerr << "Error: impossible send message to client (" << ipHost << ")";
             break ;
         }
         else if (ret == 0)
@@ -145,6 +144,6 @@ void Server::sendMsgChan(const std::string& msg, Channel& channel, int senderFd)
             continue;
         if (client->getFd() == senderFd)
             continue;
-        sendMsg(msg, client->getFd());
+        sendMsg(msg, client->getFd(), client->getAdress());
     }
 }

@@ -135,7 +135,7 @@ void    Server::run()
             }
             else if (this->_socketIrc[i].revents & POLLERR)
             {
-                sendMsg("Error : event POLLERR\r\n", this->_socketIrc[i].fd);
+                sendMsg("Error : event POLLERR\r\n", this->_socketIrc[i].fd, this->_listClient[this->_socketIrc[i].fd]->getAdress());
                 removeClient(this->_socketIrc[i].fd, i);
                 i--; 
             }
