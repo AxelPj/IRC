@@ -5,6 +5,8 @@ int Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
     std::string oldNick = client.getNick();
     std::string newNick = token[1];
+    if (newNick.size() > 30)
+        newNick = newNick.substr(0, 30);
     std::string host = client.getAdress();
     client.setNick(newNick);
     sendMsg(MSG_NICK(oldNick, "realuser", host, newNick), client.getFd(), host);

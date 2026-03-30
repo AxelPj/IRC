@@ -22,6 +22,8 @@ int Server::parserCmdUser(const std::vector<std::string> &tokens, const Client &
 
 int Server::parserCmdNick(const std::vector<std::string> &tokens)
 {
+    if (checkUserExist(tokens[1]))
+		return -3;
 	if (tokens.size() == 1 || tokens[1].empty())
 		return -1;
 	const std::string ok = "[]\\`_^{}|-";
@@ -33,8 +35,6 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens)
 		if (!std::isalnum(c) && ok.find(c) == std::string::npos)
 			return -2;
 	}
-    if (checkUserExist(tokens[1]))
-		return -3;
 	return 0;
 }
 
