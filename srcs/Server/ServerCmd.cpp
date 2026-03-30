@@ -39,7 +39,15 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
 {
 	if (token[0] == "JOIN")
 	{
-		for ()
+		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
+		{
+			if (i->second->isMember(client))
+			{
+				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
+				i->second->removeMember(client);
+			}
+		}
+		return 0 ;
 	}
     _listChannel[token[1]]->removeMember(client);
     std::string msg = "";
@@ -85,7 +93,7 @@ int Server::cmdKick(const std::vector<std::string> token, Client &client, Channe
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
     }
-    //sendMsg(MSG_KICK(token[0], "realuser", host, channel.getName(), token[2], msg), client);
+    sendMsg(MSG_KICK(token[0], "realuser", host, channel.getName(), token[2], msg), client);
     sendMsgChan(MSG_KICK(token[0], "realuser", host, channel.getName(), token[2], msg), channel, INVALID_SOCKET);
     channel.removeMember(client);
     return (0);
@@ -123,11 +131,11 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 		sendMsg(RPL_ENDOFINVITELIST("server", client.getNick()), client);
 		return 0;
 	}
-    Client *invitedClient = &getClient(token[1]);
+    Client invitedClient = getClient(token[1]);
     std::string host = client.getAddress();
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
-    sendMsg(RPL_INVITING("server", invitedClient->getNick(), token[1], token[2]), *invitedClient);
-    sendMsgChan(std::string(":") + client.getNick() + "!" + "realuser" + "@" + host + " INVITE " + token[1] + " :" + token[2] + "\r\n", getChannel(token[2]), client.getFd());
+	sendMsg(MSG_INVITE(client.getNick(), "realuser", host, token[1], token[2]), invitedClient);
+    //sendMsgChan(std::string(":") + client.getNick() + "!" + "realuser" + "@" + host + " INVITE " + token[1] + " :" + token[2] + "\r\n", getChannel(token[2]), client.getFd());
     return (0);
 }
 

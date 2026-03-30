@@ -81,5 +81,6 @@
 #define MSG_MODE(nick, user, host, channel, modes, params) (std::string(":") + nick + "!" + user + "@" + host + " MODE " + channel + " " + modes + " " + params + "\r\n")
 #define MSG_PRIVMSG(nick, user, host, target, message) (std::string(":") + nick + "!" + user + "@" + host + " PRIVMSG " + target + " :" + message + "\r\n")
 #define MSG_NOTICE(nick, user, host, target, message) (std::string(":") + nick + "!" + user + "@" + host + " NOTICE " + target + " :" + message + "\r\n")
+#define MSG_INVITE(nick, user, host, target, channel) (std::string(":") + nick + "!" + user + "@" + host + " INVITE " + target + " " + channel + "\r\n")
 
 #endif
