@@ -24,7 +24,7 @@ class Client {
 
 		//Getters//
 		std::string getPassword()const;
-		std::string getAdress()const;
+		std::string getAddress()const;
 		std::string getNick()const;
 		std::string getSecond()const;
 		std::string getThird()const;
@@ -45,7 +45,7 @@ class Client {
 		Client();
 		int _fd;
 		std::string _password;
-		std::string _adress;
+		std::string _address;
 		std::string _nick;
 		std::string _second;
 		std::string _third;

@@ -111,9 +111,11 @@ void Server::removeMode(Channel *channel, char mode, Client& client)
     else if (mode == 'o')
         channel->setStatusClient(client, CONNECTED);
 }
-void    Server::sendMsg(const std::string& msg, int socket, const std::string& ipHost)
+void    Server::sendMsg(const std::string& msg, const Client& client)
 {
     int ret;
+	int socket = client.getFd();
+	const std::string &ipHost = client.getAddress();
     
     const char *buf = msg.c_str();
     while (strlen(buf) != 0)
@@ -144,6 +146,6 @@ void Server::sendMsgChan(const std::string& msg, Channel& channel, int senderFd)
             continue;
         if (client->getFd() == senderFd)
             continue;
-        sendMsg(msg, client->getFd(), client->getAdress());
+        sendMsg(msg, *client);
     }
 }

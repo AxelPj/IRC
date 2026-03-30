@@ -95,7 +95,7 @@ class Server
         int                         cmdReconnect(Client &client, const std::vector<std::string> &token);
         int                         parserCmdUser(const std::vector<std::string> &tokens);
         // others
-        void                        sendMsg(const std::string& msg, int socket, const std::string& ipHost);
+        void                        sendMsg(const std::string& msg, const Client& client);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
         void                        createChannel(const std::string &channelName, const Client *client);
         void                        addMode(Channel *channel, char mode, const std::string &param, Client& client);

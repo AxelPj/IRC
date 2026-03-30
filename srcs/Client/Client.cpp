@@ -5,8 +5,8 @@ Client::Client() : _fd(-1) {}
 
 Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	: _fd(Socketclient.fd) {
-	this->_adress = inet_ntoa(addrClient.sin_addr);
-	std::cout << "New client connected: " << this->_adress << std::endl;
+	this->_address = inet_ntoa(addrClient.sin_addr);
+	std::cout << "New client connected: " << this->_address << std::endl;
 	std::cout << "Client fd: " << this->_fd << std::endl;
 	std::cout << "Client port: " << ntohs(addrClient.sin_port) << std::endl;
 	this->_buffer = "";
@@ -20,7 +20,7 @@ Client &Client::operator=(const Client &other) {
 	{
 		this->_fd = other._fd;
 		this->_password = other._password;
-		this->_adress = other._adress;
+		this->_address = other._address;
 		this->_nick = other._nick;
 		this->_second = other._second;
 		this->_third = other._third;
@@ -37,8 +37,8 @@ std::string Client::getPassword() const {
 	return this->_password;
 }
 
-std::string Client::getAdress() const {
-	return this->_adress;
+std::string Client::getAddress() const {
+	return this->_address;
 }
 
 std::string Client::getNick() const {
