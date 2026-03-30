@@ -7,6 +7,8 @@
 class Server;
 class Client;
 
+#define RPL_NAMREPLY(server, client, channel, users) (std::string(":") + server + " 353 " + client + " = " + channel + " :" + users + "\r\n")
+
 enum ChannelMode
 {
 	INVITE_ONLY = 0, // i
@@ -44,11 +46,8 @@ class Channel
 		// Cmds
 		void							        kick(Client &issuer, Client &target);
 		void							        mode(Client &user, const std::string &modes);
-		void							        names(Client &user);
-		void							        topic(Client &user, const std::string &newTopic);
-		void							        topic(Client &user);
 		void							        part(Client &user);
-		void							        join(Client &user, const std::string &password);
+		std::string						        namesReply(const Client &user);
 
 		// getters
 		const std::string                       &getName() const;

@@ -22,7 +22,6 @@
 #define RPL_INVITELIST(server, client, channel) (std::string(":") + server + " 336 " + client + " " + channel + "\r\n")
 #define RPL_ENDOFINVITELIST(server, client) (std::string(":") + server + " 337 " + client + " :End of /INVITE list\r\n")
 #define RPL_INVITING(server, client, nick, channel) (std::string(":") + server + " 341 " + client + " " + nick + " " + channel + "\r\n")
-#define RPL_NAMREPLY(server, client, channel, users) (std::string(":") + server + " 353 " + client + " = " + channel + " :" + users + "\r\n")
 #define RPL_ENDOFNAMES(server, client, channel) (std::string(":") + server + " 366 " + client + " " + channel + " :End of /NAMES list\r\n")
 #define RPL_CHANNELMODEIS(server, client, channel, modes) (std::string(":") + server + " 324 " + client + " " + channel + " " + modes + "\r\n")
 #define RPL_CREATIONTIME(server, client, channel, timestamp) (std::string(":") + server + " 329 " + client + " " + channel + " " + timestamp + "\r\n")

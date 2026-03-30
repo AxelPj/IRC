@@ -158,7 +158,7 @@ Server::~Server()
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
         delete it->second;
-    std::cout << "Server closed madafucka\n" << std::endl;
+    std::cout << "Server closed, goodbye\n" << std::endl;
 }
 
 // getters 

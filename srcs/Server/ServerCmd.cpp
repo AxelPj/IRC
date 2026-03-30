@@ -58,12 +58,13 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
     }
 	sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
-	// TODO VERIFY THESE NUMERICS
-	sendMsg(RPL_TOPIC(client.getNick(), "realuser", host, channel), client.getFd(), host);
 	Channel chan = getChannel(channel);
-    for (std::map<const Client*, ClientStatus>::iterator it = chan.getMemberList().begin(); it != chan.getMemberList().end(); it++)
-		sendMsg(RPL_NAMREPLY("server", client.getNick(), channel, it->first->getNick()), client.getFd(), client.getAdress());
-	//TODO sendMsg(RPL_ENDOFNAMES);
+	if (chan.getTopic() != "")
+		sendMsg(RPL_TOPIC("server", client.getNick(), channel, chan.getTopic()), client.getFd(), client.getAdress());
+	else
+		sendMsg(RPL_NOTOPIC("server", client.getNick(), channel), client.getFd(), client.getAdress());
+	sendMsg(chan.namesReply(client), client.getFd(), client.getAdress());
+	sendMsg(RPL_ENDOFNAMES("server", client.getNick(), channel), client.getFd(), client.getAdress());
     return (0);
 }
 

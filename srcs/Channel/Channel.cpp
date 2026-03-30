@@ -129,6 +129,24 @@ bool Channel::isOp(const Client &client) const
     return (false);
 }
 
+std::string Channel::namesReply(const Client& client)
+{
+	std::string namesList = "";
+    for (std::map<const Client*, ClientStatus>::iterator it = _memberList.begin(); it != _memberList.end(); it++)
+	{
+		Client c = *it->first;
+		if (isMember(c))
+		{
+			if (it != _memberList.begin())
+				namesList += " ";
+			if (isOp(c))
+				namesList += "@";
+			namesList += c.getNick();
+		}
+	}
+		return RPL_NAMREPLY("server", client.getNick(), _name, namesList), client.getFd(), client.getAdress();
+}
+
 bool *Channel::whichMod()
 {
     return (this->_modList);
@@ -146,89 +164,6 @@ void Channel::removeMember(const Client &client)
     }
 }
 
-// ─── ACTIONS ────────────────────────────────────────────────────────────────
-
-void Channel::join(Client &user, const std::string &password)
-{
-    if (this->_memberList.count(&user))
-        return ;
-    // ERR_INVITEONLYCHAN
-    if (this->_modList[INVITE_ONLY] && !isInvited(user))
-        return ;
-    // ERR_CHANNELISFULL
-    if (this->_userLimit >= 0 && (int)this->_memberList.size() >= this->_userLimit)
-        return ;
-    // ERR_BADCHANNELKEY
-    if (this->_modList[PASSWORD] && password != this->_password)
-        return ;
-    this->_memberList[&user] = CONNECTED;
-    // JOIN MESSAGE
-    // RPL_TOPIC
-    // RPL_TOPICTIME
-    // RPL_NAMREPLY
-    // RPL_ENDOFNAMES
-}
-
-void Channel::part(Client &user)
-{
-    if (this->_memberList.count(&user))
-    {
-        this->_memberList.erase(&user);
-        // PART MESSAGE
-    }
-    // else ERR_NOTONCHANNEL
-}
-
-void Channel::topic(Client &user)
-{
-    // if topic    → RPL_TOPIC + RPL_TOPICWHOTIME
-    // else        → RPL_NOTOPIC
-    (void)user;
-}
-
-void Channel::topic(Client &user, const std::string &newTopic)
-{
-    if (!this->_memberList.count(&user))
-        return ; // ERR_NOTONCHANNEL
-    if (this->_modList[TOPIC_OPE] && !isOp(user))
-        return ; // ERR_CHANOPRIVSNEEDED
-    this->_topic = newTopic;
-    // TOPIC MESSAGE
-}
-
-void Channel::names(Client &user)
-{
-    // secret channel → RPL_ENDOFNAMES only if not member
-    if (!isMember(user))
-        return ;
-    // iterate over memberList
-    // RPL_NAMREPLY + RPL_ENDOFNAMES
-}
-
-void Channel::kick(Client &issuer, Client &target)
-{
-    if (!this->_memberList.count(&issuer))
-        return ; // ERR_NOTONCHANNEL
-    if (!isOp(issuer))
-        return ; // ERR_CHANOPRIVSNEEDED
-    if (!this->_memberList.count(&target))
-        return ; // ERR_USERNOTINCHANNEL
-    this->_memberList.erase(&target);
-    // KICK MESSAGE
-}
-
-void Channel::mode(Client &user, const std::string &modes)
-{
-    if (!this->_memberList.count(&user))
-        return ; // ERR_NOTONCHANNEL
-    if (!isOp(user))
-        return ; // ERR_CHANOPRIVSNEEDED
-    if (modes.empty())
-        return ;
-    // TODO: parser les modes +/- i k o l t
-    (void)modes;
-}
-
 void Channel::invite(Client &user)
 {
     this->_memberList[&user] = INVITED;
@@ -237,12 +172,4 @@ void Channel::invite(Client &user)
 void Channel::join(Client &user)
 {
     this->_memberList[&user] = CONNECTED;
-}
-
-void Channel::setMode(bool isRemoved, int mask)
-{
-    if (isRemoved)
-        this->_modList[mask] = false;
-    else
-        this->_modList[mask] = true;
 }
