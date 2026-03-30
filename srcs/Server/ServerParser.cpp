@@ -69,7 +69,9 @@ void    Server::processParser(Client &client)
                                 break ;
                             case 1: //JOIN
                                 if (tokens[1].find(',') != std::string::npos)
+                                {
                                     flag = parserCmdJoinMulti(tokens, client);
+                                }
                                 else
                                 {
                                     flag = parserCmdJoin(tokens, client);

@@ -72,20 +72,14 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
 
 int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)
 {
-    if (tokens.size() < 2)
-    {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
-        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client);
-        return -1;
-    }
     std::vector<std::string> passwords;
     std::vector<std::string> channels = tokenComma(tokens[1]);
     if (tokens.size() > 2)
         passwords = tokenComma(tokens[2]);
-    size_t i = 0;
-    while (i++ < channels.size())
+    for (size_t i = 0; i < channels.size(); i++)
     {
         const std::string& chan = channels[i];
+        sendMsg(chan + "\n\n\n", client.getFd(), client.getAdress());
         std::string pwd;
         if (i < passwords.size())
             pwd = passwords[i];
@@ -124,7 +118,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
                     continue ;
                 }
             }
-            cmdJoin(client, chan, true);
+            cmdJoin(client, chan, false);
         }
     }
     return (0);
