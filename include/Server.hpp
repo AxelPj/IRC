@@ -71,7 +71,7 @@ class Server
         int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPart(const std::vector<std::string> &tokens, const Client& client);
-        int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
+        std::vector<std::string>    parserCmdPartMulti(std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
         int                         parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdInvite(const std::vector<std::string> &tokens, Client &client);
@@ -83,6 +83,7 @@ class Server
         int                         cmdUser(Client &client, const std::vector<std::string> &token);
         int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
         int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
+        int                         cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all);
         int                         cmdNick(Client &client, const std::vector<std::string> &token);
         int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
         int                         cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
