@@ -54,9 +54,8 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
         this->_listChannel[channel]->setStatusClient(client, OP);
     }
     else if (setOps == false)
-    {
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
-    }
+    sendMsg(MSG_JOIN(client.getNick(), "realuser", host, channel), client.getFd(), host);
 	sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
 	Channel chan = getChannel(channel);
 	if (chan.getTopic() != "")
