@@ -20,29 +20,10 @@ std::vector<std::string> Server::tokenComma(const std::string &buffer)
     char *bufCpy = strdup(buffer.c_str());
     std::vector<std::string> tokens;
     char *token;
-
-    token = strtok(bufCpy, " ");
-    if (token == NULL)
-    {
-        free(bufCpy);
-        return (tokens);
-    }
+    token = strtok(bufCpy, ",");
     tokens.push_back(token);
-    while ((token = strtok(NULL, ",")) != NULL)
-    {
-        if (token[0] == ':')
-        {
-            std::string tmp = token + 1;
-            token = strtok(NULL, "\r\n");
-            if (token != NULL)
-                tmp += token;
-            tokens.push_back(tmp);
-            free(bufCpy);
-            return (tokens);
-        }
-        else
+    while ((token = strtok(NULL, ",\r\n")) != NULL)
             tokens.push_back(token);
-    }
     free(bufCpy);
     return (tokens);
 }
