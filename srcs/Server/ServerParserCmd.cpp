@@ -79,7 +79,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
     for (size_t i = 0; i < channels.size(); i++)
     {
         const std::string& chan = channels[i];
-        sendMsg(chan + "\n\n\n", client.getFd(), client.getAdress());
+        sendMsg(chan + "\n\n\n", client);
         std::string pwd;
         if (i < passwords.size())
             pwd = passwords[i];
