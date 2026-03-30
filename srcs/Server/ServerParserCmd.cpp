@@ -40,6 +40,8 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens)
 
 int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
 {
+	if (tokens.size() == 2 && tokens[1] == "0")
+		return (2);
     if (tokens[1][0] != '#' || tokens[1].size() > 50)
         return (-5);
     if (tokens[1][0] == '#' && tokens[1].size() <= 50)
@@ -63,8 +65,6 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
             return (0);
         }
     }
-	if (tokens.size() == 2 && tokens[1] == "0")
-		return (2);
 	if (tokens.size() == 1)
 		return(-4);
     return(0);
@@ -74,17 +74,8 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
-<<<<<<< HEAD
         std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client);
-=======
-        std::string nick;
-        if (client.getNick().empty())
-            nick = "*";
-        else
-            nick = client.getNick();
-        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client.getFd(), client.getAdress());
->>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
         return -1;
     }
     std::vector<std::string> passwords;
@@ -154,17 +145,8 @@ int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
-<<<<<<< HEAD
         std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client);
-=======
-        std::string nick;
-        if (client.getNick().empty())
-            nick = "*";
-        else
-            nick = client.getNick();
-        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client.getFd(), client.getAdress());
->>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
         return (-1);
     }
     std::vector<std::string> channels = tokenComma(tokens[1]);

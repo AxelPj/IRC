@@ -36,7 +36,7 @@ void    Server::init()
     if (bind(this->_sockfd, (sockaddr*)&addr, sizeof(addr)) < 0)
         throw std::runtime_error("Error: bind failed");
     else
-        std::cout << "Server binded on port " << this->_port << std::endl;
+        std::cout << "Server bound on port " << this->_port << std::endl;
     if (listen(this->_sockfd, 5) < 0)
         throw std::runtime_error("Error: listen failed");
     else

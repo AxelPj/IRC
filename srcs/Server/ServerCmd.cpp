@@ -7,23 +7,15 @@ int Server::cmdNick(Client &client, const std::vector<std::string> &token)
     std::string newNick = token[1];
     if (newNick.size() > 30)
         newNick = newNick.substr(0, 30);
-    std::string host = client.getAdress();
+    std::string host = client.getAddress();
     client.setNick(newNick);
-    sendMsg(MSG_NICK(oldNick, "realuser", host, newNick), client.getFd(), host);
+    sendMsg(MSG_NICK(oldNick, "realuser", host, newNick), client);
     if (client.getUser().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
-<<<<<<< HEAD
         sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAddress()), client);
         sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client);
         sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client);
-        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client);
-        sendMsg(ERR_NOMOTD("server", client.getNick()), client);
-=======
-        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd(), client.getAdress());
-        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd(), client.getAdress());
-        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd(), client.getAdress());
->>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
     }
     return (0);
 }
@@ -34,25 +26,21 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
     if (client.getNick().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
-<<<<<<< HEAD
         sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAddress()), client);
         sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client);
         sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client);
-        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client);
-        sendMsg(ERR_NOMOTD("server", client.getNick()), client);
-=======
-        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd(), client.getAdress());
-        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd(), client.getAdress());
-        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd(), client.getAdress());
->>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
     }
-    sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAdress());
-    sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAdress());
+    //sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAddress());
+    //sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAddress());
     return (0);
 }
 
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
+	if (token[0] == "JOIN")
+	{
+		for ()
+	}
     _listChannel[token[1]]->removeMember(client);
     std::string msg = "";
     if (reason == true)
@@ -118,7 +106,7 @@ int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& clien
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
     sendMsg(MSG_TOPIC(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), client);
-	sendMsgChan(MSG_TOPIC(client.getNick(), "realuser", host, tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
+	sendMsgChan(MSG_TOPIC(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
     return(0);
 }
 

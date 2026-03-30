@@ -61,11 +61,11 @@ void    Server::processParser(Client &client)
                                 if (flag == 0)
                                     cmdNick(client, tokens);
                                 else if (flag == -1)
-                                    sendMsg(ERR_NONICKNAMEGIVEN("server", nick), client.getFd(), client.getAdress());
+                                    sendMsg(ERR_NONICKNAMEGIVEN("server", nick), client);
                                 else if (flag == -2)
                                     sendMsg(ERR_ERRONEUSNICKNAME("server", nick), client);
                                 else if (flag == -3)
-                                    sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd(), client.getAdress());
+                                    sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client);
                                 break ;
                             case 1: //JOIN
                                 if (tokens[1].find(',') != std::string::npos)
@@ -77,6 +77,8 @@ void    Server::processParser(Client &client)
                                         cmdJoin(client, tokens[1], false);
                                     else if (flag == 1)
                                         cmdJoin(client, tokens[1], true);
+									else if (flag == 2)
+										cmdPart(client, tokens, 0);
                                     else if (flag == -2)
                                         sendMsg(ERR_INVITEONLYCHAN("server", client.getNick(), tokens[1]), client);
                                     else if (flag == -3)
@@ -84,7 +86,7 @@ void    Server::processParser(Client &client)
                                     else if (flag == -4)
                                         sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client);
                                     else if (flag == -5)
-                                        sendMsg(ERR_BADCHANMASK("server", tokens[1]), client.getFd(), client.getAdress());
+                                        sendMsg(ERR_BADCHANMASK("server", tokens[1]), client);
                                     else if (flag == -1)
                                         sendMsg(ERR_CHANNELISFULL("server", client.getNick(), tokens[1]), client);
                                 }
