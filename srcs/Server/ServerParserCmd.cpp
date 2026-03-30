@@ -40,7 +40,7 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens)
 
 int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
 {
-    if (tokens[1][0] != '#' && tokens[1].size() > 50)
+    if (tokens[1][0] != '#' || tokens[1].size() > 50)
         return (-5);
     if (tokens[1][0] == '#' && tokens[1].size() <= 50)
     {
