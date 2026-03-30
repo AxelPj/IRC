@@ -135,7 +135,7 @@ std::string Channel::namesReply(const Client& client)
     for (std::map<const Client*, ClientStatus>::iterator it = _memberList.begin(); it != _memberList.end(); it++)
 	{
 		Client c = *it->first;
-		if (isMember(c))
+		if (it->second != INVITED)
 		{
 			if (it != _memberList.begin())
 				namesList += " ";
@@ -144,7 +144,7 @@ std::string Channel::namesReply(const Client& client)
 			namesList += c.getNick();
 		}
 	}
-		return RPL_NAMREPLY("server", client.getNick(), _name, namesList), client.getFd(), client.getAdress();
+		return RPL_NAMREPLY("server", client.getNick(), _name, namesList);
 }
 
 bool *Channel::whichMod()
