@@ -49,7 +49,7 @@ int Channel::getStatusClient(const Client &client) const
     std::map<const Client*, ClientStatus>::const_iterator it = this->_memberList.find(&client);
     if (it != this->_memberList.end())
         return (it->second);
-    return (NOT_CONNECTED);
+    return (-1);
 }
 
 std::map<const Client*, ClientStatus> &Channel::getMemberList()

@@ -38,8 +38,8 @@ void    Server::processParser(Client &client)
         if (!line.empty())
         {
             std::string processBuffer = line;
-            while (!processBuffer.empty() && (processBuffer.back() == '\r' || processBuffer.back() == '\n'))
-                processBuffer.pop_back();
+            while (!processBuffer.empty() && (*processBuffer.rbegin() == '\r' || *processBuffer.rbegin() == '\n'))
+                processBuffer.erase(processBuffer.size() - 1);
             std::vector<std::string> tokens = tokenSpace(processBuffer);
             if (!tokens.empty())
             {
@@ -161,21 +161,20 @@ void    Server::processParser(Client &client)
                                 break ;
                             case 5: //INVITE
                                 flag = parserCmdInvite(tokens, client);
-                                if (flag == -1)
+								if (flag == -1)
+									sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client.getFd(), client.getAdress());
+								else if (flag == -2)
                                     sendMsg(ERR_NOSUCHNICK("server", tokens[1]), client.getFd(), client.getAdress());
-                                else if (flag == -2)
-                                    sendMsg(ERR_NOSUCHCHANNEL("server", tokens[2]), client.getFd(), client.getAdress());
                                 else if (flag == -3)
-                                    sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), tokens[2]), client.getFd(), client.getAdress());
+                                    sendMsg(ERR_NOSUCHCHANNEL("server", tokens[2]), client.getFd(), client.getAdress());
                                 else if (flag == -4)
-                                    sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), tokens[2]), client.getFd(), client.getAdress());
+                                    sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), tokens[2]), client.getFd(), client.getAdress());
                                 else if (flag == -5)
+                                    sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), tokens[2]), client.getFd(), client.getAdress());
+                                else if (flag == -6)
                                     sendMsg(ERR_USERONCHANNEL("server", client.getNick(), tokens[1], tokens[2]), client.getFd(), client.getAdress());
-                                else if (flag == 0)
-                                {
+                                else
                                     cmdInvite(client, tokens);
-                                    sendMsg(RPL_INVITING("server", client.getNick(), tokens[1], tokens[2]), client.getFd(), client.getAdress());
-                                }
                                 break ;
                             case 6: //TOPIC
                                 flag = parserCmdTopic(tokens, client);

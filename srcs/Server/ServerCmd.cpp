@@ -33,7 +33,7 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
 
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
-    _listChannel[token[1]]->setStatusClient(client, NOT_CONNECTED);
+    _listChannel[token[1]]->removeMember(client);
     std::string msg = "";
     if (reason == true)
     {
@@ -52,13 +52,18 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
     {
         createChannel(channel, &client);
         this->_listChannel[channel]->setStatusClient(client, OP);
-        sendMsg(MSG_JOIN(client.getNick(), "realuser", host, channel), client.getFd(), host);
     }
     else if (setOps == false)
     {
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
-        sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
     }
+	sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
+	// TODO VERIFY THESE NUMERICS
+	sendMsg(RPL_TOPIC(client.getNick(), "realuser", host, channel), client.getFd(), host);
+	Channel chan = getChannel(channel);
+    for (std::map<const Client*, ClientStatus>::iterator it = chan.getMemberList().begin(); it != chan.getMemberList().end(); it++)
+		sendMsg(RPL_NAMREPLY("server", client.getNick(), channel, it->first->getNick()), client.getFd(), client.getAdress());
+	//TODO sendMsg(RPL_ENDOFNAMES);
     return (0);
 }
 
@@ -98,6 +103,17 @@ int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& clien
 
 int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 {
+	if (token.size() == 1)
+	{
+		std::string invList = "";
+		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
+		{
+			if (i->second->isInvited(client))
+				sendMsg(RPL_INVITELIST("server", client.getNick(), i->first), client.getFd(), client.getAdress());
+		}
+		sendMsg(RPL_ENDOFINVITELIST("server", client.getNick()), client.getFd(), client.getAdress());
+		return 0;
+	}
     Client *invitedClient = &getClient(token[1]);
     std::string host = client.getAdress();
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client.getFd(), host);

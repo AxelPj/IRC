@@ -22,19 +22,19 @@ std::vector<std::string> Server::tokenComma(const std::string &buffer)
     char *token;
 
     token = strtok(bufCpy, " ");
-    if (token == nullptr)
+    if (token == NULL)
     {
         free(bufCpy);
         return (tokens);
     }
     tokens.push_back(token);
-    while ((token = strtok(nullptr, ",")) != nullptr)
+    while ((token = strtok(NULL, ",")) != NULL)
     {
         if (token[0] == ':')
         {
             std::string tmp = token + 1;
-            token = strtok(nullptr, "\r\n");
-            if (token != nullptr)
+            token = strtok(NULL, "\r\n");
+            if (token != NULL)
                 tmp += token;
             tokens.push_back(tmp);
             free(bufCpy);
@@ -53,19 +53,19 @@ std::vector<std::string> Server::tokenSpace(const std::string &buffer)
     std::vector<std::string> tokens;
     char *token;
     token = strtok(bufCpy, " \r\n");
-    if (token == nullptr)
+    if (token == NULL)
     {
         free(bufCpy);
         return (tokens);
     }
     tokens.push_back(token);
-    while ((token = strtok(nullptr, " \r\n")) != nullptr)
+    while ((token = strtok(NULL, " \r\n")) != NULL)
     {
         if (token[0] == ':')
         {
             std::string tmp = token + 1;
-            token = strtok(nullptr, "\r\n");
-            if (token != nullptr)
+            token = strtok(NULL, "\r\n");
+            if (token != NULL)
                 tmp += token;
             tokens.push_back(tmp);
             free(bufCpy);

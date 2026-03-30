@@ -1,4 +1,4 @@
-#include "../include/Server.hpp"
+#include "Server.hpp"
 
 int main(int ac, char **av)
 {
@@ -12,7 +12,10 @@ int main(int ac, char **av)
         std::string password = "";
         if (ac == 3)
             password = av[2];
-        Server serv(std::stoi(av[1]), password);
+		//changed bc unvalaibale in c++98
+        //Server serv(std::stoi(av[1]), password);
+		char *endptr;
+        Server serv(std::strtol(av[1], &endptr, 10), password);
         serv.init();
         serv.run();
     }

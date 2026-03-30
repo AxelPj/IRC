@@ -18,10 +18,9 @@ enum ChannelMode
 
 enum ClientStatus
 {
-	NOT_CONNECTED = 0,
-	CONNECTED     = 1,
-	INVITED       = 2,
-	OP            = 3
+	CONNECTED     = 0,
+	INVITED       = 1,
+	OP            = 2
 };
 
 class Channel

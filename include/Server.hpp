@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <vector>

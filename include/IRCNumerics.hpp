@@ -19,6 +19,8 @@
 
 #define RPL_NOTOPIC(server, client, channel) (std::string(":") + server + " 331 " + client + " " + channel + " :No topic is set\r\n")
 #define RPL_TOPIC(server, client, channel, topic) (std::string(":") + server + " 332 " + client + " " + channel + " " + topic + "\r\n")
+#define RPL_INVITELIST(server, client, channel) (std::string(":") + server + " 336 " + client + " " + channel + "\r\n")
+#define RPL_ENDOFINVITELIST(server, client) (std::string(":") + server + " 337 " + client + " :End of /INVITE list\r\n")
 #define RPL_INVITING(server, client, nick, channel) (std::string(":") + server + " 341 " + client + " " + nick + " " + channel + "\r\n")
 #define RPL_NAMREPLY(server, client, channel, users) (std::string(":") + server + " 353 " + client + " = " + channel + " :" + users + "\r\n")
 #define RPL_ENDOFNAMES(server, client, channel) (std::string(":") + server + " 366 " + client + " " + channel + " :End of /NAMES list\r\n")
@@ -52,14 +54,14 @@
 
 //A VERIFIER SI ON A BESOIN DE CES NUMERICS
 
-// Additional RPL responses
+// AWAY: Bonus pas trop dur a faire
 #define RPL_AWAY(server, nick, message) (std::string(":") + server + " 306 " + nick + " :" + message + "\r\n")
 #define RPL_UNAWAY(server, nick) (std::string(":") + server + " 305 " + nick + " :You are no longer marked as being away\r\n")
+
 #define RPL_WHOREPLY(server, client, channel, user, host, nick, flags, hopcount, realname) (std::string(":") + server + " 352 " + client + " " + channel + " " + user + " " + host + " " + nick + " " + flags + " :" + hopcount + " " + realname + "\r\n")
 #define RPL_ENDOFWHO(server, client, channel) (std::string(":") + server + " 315 " + client + " " + channel + " :End of /WHO list\r\n")
 #define RPL_LIST(server, client, channel, usercount, topic) (std::string(":") + server + " 322 " + client + " " + channel + " " + usercount + " :" + topic + "\r\n")
 #define RPL_LISTEND(server, client) (std::string(":") + server + " 323 " + client + " :End of /LIST\r\n")
-#define RPL_TOPICWHOTIME(server, client, channel, who, timestamp) (std::string(":") + server + " 333 " + client + " " + channel + " " + who + " " + timestamp + "\r\n")
 #define RPL_UMODEIS(server, nick, modes) (std::string(":") + server + " 221 " + nick + " +" + modes + "\r\n")
 #define RPL_KICKOUT(nick, user, host, channel, reason) (std::string(":") + nick + "!" + user + "@" + host + " KICK " + channel + " :" + reason + "\r\n")
 #define RPL_KILL(nick, user, host, reason) (std::string(":") + nick + "!" + user + "@" + host + " KILL :" + reason + "\r\n")
@@ -70,7 +72,6 @@
 #define ERR_TOOMANYTARGETS(server, client, target) (std::string(":") + server + " 407 " + client + " " + target + " :Too many recipients\r\n")
 #define ERR_NOCOMMANDGIVEN(server, client) (std::string(":") + server + " 409 " + client + " :No origin specified\r\n")
 #define ERR_NOADMININFO(server, servername) (std::string(":") + server + " 423 " + servername + " :No administrative info available\r\n")
-#define ERR_FILEERROR(server, fileop) (std::string(":") + server + " 424 :File error doing " + fileop + "\r\n")
 #define ERR_USERSDONTMATCH(server, client) (std::string(":") + server + " 502 " + client + " :Cant change mode for other users\r\n")
 #define ERR_RESTRICTED(server, client) (std::string(":") + server + " 499 " + client + " :Your connection is restricted!\r\n")
 #define ERR_KEYSET(server, client, channel) (std::string(":") + server + " 467 " + client + " " + channel + " :Channel key already set\r\n")
