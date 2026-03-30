@@ -22,6 +22,8 @@ int Server::parserCmdUser(const std::vector<std::string> &tokens, const Client &
 
 int Server::parserCmdNick(const std::vector<std::string> &tokens)
 {
+    if (checkUserExist(tokens[1]))
+		return -3;
 	if (tokens.size() == 1 || tokens[1].empty())
 		return -1;
 	const std::string ok = "[]\\`_^{}|-";
@@ -33,13 +35,13 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens)
 		if (!std::isalnum(c) && ok.find(c) == std::string::npos)
 			return -2;
 	}
-    if (checkUserExist(tokens[1]))
-		return -3;
 	return 0;
 }
 
 int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
 {
+    if (tokens[1][0] != '#' || tokens[1].size() > 50)
+        return (-5);
     if (tokens[1][0] == '#' && tokens[1].size() <= 50)
     {
         bool exist = checkChannelExist(tokens[1]);
@@ -72,8 +74,17 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
+<<<<<<< HEAD
         std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client);
+=======
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client.getFd(), client.getAdress());
+>>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
         return -1;
     }
     std::vector<std::string> passwords;
@@ -81,7 +92,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
     if (tokens.size() > 2)
         passwords = tokenComma(tokens[2]);
     size_t i = 0;
-    while (i < channels.size())
+    while (i++ < channels.size())
     {
         const std::string& chan = channels[i];
         std::string pwd;
@@ -90,7 +101,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
         else
             pwd = "";
         if (chan.empty() || chan[0] != '#')
-            return -1;
+            continue;
         bool exist = checkChannelExist(chan);
         if (exist == false)
         {
@@ -124,7 +135,6 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
             }
             cmdJoin(client, chan, true);
         }
-        i++;
     }
     return (0);
 }
@@ -144,8 +154,17 @@ int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
+<<<<<<< HEAD
         std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client);
+=======
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client.getFd(), client.getAdress());
+>>>>>>> d611b07931d0f4d8ef68c6161a9c1490e37922ad
         return (-1);
     }
     std::vector<std::string> channels = tokenComma(tokens[1]);
@@ -350,7 +369,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     std::string modes = tokens[2];
     size_t paramIndex = 3;
     char sign = 0;
-
     for (size_t i = 0; i < modes.size(); i++)
     {
         if (modes[i] == '+' || modes[i] == '-')

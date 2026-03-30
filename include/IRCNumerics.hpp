@@ -49,7 +49,7 @@
 #define ERR_INVALIDMODEPARAM() (std::string(":server 696 :Invalid mode parameter\r\n"))
 #define ERR_ALREADYREGISTERED(server, client) (std::string(":") + server + " 462 " + client + " :You may not reregister\r\n")
 #define ERR_INVALIDUSERNAME(server, client) (std::string(":") + server + " 468 " + client + " :Erroneous username\r\n")
-
+#define ERR_BADCHANMASK(server, channel) (std::string(":") + server + " 476 " + channel + " :Bad Channel Mask\r\n")
 
 //A VERIFIER SI ON A BESOIN DE CES NUMERICS
 

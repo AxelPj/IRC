@@ -9,7 +9,7 @@ bool Server::checkUserExist(const std::string &userName)
 {
     for (std::map<int, Client*>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
     {
-        if (it->second->getUser() == userName)
+        if (it->second->getNick() == userName)
             return (true);
     }
     return (false);
