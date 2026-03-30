@@ -58,14 +58,14 @@ void    Server::processParser(Client &client)
                         {
                             case 0: //NICK
                                 flag = parserCmdNick(tokens);
-                                if (flag == -1)
+                                if (flag == 0)
+                                    cmdNick(client, tokens);
+                                else if (flag == -1)
                                     sendMsg(ERR_NONICKNAMEGIVEN("server", nick), client.getFd(), client.getAdress());
                                 else if (flag == -2)
                                     sendMsg(ERR_ERRONEUSNICKNAME("server", nick), client.getFd(), client.getAdress());
                                 else if (flag == -3)
                                     sendMsg(ERR_NICKNAMEINUSE("server", nick, tokens[1]), client.getFd(), client.getAdress());
-                                if (flag == 0)
-                                    cmdNick(client, tokens);
                                 break ;
                             case 1: //JOIN
                                 if (tokens[1].find(',') != std::string::npos)
