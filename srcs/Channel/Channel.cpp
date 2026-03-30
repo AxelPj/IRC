@@ -144,7 +144,7 @@ std::string Channel::namesReply(const Client& client)
 			namesList += c.getNick();
 		}
 	}
-		return RPL_NAMREPLY("server", client.getNick(), _name, namesList), client.getFd(), client.getAdress();
+    return RPL_NAMREPLY("server", client.getNick(), _name, namesList);
 }
 
 bool *Channel::whichMod()

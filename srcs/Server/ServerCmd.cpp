@@ -3,15 +3,17 @@
 
 int Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
-    client.setNick(token[1]);
+    std::string oldNick = client.getNick();
+    std::string newNick = token[1];
+    std::string host = client.getAdress();
+    client.setNick(newNick);
+    sendMsg(MSG_NICK(oldNick, "realuser", host, newNick), client.getFd(), host);
     if (client.getUser().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
         sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd(), client.getAdress());
         sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd(), client.getAdress());
         sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd(), client.getAdress());
-        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAdress());
-        sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAdress());
     }
     return (0);
 }
@@ -25,9 +27,9 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
         sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAdress()), client.getFd(), client.getAdress());
         sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client.getFd(), client.getAdress());
         sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client.getFd(), client.getAdress());
-        sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAdress());
-        sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAdress());
     }
+    sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAdress());
+    sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAdress());
     return (0);
 }
 
@@ -97,6 +99,7 @@ int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& clien
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
     std::string host = client.getAdress();
+    sendMsg(MSG_TOPIC(client.getNick(), "realuser", host, tokens[1], tokens[2]), client.getFd(), client.getAdress());
 	sendMsgChan(MSG_TOPIC(client.getNick(), "realuser", host, tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
     return(0);
 }

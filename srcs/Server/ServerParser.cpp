@@ -83,6 +83,8 @@ void    Server::processParser(Client &client)
                                         sendMsg(ERR_BADCHANNELKEY("server", client.getNick(), tokens[1]), client.getFd(), client.getAdress());
                                     else if (flag == -4)
                                         sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client.getFd(), client.getAdress());
+                                    else if (flag == -5)
+                                        sendMsg(ERR_BADCHANMASK("server", tokens[1]), client.getFd(), client.getAdress());
                                     else if (flag == -1)
                                         sendMsg(ERR_CHANNELISFULL("server", client.getNick(), tokens[1]), client.getFd(), client.getAdress());
                                 }

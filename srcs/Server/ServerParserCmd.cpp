@@ -40,6 +40,8 @@ int Server::parserCmdNick(const std::vector<std::string> &tokens)
 
 int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client)
 {
+    if (tokens[1][0] != '#' && tokens[1].size() > 50)
+        return (-5);
     if (tokens[1][0] == '#' && tokens[1].size() <= 50)
     {
         bool exist = checkChannelExist(tokens[1]);
@@ -72,7 +74,11 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "JOIN"), client.getFd(), client.getAdress());
         return -1;
     }
@@ -81,7 +87,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
     if (tokens.size() > 2)
         passwords = tokenComma(tokens[2]);
     size_t i = 0;
-    while (i < channels.size())
+    while (i++ < channels.size())
     {
         const std::string& chan = channels[i];
         std::string pwd;
@@ -90,7 +96,7 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
         else
             pwd = "";
         if (chan.empty() || chan[0] != '#')
-            return -1;
+            continue;
         bool exist = checkChannelExist(chan);
         if (exist == false)
         {
@@ -124,7 +130,6 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
             }
             cmdJoin(client, chan, true);
         }
-        i++;
     }
     return (0);
 }
@@ -144,7 +149,11 @@ int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 2)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client.getFd(), client.getAdress());
         return (-1);
     }
@@ -182,13 +191,21 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
 {
     if (tokens.size() < 2)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NORECIPIENT("server", nick), client.getFd(), client.getAdress());
         return (-1);
     }
     if (tokens.size() < 3)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NOTEXTOSEND("server", nick), client.getFd(), client.getAdress());
         return (-2);
     }
@@ -235,7 +252,11 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
 {
     if (tokens.size() < 3)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client.getFd(), client.getAdress());
         return (-1);
     }
@@ -350,7 +371,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     std::string modes = tokens[2];
     size_t paramIndex = 3;
     char sign = 0;
-
     for (size_t i = 0; i < modes.size(); i++)
     {
         if (modes[i] == '+' || modes[i] == '-')
