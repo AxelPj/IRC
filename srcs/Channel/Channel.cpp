@@ -12,7 +12,7 @@ Channel::Channel(const Client &cli, const std::string &name)
 {
     for (int i = 0; i < LIST_MODE; i++)
         this->_modList[i] = false;
-    this->_memberList[&cli] = CONNECTED;
+    this->_memberList[&cli] = OP;
 }
 
 Channel::~Channel(){}

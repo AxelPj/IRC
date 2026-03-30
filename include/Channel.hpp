@@ -36,7 +36,6 @@ class Channel
 		std::map<const Client*, ClientStatus>   _memberList;
 		void    						        join(Client &user);
 		void    						        setMode(bool isRemoved, int mask);
-		void    						        invite(Client &user);
 
 	public:
 												Channel();
@@ -71,6 +70,7 @@ class Channel
 		bool    						        isInvited(const Client &client) const;
 		bool    						        isMember(const Client &client) const;
 		bool    						        isOp(const Client &client) const;
+		void    						        invite(Client &user);
 		bool    						        *whichMod();
 		void                        			removeMember(const Client &client);
 
