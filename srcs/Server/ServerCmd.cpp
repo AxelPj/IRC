@@ -118,19 +118,18 @@ void Server::cmdJoin(const Client &client, const std::string &channel, bool setO
     return ;
 }
 
-void Server::cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
+void Server::cmdKick(Client &kicker, const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
 {
-    std::string host = client.getAddress();
+    std::string host = kicker.getAddress();
     std::string msg = "";
     if(reason == true)
     {
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
     }
-    sendMsg(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), client);
-    sendMsgChan(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), channel, INVALID_SOCKET);
+    sendMsg(MSG_KICK(kicker.getNick(), kicker.getUser(), host, channel.getName(), token[1], msg), client);
+    sendMsgChan(MSG_KICK(kicker.getNick(), kicker.getUser(), host, channel.getName(), token[1], msg), channel, INVALID_SOCKET);
     channel.removeMember(client);
-    return ;
 }
 
 void Server::cmdPong(Client &client, const std::vector<std::string> &token)

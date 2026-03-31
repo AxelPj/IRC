@@ -208,19 +208,17 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
 
 int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client)
 {
-	if (tokens.size() < 3)
-		return -1;
-	else if (channelExists(tokens[1]) == false)
+	if (channelExists(tokens[0]) == false)
         return (-2);
-	else if (getChannel(tokens[1]).isMember(client) == false || userExists(tokens[2]) == false)
+	else if (getChannel(tokens[0]).isMember(client) == false || userExists(tokens[1]) == false)
 		return -3;
-	else if (getChannel(tokens[1]).isMember(getClient(tokens[2])) == false)
+	else if (getChannel(tokens[0]).isMember(getClient(tokens[1])) == false)
 		return -4;
     else
     {
-        if (this->_listChannel[tokens[1]]->getStatusClient(client) == OP && tokens.size() == 3)
+        if (this->_listChannel[tokens[0]]->getStatusClient(client) == OP && tokens.size() == 2)
             return (0);
-        else if (this->_listChannel[tokens[1]]->getStatusClient(client) == OP && tokens.size() > 3)
+        else if (this->_listChannel[tokens[0]]->getStatusClient(client) == OP && tokens.size() > 2)
             return (1);
         else
             return (-5);
@@ -229,19 +227,50 @@ int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client
 
 int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client, bool multiUser)
 {
-    if (tokens.size() < 3)
-    {
-        std::string nick;
-        if (client.getNick().empty())
-            nick = "*";
-        else
-            nick = client.getNick();
-		sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, nick, "KICK"), client);
-        return (-1);
-    }
-    std::vector<std::string> channels = tokenComma(tokens[2]);
+    std::vector<std::string> channels = tokenComma(tokens[0]);
     std::vector<std::string> users = tokenComma(tokens[1]);
     if (multiUser == false)
+    {
+        if (users.size() != 1)
+        {
+            sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), "KICK"), client);
+            return (-1);
+        }
+        const std::string& user = users[0];
+        if (user.empty() || userExists(user) == false)
+        {
+            sendMsg(ERR_NOSUCHNICK(SERVER_NAME, user), client);
+            return (-2);
+        }
+        for (size_t i = 0; i < channels.size(); i++)
+        {
+            const std::string& chan = channels[i];
+            if (chan.empty() || chan[0] != '#')
+                continue;
+            if (channelExists(chan) == false)
+            {
+                sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, chan), client);
+                continue;
+            }
+            if (this->_listChannel[chan]->isMember(client) == false)
+            {
+                sendMsg(ERR_NOTONCHANNEL(SERVER_NAME, client.getNick(), chan), client);
+                continue;
+            }
+            if (this->_listChannel[chan]->getStatusClient(client) != OP)
+            {
+                sendMsg(ERR_CHANOPRIVSNEEDED(SERVER_NAME, client.getNick(), chan), client);
+                continue;
+            }
+            if (this->_listChannel[chan]->isMember(getClient(user)) == false)
+            {
+                sendMsg(ERR_USERNOTINCHANNEL(SERVER_NAME, user, chan), client);
+                continue;
+            }
+            cmdKick(client, tokens, getClient(user), *this->_listChannel[chan], false);
+        }
+    }
+    else
     {
         if (channels.size() != users.size())
         {
@@ -252,71 +281,35 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
         {
             const std::string& chan = channels[i];
             const std::string& user = users[i];
+            
             if (chan.empty() || chan[0] != '#')
-                continue ;
-            if (channelExists(chan) == false)
-            {   
-                sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, chan), client);
-                continue ;
-            }
-            if (this->_listChannel[chan]->isMember(client) == false)
-            {
-                sendMsg(ERR_NOTONCHANNEL(SERVER_NAME, client.getNick(), chan), client);
-                continue ;
-            }
-            if (this->_listChannel[chan]->getStatusClient(client) != OP)
-            {
-                sendMsg(ERR_CHANOPRIVSNEEDED(SERVER_NAME, client.getNick(), chan), client);
-                continue ;
-            }
-            if (user.empty() || userExists(user) == false)
+                continue;
+            if (userExists(user) == false)
             {
                 sendMsg(ERR_NOSUCHNICK(SERVER_NAME, user), client);
-                continue ;
+                continue;
             }
-            if (this->_listChannel[chan]->isMember(getClient(user)) == false)
-            {
-                sendMsg(ERR_USERNOTINCHANNEL(SERVER_NAME, user, chan), client);
-                continue ;
-            }
-            cmdKick(tokens, getClient(user), *this->_listChannel[chan], false);
-        }
-    }
-    else
-    {
-        const std::string& user = users[0];
-        if (user.empty() || userExists(user) == false)
-        {
-            sendMsg(ERR_NOSUCHNICK(SERVER_NAME, user), client);
-            return (-2);
-        }
-        for (size_t i = 0; i < channels.size(); i++)
-        {
-            const std::string& chan = channels[i];
-
-            if (chan.empty() || chan[0] != '#')
-                continue ;
             if (channelExists(chan) == false)
             {
                 sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, chan), client);
-                continue ;
+                continue;
             }
             if (this->_listChannel[chan]->isMember(client) == false)
             {
                 sendMsg(ERR_NOTONCHANNEL(SERVER_NAME, client.getNick(), chan), client);
-                continue ;
+                continue;
             }
             if (this->_listChannel[chan]->getStatusClient(client) != OP)
             {
                 sendMsg(ERR_CHANOPRIVSNEEDED(SERVER_NAME, client.getNick(), chan), client);
-                continue ;
+                continue;
             }
             if (this->_listChannel[chan]->isMember(getClient(user)) == false)
             {
                 sendMsg(ERR_USERNOTINCHANNEL(SERVER_NAME, user, chan), client);
-                continue ;
+                continue;
             }
-            cmdKick(tokens, getClient(user), *this->_listChannel[chan], false);
+            cmdKick(client, tokens, getClient(user), *this->_listChannel[chan], false);
         }
     }
     return (0);

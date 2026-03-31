@@ -91,7 +91,7 @@ class Server
         void                        cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all);
         void                        cmdNick(Client &client, const std::vector<std::string> &token);
         void                        cmdPrivMsg(Client &client, const std::vector<std::string> &token);
-        void                        cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
+        void                        cmdKick(Client &kicker, const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
         void                        cmdInvite(Client &client, const std::vector<std::string> &token);
         void                        cmdTopic(const std::vector<std::string> &token, const Client& client);
         void                        cmdMode(Client &client, const std::vector<std::string> &token);
@@ -110,6 +110,7 @@ class Server
         void                        addMode(Channel &channel, char mode, const std::string &param);
         void                        removeMode(Channel &channel, char mode, const std::string &param);
         void                        removeClient(Client &client);
+        int                         findChanForKick(const std::vector<std::string> &tokens);
 };
 
 #endif
