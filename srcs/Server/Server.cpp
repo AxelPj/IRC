@@ -81,7 +81,7 @@ void Server::removeClient(int fdClient, int i)
             if (it->second->isEmpty())
             {
                 delete it->second;
-                it = _listChannel.erase(it);
+                _listChannel.erase(it++);
             }
             else
                 it++;
