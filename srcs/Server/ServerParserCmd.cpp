@@ -201,9 +201,9 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
         if (!userExist && !channelExist)
 			sendMsg(ERR_NOSUCHNICK("server", target), client);
         else if (userExist)
-            sendMsg(MSG_PRIVMSG(client.getNick(), "realuser", client.getAddress(), target, tokens[2]), getClient(target));
+            sendMsg(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), target, tokens[2]), getClient(target));
         else
-            sendMsgChan(MSG_PRIVMSG(client.getNick(), "realuser", client.getAddress(), target, tokens[2]), *this->_listChannel[target], client.getFd());
+            sendMsgChan(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), target, tokens[2]), *this->_listChannel[target], client.getFd());
     }
     return (0);
 }

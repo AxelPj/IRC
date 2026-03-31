@@ -72,7 +72,7 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 void Server::removeClient(int fdClient, int i)
 {
     Client *client = _listClient[fdClient];
-    for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
+    for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end();)
     {
         if (it->second->isMember(*client))
         {
@@ -82,9 +82,12 @@ void Server::removeClient(int fdClient, int i)
             {
                 delete it->second;
                 it = _listChannel.erase(it);
-                continue ;
             }
+            else
+                it++;
         }
+        else
+            it++;
     }
     close(fdClient);
     _socketIrc.erase(_socketIrc.begin() + i);

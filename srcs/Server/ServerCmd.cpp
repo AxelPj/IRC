@@ -9,7 +9,7 @@ int Server::cmdNick(Client &client, const std::vector<std::string> &token)
         newNick = newNick.substr(0, 30);
     std::string host = client.getAddress();
     client.setNick(newNick);
-    sendMsg(MSG_NICK(oldNick, "realuser", host, newNick), client);
+    sendMsg(MSG_NICK(oldNick, client.getUser(), host, newNick), client);
     if (client.getUser().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
@@ -44,8 +44,8 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
     }
-    sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), client);
-    sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
+    sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), token[1], msg), client);
+    sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
     if (this->_listChannel[token[1]]->isEmpty())
     {
         delete _listChannel[token[1]];
@@ -62,8 +62,8 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
 		{
 			if (i->second->isMember(client))
 			{
-                sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), client);
-				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
+                sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, ""), client);
+				sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, ""), *i->second, client.getFd());
 				i->second->removeMember(client);
                 if (i->second->isEmpty())
                 {
@@ -83,8 +83,8 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
             delete _listChannel[chan[i]];
             _listChannel.erase(chan[i]);
         }
-        sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), client);
-        sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
+        sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), client);
+        sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
     
     }
     return (0);
@@ -100,8 +100,8 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
     }
     else if (setOps == false)
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
-    sendMsg(MSG_JOIN(client.getNick(), "realuser", host, channel), client);
-	sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
+    sendMsg(MSG_JOIN(client.getNick(), client.getUser(), host, channel), client);
+	sendMsgChan(MSG_JOIN(client.getNick(), client.getUser(), host, channel), getChannel(channel), client.getFd());
 	Channel chan = getChannel(channel);
 	if (chan.getTopic() != "")
 		sendMsg(RPL_TOPIC("server", client.getNick(), channel, chan.getTopic()), client);
@@ -121,8 +121,8 @@ int Server::cmdKick(const std::vector<std::string> token, Client &client, Channe
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
     }
-    sendMsg(MSG_KICK(token[0], "realuser", host, channel.getName(), token[2], msg), client);
-    sendMsgChan(MSG_KICK(token[0], "realuser", host, channel.getName(), token[2], msg), channel, INVALID_SOCKET);
+    sendMsg(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), client);
+    sendMsgChan(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), channel, INVALID_SOCKET);
     channel.removeMember(client);
     return (0);
 }
@@ -141,8 +141,8 @@ int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& clien
 {
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
-    sendMsg(MSG_TOPIC(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), client);
-	sendMsgChan(MSG_TOPIC(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
+    sendMsg(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), client);
+	sendMsgChan(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
     return(0);
 }
 
@@ -162,7 +162,7 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
     Channel &chan = getChannel(token[2]);
 	chan.invite(invitedClient);
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
-	sendMsg(MSG_INVITE(client.getNick(), "realuser", client.getAddress(), token[1], token[2]), invitedClient);
+	sendMsg(MSG_INVITE(client.getNick(), client.getUser(), client.getAddress(), token[1], token[2]), invitedClient);
     return (0);
 }
 
@@ -174,7 +174,7 @@ int Server::cmdQuit(Client& client, const std::string& reason)
     {
         if (it->second->isMember(client))
         {
-            sendMsgChan(MSG_QUIT(client.getNick(), "realuser", host, reasonStr), *it->second, client.getFd());
+            sendMsgChan(MSG_QUIT(client.getNick(), client.getUser(), host, reasonStr), *it->second, client.getFd());
             it->second->removeMember(client);
             if (it->second->isEmpty())
             {

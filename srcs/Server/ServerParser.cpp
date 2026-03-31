@@ -133,7 +133,7 @@ void    Server::processParser(Client &client)
                                             for (size_t i = 2; i < tokens.size(); i++)
                                                 tokens[2] += tokens[i];
                                         }
-                                        sendMsg(MSG_PRIVMSG(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), getClient(tokens[1]));
+                                        sendMsg(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), getClient(tokens[1]));
                                     }
                                     else if (flag == 1)
                                     {
@@ -142,7 +142,7 @@ void    Server::processParser(Client &client)
                                             for (size_t i = 2; i < tokens.size(); i++)
                                                 tokens[2] += tokens[i];
                                         }
-                                        sendMsgChan(MSG_PRIVMSG(client.getNick(), "realuser", client.getAddress(), tokens[1], tokens[2]), *this->_listChannel[tokens[1]], client.getFd());
+                                        sendMsgChan(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), *this->_listChannel[tokens[1]], client.getFd());
                                     }
                                     else if (flag == -1)
                                         sendMsg(ERR_NORECIPIENT("server", client.getNick()), client);
