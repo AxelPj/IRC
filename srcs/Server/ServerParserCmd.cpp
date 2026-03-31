@@ -66,8 +66,8 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
         }
     }
 	if (tokens.size() == 1)
-		return(-4);
-    return(0);
+		return (-4);
+    return (0);
 }
 
 int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)
@@ -401,7 +401,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
         char mode = modes[i];
         if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'l' && mode != 'o')
             return (-4);
-
         std::string param;
         bool needsParam = (mode == 'o') || (sign == '+' && (mode == 'k' || mode == 'l'));
         if (needsParam)
@@ -423,7 +422,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
                 }
             }
         }
-
         if (sign == '+')
             addMode(channel, mode, param);
         else if (sign == '-')

@@ -21,7 +21,7 @@ void    Server::init()
     addr.sin_port = htons(this->_port);
     addr.sin_addr.s_addr = INADDR_ANY;
     int opt = 1;
-
+    
     // create a socket with AF_INET, SOCK_STREAM, 0,
     // AF_INET is the address family for IPv4, SOCK_STREAM is the type of socket for TCP, and 0 is the protocol (0 is the default protocol)
     this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
