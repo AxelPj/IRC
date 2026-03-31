@@ -71,10 +71,25 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 
 void Server::removeClient(int fdClient, int i)
 {
+    Client *client = _listClient[fdClient];
+    for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
+    {
+        if (it->second->isMember(*client))
+        {
+            sendMsgChan(MSG_QUIT(client->getNick(), client->getUser(), client->getAddress(), "Connection lost"), *it->second, client->getFd());
+            it->second->removeMember(*client);
+            if (it->second->isEmpty()) // ou getMemberCount() == 0
+            {
+                delete it->second;
+                it = _listChannel.erase(it); // it++ est géré par erase
+                continue ;
+            }
+        }
+    }
     close(fdClient);
-    this->_socketIrc.erase(this->_socketIrc.begin() + i);
-    delete this->_listClient[fdClient];
-    this->_listClient.erase(fdClient);
+    _socketIrc.erase(_socketIrc.begin() + i);
+    delete _listClient[fdClient];
+    _listClient.erase(fdClient);
 }
 
 void    Server::run()
@@ -144,10 +159,6 @@ void    Server::run()
             {
                 removeClient(this->_socketIrc[i].fd, i);
                 i--;
-            }
-            else if (this->_socketIrc[i].revents & POLLOUT)
-            {
-
             }
         }
     }

@@ -173,3 +173,10 @@ void Channel::join(Client &user)
 {
     this->_memberList[&user] = CONNECTED;
 }
+
+bool    Channel::isEmpty()
+{
+    if (this->_memberList.empty())
+        return(true);
+    return(false);
+}

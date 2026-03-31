@@ -153,8 +153,12 @@ void    Server::processParser(Client &client)
                                 }
                                 break ;
                             case 4: //KICK
-                                if (tokens[1].find(',') != std::string::npos)
-                                    parserCmdKickMulti(tokens, client);
+                                if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') != std::string::npos)
+                                    parserCmdKickMulti(tokens, client, true);
+                                else if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') == std::string::npos)
+                                    parserCmdKickMulti(tokens, client, false);
+                                else if (tokens[1].find(',') == std::string::npos && tokens[2].find(',') != std::string::npos)
+                                    sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client);
                                 else
                                 {
                                     flag = parserCmdKick(tokens, client);
