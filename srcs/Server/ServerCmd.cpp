@@ -46,6 +46,11 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
     }
     sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), client);
     sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
+    if (_listChannel[token[1]]->isEmpty())
+    {
+        delete _listChannel[token[1]];
+        _listChannel.erase(token[1]);
+    }
     return (0);
 }
 
@@ -59,10 +64,10 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
 			{
                 sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), client);
 				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
-				i->second->removeMember(client);    
+				i->second->removeMember(client);
 			}
 		}
-		return 0 ;
+		return (0);
 	}
     for (size_t i = 0; i < chan.size(); i++)
     {
