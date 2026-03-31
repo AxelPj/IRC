@@ -46,10 +46,10 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
     }
     sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), client);
     sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
-    if (_listChannel[token[1]]->isEmpty())
+    if (this->_listChannel[token[1]]->isEmpty())
     {
         delete _listChannel[token[1]];
-        _listChannel.erase(token[1]);
+        this->_listChannel.erase(token[1]);
     }
     return (0);
 }
@@ -176,6 +176,12 @@ int Server::cmdQuit(Client& client, const std::string& reason)
         {
             sendMsgChan(MSG_QUIT(client.getNick(), "realuser", host, reasonStr), *it->second, client.getFd());
             it->second->removeMember(client);
+            if (it->second->isEmpty())
+            {
+                delete it->second;
+                it = _listChannel.erase(it);
+                continue ;
+            }
         }
     }
     return (0);
