@@ -92,6 +92,7 @@ void Server::removeMode(Channel &channel, char mode, const std::string &param)
 	else if (mode == 'o')
 		channel.setStatusClient(getClient(param), CONNECTED);
 }
+
 void Server::sendMsg(const std::string &msg, const Client &client)
 {
 	int ret;
@@ -129,4 +130,10 @@ void Server::sendMsgChan(const std::string &msg, Channel &channel, int senderFd)
 			continue;
 		sendMsg(msg, *client);
 	}
+}
+
+void Server::broadcastMsg(const std::string &msg)
+{
+	for (std::map<int, Client*>::const_iterator i = _listClient.begin(); i != _listClient.end(); ++i)
+		sendMsg(msg, *i->second);
 }

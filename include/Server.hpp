@@ -105,6 +105,7 @@ class Server
         // others
         void                        sendMsg(const std::string& msg, const Client& client);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
+		void						broadcastMsg(const std::string& msg);
         void                        createChannel(const std::string &channelName, const Client *client);
         void                        addMode(Channel &channel, char mode, const std::string &param);
         void                        removeMode(Channel &channel, char mode, const std::string &param);

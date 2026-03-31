@@ -9,7 +9,7 @@ void Server::cmdNick(Client &client, const std::vector<std::string> &token)
         newNick = newNick.substr(0, 30);
     std::string host = client.getAddress();
     client.setNick(newNick);
-    sendMsg(MSG_NICK(oldNick, client.getUser(), host, newNick), client);
+    broadcastMsg(MSG_NICK(oldNick, client.getUser(), host, newNick));
     if (client.getUser().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
