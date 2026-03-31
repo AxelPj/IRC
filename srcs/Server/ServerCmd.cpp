@@ -133,7 +133,6 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 {
 	if (token.size() == 1)
 	{
-		std::string invList = "";
 		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
 		{
 			if (i->second->isInvited(client))
@@ -143,11 +142,10 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 		return 0;
 	}
     Client invitedClient = getClient(token[1]);
-	Channel chan = getChannel(token[2]);
+    Channel &chan = getChannel(token[2]);
 	chan.invite(invitedClient);
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
 	sendMsg(MSG_INVITE(client.getNick(), "realuser", client.getAddress(), token[1], token[2]), invitedClient);
-    //sendMsgChan(std::string(":") + client.getNick() + "!" + "realuser" + "@" + host + " INVITE " + token[1] + " :" + token[2] + "\r\n", getChannel(token[2]), client.getFd());
     return (0);
 }
 

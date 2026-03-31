@@ -71,6 +71,7 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 
 void Server::removeClient(int fdClient, int i)
 {
+    close(fdClient);
     this->_socketIrc.erase(this->_socketIrc.begin() + i);
     delete this->_listClient[fdClient];
     this->_listClient.erase(fdClient);
@@ -158,6 +159,7 @@ Server::~Server()
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
         delete it->second;
+    close(this->_socketIrc[0].fd);
     std::cout << "Server closed, goodbye\n" << std::endl;
 }
 
@@ -186,7 +188,7 @@ Client& Server::getClient(const std::string &nameClient)
 {
     for (std::map<int, Client*>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
     {
-        if (it->second->getUser() == nameClient)
+        if (it->second->getNick() == nameClient)
             return (*it->second);
     }
     throw std::runtime_error("Client not found");

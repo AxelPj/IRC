@@ -283,10 +283,8 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
 
 int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &client)
 {
-	if (tokens.size() == 1)
-		return 1;
-	if (tokens.size() == 2)
-		return (-1);
+	if (tokens.size() < 3)
+		return -1;
 	else if (checkUserExist(tokens[1]) == false)
         return (-2);
 	else if (checkChannelExist(tokens[2]) == false)
@@ -297,7 +295,7 @@ int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &clie
     else if(channel->getModList()[INVITE_ONLY] && channel->getStatusClient(client) != OP )
         return(-5);
 	else if (channel->isMember(getClient(tokens[1])))
-		return -6;
+		return (-6);
     else
     {
         this->_listChannel[tokens[2]]->setStatusClient(getClient(tokens[1]), INVITED);
