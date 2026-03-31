@@ -237,7 +237,8 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
         if (client.getNick().empty())
             nick = "*";
         else
-            nick = client.getNick();        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
+            nick = client.getNick();
+        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
         return (-1);
     }
     std::vector<std::string> channels = tokenComma(tokens[2]);
