@@ -78,10 +78,10 @@ void Server::removeClient(int fdClient, int i)
         {
             sendMsgChan(MSG_QUIT(client->getNick(), client->getUser(), client->getAddress(), "Connection lost"), *it->second, client->getFd());
             it->second->removeMember(*client);
-            if (it->second->isEmpty()) // ou getMemberCount() == 0
+            if (it->second->isEmpty())
             {
                 delete it->second;
-                it = _listChannel.erase(it); // it++ est géré par erase
+                it = _listChannel.erase(it);
                 continue ;
             }
         }
