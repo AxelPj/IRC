@@ -46,10 +46,10 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
     }
     sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), client);
     sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
-    if (_listChannel[token[1]]->isEmpty())
+    if (this->_listChannel[token[1]]->isEmpty())
     {
         delete _listChannel[token[1]];
-        _listChannel.erase(token[1]);
+        this->_listChannel.erase(token[1]);
     }
     return (0);
 }
@@ -65,6 +65,12 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
                 sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), client);
 				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
 				i->second->removeMember(client);
+                if (i->second->isEmpty())
+                {
+                    delete i->second;
+                    i = _listChannel.erase(i);
+                    continue ;
+                }
 			}
 		}
 		return (0);
@@ -72,8 +78,14 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
     for (size_t i = 0; i < chan.size(); i++)
     {
         this->_listChannel[chan[i]]->removeMember(client);
+        if (_listChannel[chan[i]]->isEmpty())
+        {
+            delete _listChannel[chan[i]];
+            _listChannel.erase(chan[i]);
+        }
         sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), client);
         sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
+    
     }
     return (0);
 }
@@ -164,6 +176,12 @@ int Server::cmdQuit(Client& client, const std::string& reason)
         {
             sendMsgChan(MSG_QUIT(client.getNick(), "realuser", host, reasonStr), *it->second, client.getFd());
             it->second->removeMember(client);
+            if (it->second->isEmpty())
+            {
+                delete it->second;
+                it = _listChannel.erase(it);
+                continue ;
+            }
         }
     }
     return (0);
