@@ -139,7 +139,7 @@ std::string Channel::namesReply(const Client& client)
 		{
 			if (it != _memberList.begin())
 				namesList += " ";
-			if (isOp(c))
+			if (it->second == OP)
 				namesList += "@";
 			namesList += c.getNick();
 		}
