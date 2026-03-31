@@ -3,7 +3,7 @@
 
 #include <string>
 
-#define RPL_WELCOME(server, nick, user, host) (std::string(":") + server + " 001 " + nick + " :Welcome to the IRC Network " + nick + "!" + user + "@" + host + "\r\n")
+#define RPL_WELCOME(server, nick, user, host) (std::string(":") + server + " 001 " + nick + " :Welcome to the " + server + " IRC Network " + nick + "!" + user + "@" + host + "\r\n")
 #define RPL_YOURHOST(server, nick, version) (std::string(":") + server + " 002 " + nick + " :Your host is " + server + ", running version " + version + "\r\n")
 #define RPL_CREATED(server, nick, createdAt) (std::string(":") + server + " 003 " + nick + " :This server was created " + createdAt + "\r\n")
 #define RPL_MYINFO(server, nick, version, userModes, chanModes) (std::string(":") + server + " 004 " + nick + " " + server + " " + version + " " + userModes + " " + chanModes + "\r\n")

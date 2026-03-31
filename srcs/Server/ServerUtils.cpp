@@ -1,11 +1,11 @@
 #include "Server.hpp"
 
-bool Server::checkChannelExist(const std::string &channelName)
+bool Server::channelExists(const std::string &channelName)
 {
 	return (this->_listChannel.find(channelName) != this->_listChannel.end());
 }
 
-bool Server::checkUserExist(const std::string &userName)
+bool Server::userExists(const std::string &userName)
 {
 	for (std::map<int, Client *>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
 	{
@@ -70,7 +70,7 @@ void Server::addMode(Channel &channel, char mode, const std::string &param)
 	if (mode == 'i')
 		channel.setInviteOnly(true);
 	else if (mode == 't')
-		channel.setTopicResctriction(true);
+		channel.setTopicRestriction(true);
 	else if (mode == 'k')
 		channel.setPassword(param);
 	else if (mode == 'l')
@@ -84,7 +84,7 @@ void Server::removeMode(Channel &channel, char mode, const std::string &param)
 	if (mode == 'i')
 		channel.setInviteOnly(false);
 	else if (mode == 't')
-		channel.setTopicResctriction(false);
+		channel.setTopicRestriction(false);
 	else if (mode == 'k')
 		channel.setPassword("");
 	else if (mode == 'l')

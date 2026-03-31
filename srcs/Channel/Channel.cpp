@@ -92,19 +92,13 @@ void Channel::setStatusClient(const Client &client, ClientStatus status)
 
 bool Channel::setInviteOnly(bool active)
 {
-    if (active)
-        this->_modList[INVITE_ONLY] = true;
-    else
-        this->_modList[INVITE_ONLY] = false;
+	this->_modList[INVITE_ONLY] = active;
     return (this->_modList[INVITE_ONLY]);
 }
 
-bool Channel::setTopicResctriction(bool active)
+bool Channel::setTopicRestriction(bool active)
 {
-    if(active)
-        this->_modList[TOPIC_OPE] = true;
-    else
-        this->_modList[TOPIC_OPE] = false;
+	this->_modList[TOPIC_OPE] = active;
     return (this->_modList[TOPIC_OPE]);
 }
 
@@ -142,14 +136,14 @@ std::string Channel::namesReply(const Client& client)
 		Client c = *it->first;
 		if (it->second != INVITED)
 		{
-			if (it != _memberList.begin())
+			if (!namesList.empty())
 				namesList += " ";
 			if (it->second == OP)
 				namesList += "@";
 			namesList += c.getNick();
 		}
 	}
-	return RPL_NAMREPLY("server", client.getNick(), _name, namesList);
+	return RPL_NAMREPLY(SERVER_NAME, client.getNick(), _name, namesList);
 }
 
 bool *Channel::whichMod()

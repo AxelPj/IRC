@@ -13,6 +13,7 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	this->_username = "";
 	this->_realName = "";
 	this->_nick = "";
+	this->_isAway = false;
 	this->_registered = false;
 }
 

@@ -13,9 +13,9 @@ void Server::cmdNick(Client &client, const std::vector<std::string> &token)
     if (client.getUser().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
-        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAddress()), client);
-        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client);
-        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client);
+        sendMsg(RPL_WELCOME(SERVER_NAME, client.getNick(), client.getUser(), client.getAddress()), client);
+        sendMsg(RPL_YOURHOST(SERVER_NAME, client.getNick(), "1.0"), client);
+        sendMsg(RPL_CREATED(SERVER_NAME, client.getNick(), "28 Mar 2026"), client);
     }
     return ;
 }
@@ -27,12 +27,12 @@ void Server::cmdUser(Client &client, const std::vector<std::string> &token)
     if (client.getNick().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
-        sendMsg(RPL_WELCOME("server", client.getNick(), client.getUser(), client.getAddress()), client);
-        sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client);
-        sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client);
+        sendMsg(RPL_WELCOME(SERVER_NAME, client.getNick(), client.getUser(), client.getAddress()), client);
+        sendMsg(RPL_YOURHOST(SERVER_NAME, client.getNick(), "1.0"), client);
+        sendMsg(RPL_CREATED(SERVER_NAME, client.getNick(), "28 Mar 2026"), client);
     }
-    //sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAddress());
-    //sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAddress());
+    //sendMsg(RPL_MYINFO(SERVER_NAME, client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAddress());
+    //sendMsg(ERR_NOMOTD(SERVER_NAME, client.getNick()), client.getFd(), client.getAddress());
     return ;
 }
 
@@ -110,11 +110,11 @@ void Server::cmdJoin(const Client &client, const std::string &channel, bool setO
 	sendMsgChan(MSG_JOIN(client.getNick(), client.getUser(), host, channel), getChannel(channel), client.getFd());
 	Channel chan = getChannel(channel);
 	if (chan.getTopic() != "")
-		sendMsg(RPL_TOPIC("server", client.getNick(), channel, chan.getTopic()), client);
+		sendMsg(RPL_TOPIC(SERVER_NAME, client.getNick(), channel, chan.getTopic()), client);
 	else
-		sendMsg(RPL_NOTOPIC("server", client.getNick(), channel), client);
+		sendMsg(RPL_NOTOPIC(SERVER_NAME, client.getNick(), channel), client);
 	sendMsg(chan.namesReply(client), client);
-	sendMsg(RPL_ENDOFNAMES("server", client.getNick(), channel), client);
+	sendMsg(RPL_ENDOFNAMES(SERVER_NAME, client.getNick(), channel), client);
     return ;
 }
 
@@ -159,15 +159,15 @@ void Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
 		{
 			if (i->second->isInvited(client))
-				sendMsg(RPL_INVITELIST("server", client.getNick(), i->first), client);
+				sendMsg(RPL_INVITELIST(SERVER_NAME, client.getNick(), i->first), client);
 		}
-		sendMsg(RPL_ENDOFINVITELIST("server", client.getNick()), client);
+		sendMsg(RPL_ENDOFINVITELIST(SERVER_NAME, client.getNick()), client);
 		return ;
 	}
     Client invitedClient = getClient(token[1]);
     Channel &chan = getChannel(token[2]);
 	chan.invite(invitedClient);
-    sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
+    sendMsg(RPL_INVITING(SERVER_NAME, client.getNick(), token[1], token[2]), client);
 	sendMsg(MSG_INVITE(client.getNick(), client.getUser(), client.getAddress(), token[1], token[2]), invitedClient);
     return ;
 }
@@ -198,8 +198,8 @@ void Server::cmdWhoUser(Client &client, const std::string& nick)
 {
 	Client target = getClient(nick);
 	if (client.canSee(target))
-		sendMsg(RPL_WHOREPLY("server", client.getNick(), "*", target.getUser(), target.getAddress(), nick, target.getAwayStatus(), target.getRealName()), client);
-	sendMsg(RPL_ENDOFWHO("server", client.getNick(), nick), client);
+		sendMsg(RPL_WHOREPLY(SERVER_NAME, client.getNick(), "*", target.getUser(), target.getAddress(), nick, target.getAwayStatus(), target.getRealName()), client);
+	sendMsg(RPL_ENDOFWHO(SERVER_NAME, client.getNick(), nick), client);
 }
 
 void Server::cmdWhoChannel(Client &client, const std::string& chanName)
@@ -212,9 +212,9 @@ void Server::cmdWhoChannel(Client &client, const std::string& chanName)
 			if (it->second != INVITED && client.canSee(*it->first))
 			{
 				Client target = *it->first;
-				sendMsg(RPL_WHOREPLY("server", client.getNick(), chanName, target.getUser(), target.getAddress(), target.getNick(), target.getAwayStatus(), target.getRealName()), client);
+				sendMsg(RPL_WHOREPLY(SERVER_NAME, client.getNick(), chanName, target.getUser(), target.getAddress(), target.getNick(), target.getAwayStatus(), target.getRealName()), client);
 			}
 		}
 	}
-	sendMsg(RPL_ENDOFWHO("server", client.getNick(), chanName), client);
+	sendMsg(RPL_ENDOFWHO(SERVER_NAME, client.getNick(), chanName), client);
 }

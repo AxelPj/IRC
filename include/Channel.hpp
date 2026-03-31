@@ -64,7 +64,7 @@ class Channel
 		void    						        setUserLimit(int limit);
 		void    						        setStatusClient(const Client &client, ClientStatus status);
 		bool                                    setInviteOnly(bool active);
-		bool                                    setTopicResctriction(bool active);
+		bool                                    setTopicRestriction(bool active);
 
 		// utils
 		bool    						        isInvited(const Client &client) const;

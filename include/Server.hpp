@@ -16,8 +16,10 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "IRCNumerics.hpp"
+
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+#define SERVER_NAME "DyingStar"
 
 class Client;
 class channel;
@@ -47,8 +49,8 @@ class Server
         void                        addChannel(const std::string &channel);
         void                        removeChannel(const std::string &channel);
         void                        removeClient(int fdClient, int i);
-        bool                        checkChannelExist(const std::string &channelName);
-        bool                        checkUserExist(const std::string &userName);
+        bool                        channelExists(const std::string &channelName);
+        bool                        userExists(const std::string &userName);
 
         // getters
         int                         getPort() const;
