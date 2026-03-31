@@ -37,18 +37,6 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
 
 int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
-	if (token[0] == "JOIN")
-	{
-		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
-		{
-			if (i->second->isMember(client))
-			{
-				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
-				i->second->removeMember(client);
-			}
-		}
-		return 0 ;
-	}
     _listChannel[token[1]]->removeMember(client);
     std::string msg = "";
     if (reason == true)
@@ -58,6 +46,47 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
     }
     sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), client);
     sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
+    if (this->_listChannel[token[1]]->isEmpty())
+    {
+        delete _listChannel[token[1]];
+        this->_listChannel.erase(token[1]);
+    }
+    return (0);
+}
+
+int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all)
+{
+	if (all == true)
+	{
+		for (std::map<std::string, Channel*>::const_iterator i = this->_listChannel.begin(); i != _listChannel.end(); i++)
+		{
+			if (i->second->isMember(client))
+			{
+                sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), client);
+				sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), i->first, ""), *i->second, client.getFd());
+				i->second->removeMember(client);
+                if (i->second->isEmpty())
+                {
+                    delete i->second;
+                    i = _listChannel.erase(i);
+                    continue ;
+                }
+			}
+		}
+		return (0);
+	}
+    for (size_t i = 0; i < chan.size(); i++)
+    {
+        this->_listChannel[chan[i]]->removeMember(client);
+        if (_listChannel[chan[i]]->isEmpty())
+        {
+            delete _listChannel[chan[i]];
+            _listChannel.erase(chan[i]);
+        }
+        sendMsg(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), client);
+        sendMsgChan(MSG_PART(client.getNick(), "realuser", client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
+    
+    }
     return (0);
 }
 
@@ -71,7 +100,6 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
     }
     else if (setOps == false)
         this->_listChannel[channel]->setStatusClient(client, CONNECTED);
-    //sendMsg(MSG_JOIN(client.getNick(), "realuser", host, channel), client.getFd(), host);
     sendMsg(MSG_JOIN(client.getNick(), "realuser", host, channel), client);
 	sendMsgChan(MSG_JOIN(client.getNick(), "realuser", host, channel), getChannel(channel), client.getFd());
 	Channel chan = getChannel(channel);
@@ -122,7 +150,6 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 {
 	if (token.size() == 1)
 	{
-		std::string invList = "";
 		for (std::map<std::string, Channel*>::const_iterator i = _listChannel.begin(); i != _listChannel.end(); i++)
 		{
 			if (i->second->isInvited(client))
@@ -132,11 +159,10 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 		return 0;
 	}
     Client invitedClient = getClient(token[1]);
-	Channel chan = getChannel(token[2]);
+    Channel &chan = getChannel(token[2]);
 	chan.invite(invitedClient);
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
 	sendMsg(MSG_INVITE(client.getNick(), "realuser", client.getAddress(), token[1], token[2]), invitedClient);
-    //sendMsgChan(std::string(":") + client.getNick() + "!" + "realuser" + "@" + host + " INVITE " + token[1] + " :" + token[2] + "\r\n", getChannel(token[2]), client.getFd());
     return (0);
 }
 
@@ -150,6 +176,12 @@ int Server::cmdQuit(Client& client, const std::string& reason)
         {
             sendMsgChan(MSG_QUIT(client.getNick(), "realuser", host, reasonStr), *it->second, client.getFd());
             it->second->removeMember(client);
+            if (it->second->isEmpty())
+            {
+                delete it->second;
+                it = _listChannel.erase(it);
+                continue ;
+            }
         }
     }
     return (0);

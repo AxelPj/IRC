@@ -15,6 +15,7 @@
 #include <cstring>
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "IRCNumerics.hpp"
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 
@@ -69,9 +70,9 @@ class Server
         int                         parserCmdJoin(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdKick(const std::vector<std::string> &tokens, Client &client);
-        int                         parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client);
+        int                         parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client, bool multiUser);
         int                         parserCmdPart(const std::vector<std::string> &tokens, const Client& client);
-        int                         parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client);
+        std::vector<std::string>    parserCmdPartMulti(std::vector<std::string> &tokens, Client &client);
         int                         parserCmdPrivMsg(const std::vector<std::string> &token);
         int                         parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdInvite(const std::vector<std::string> &tokens, Client &client);
@@ -83,6 +84,7 @@ class Server
         int                         cmdUser(Client &client, const std::vector<std::string> &token);
         int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
         int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
+        int                         cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all);
         int                         cmdNick(Client &client, const std::vector<std::string> &token);
         int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
         int                         cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
@@ -98,8 +100,8 @@ class Server
         void                        sendMsg(const std::string& msg, const Client& client);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);
         void                        createChannel(const std::string &channelName, const Client *client);
-        void                        addMode(Channel *channel, char mode, const std::string &param, Client& client);
-        void                        removeMode(Channel *channel, char mode, Client& client);
+        void                        addMode(Channel &channel, char mode, const std::string &param);
+        void                        removeMode(Channel &channel, char mode, const std::string &param);
         void                        removeClient(Client &client);
 };
 

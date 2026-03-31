@@ -69,9 +69,7 @@ void    Server::processParser(Client &client)
                                 break ;
                             case 1: //JOIN
                                 if (tokens[1].find(',') != std::string::npos)
-                                {
-                                    flag = parserCmdJoinMulti(tokens, client);
-                                }
+                                    parserCmdJoinMulti(tokens, client);
                                 else
                                 {
                                     flag = parserCmdJoin(tokens, client);
@@ -80,7 +78,7 @@ void    Server::processParser(Client &client)
                                     else if (flag == 1)
                                         cmdJoin(client, tokens[1], true);
 									else if (flag == 2)
-										cmdPart(client, tokens, 0);
+                                        cmdPartMulti(client, std::vector<std::string>(), std::string(), true);
                                     else if (flag == -2)
                                         sendMsg(ERR_INVITEONLYCHAN("server", client.getNick(), tokens[1]), client);
                                     else if (flag == -3)
@@ -95,7 +93,18 @@ void    Server::processParser(Client &client)
                                 break;
                             case 2: //PART
                                 if (tokens[1].find(',') != std::string::npos)
-                                    flag = parserCmdPartMulti(tokens, client);
+                                {
+                                        std::vector<std::string> chanVal = parserCmdPartMulti(tokens, client);
+                                        if (chanVal.empty() == true)
+                                            break ;
+                                        else
+                                        {
+                                            if(tokens.empty() == true)
+                                                cmdPartMulti(client, chanVal, "", false);
+                                            else
+                                                cmdPartMulti(client, chanVal, tokens[0], false);
+                                        }
+                                }   
                                 else
                                 {
                                     flag = parserCmdPart(tokens, client);
@@ -144,8 +153,12 @@ void    Server::processParser(Client &client)
                                 }
                                 break ;
                             case 4: //KICK
-                                if (tokens[1].find(',') != std::string::npos)
-                                    parserCmdKickMulti(tokens, client);
+                                if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') != std::string::npos)
+                                    parserCmdKickMulti(tokens, client, true);
+                                else if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') == std::string::npos)
+                                    parserCmdKickMulti(tokens, client, false);
+                                else if (tokens[1].find(',') == std::string::npos && tokens[2].find(',') != std::string::npos)
+                                    sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), tokens[0]), client);
                                 else
                                 {
                                     flag = parserCmdKick(tokens, client);
@@ -208,7 +221,9 @@ void    Server::processParser(Client &client)
                                 flag = parserCmdMode(tokens, client);
                                 if (flag == 0)
                                 {
-                                    std::string modes = (tokens.size() > 2) ? tokens[2] : "+";
+                                    std::string modes = "+";
+									if (tokens.size() > 2)
+										modes = tokens[2];
                                     sendMsg(RPL_CHANNELMODEIS("server", client.getNick(), tokens[1], modes), client);
                                 }
                                 else if (flag == -1)

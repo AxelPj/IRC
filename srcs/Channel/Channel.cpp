@@ -72,11 +72,16 @@ void Channel::setTopic(const std::string &topic)
 void Channel::setPassword(const std::string &password)
 {
     this->_password = password;
+	if (password.empty())
+		this->_modList[PASSWORD] = false;
+	else 
+    	this->_modList[PASSWORD] = true;
 }
 
 void Channel::setUserLimit(int limit)
 {
     this->_userLimit = limit;
+    this->_modList[LIMIT] = (limit > 0);
 }
 
 void Channel::setStatusClient(const Client &client, ClientStatus status)
@@ -172,4 +177,11 @@ void Channel::invite(Client &user)
 void Channel::join(Client &user)
 {
     this->_memberList[&user] = CONNECTED;
+}
+
+bool    Channel::isEmpty()
+{
+    if (this->_memberList.empty())
+        return(true);
+    return(false);
 }

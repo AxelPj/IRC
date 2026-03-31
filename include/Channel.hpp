@@ -73,6 +73,7 @@ class Channel
 		void    						        invite(Client &user);
 		bool    						        *whichMod();
 		void                        			removeMember(const Client &client);
+		bool									isEmpty();
 
 };
 

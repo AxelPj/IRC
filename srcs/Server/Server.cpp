@@ -21,7 +21,7 @@ void    Server::init()
     addr.sin_port = htons(this->_port);
     addr.sin_addr.s_addr = INADDR_ANY;
     int opt = 1;
-
+    
     // create a socket with AF_INET, SOCK_STREAM, 0,
     // AF_INET is the address family for IPv4, SOCK_STREAM is the type of socket for TCP, and 0 is the protocol (0 is the default protocol)
     this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -71,9 +71,25 @@ bool    Server::recvClient(const pollfd &socketclient, Client &client)
 
 void Server::removeClient(int fdClient, int i)
 {
-    this->_socketIrc.erase(this->_socketIrc.begin() + i);
-    delete this->_listClient[fdClient];
-    this->_listClient.erase(fdClient);
+    Client *client = _listClient[fdClient];
+    for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
+    {
+        if (it->second->isMember(*client))
+        {
+            sendMsgChan(MSG_QUIT(client->getNick(), client->getUser(), client->getAddress(), "Connection lost"), *it->second, client->getFd());
+            it->second->removeMember(*client);
+            if (it->second->isEmpty())
+            {
+                delete it->second;
+                it = _listChannel.erase(it);
+                continue ;
+            }
+        }
+    }
+    close(fdClient);
+    _socketIrc.erase(_socketIrc.begin() + i);
+    delete _listClient[fdClient];
+    _listClient.erase(fdClient);
 }
 
 void    Server::run()
@@ -144,10 +160,6 @@ void    Server::run()
                 removeClient(this->_socketIrc[i].fd, i);
                 i--;
             }
-            else if (this->_socketIrc[i].revents & POLLOUT)
-            {
-
-            }
         }
     }
 }
@@ -158,6 +170,7 @@ Server::~Server()
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _listChannel.begin(); it != _listChannel.end(); it++)
         delete it->second;
+    close(this->_socketIrc[0].fd);
     std::cout << "Server closed, goodbye\n" << std::endl;
 }
 
@@ -186,7 +199,7 @@ Client& Server::getClient(const std::string &nameClient)
 {
     for (std::map<int, Client*>::iterator it = this->_listClient.begin(); it != this->_listClient.end(); it++)
     {
-        if (it->second->getUser() == nameClient)
+        if (it->second->getNick() == nameClient)
             return (*it->second);
     }
     throw std::runtime_error("Client not found");

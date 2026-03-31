@@ -57,17 +57,17 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
             if (modes[INVITE_ONLY])
                 if (this->_listChannel[tokens[1]]->isInvited(client) == false)
                     return (-2);
-            if (modes[PASSWORD] && tokens.size() > 2 && tokens[2].empty() == false)
+            if (modes[PASSWORD])
             {
-                if (this->_listChannel[tokens[1]]->getPassword() != tokens[2])
+                if (tokens.size() <= 2 || tokens[2].empty() || this->_listChannel[tokens[1]]->getPassword() != tokens[2])
                     return (-3);
             }
             return (0);
         }
     }
 	if (tokens.size() == 1)
-		return(-4);
-    return(0);
+		return (-4);
+    return (0);
 }
 
 int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &client)
@@ -79,7 +79,6 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
     for (size_t i = 0; i < channels.size(); i++)
     {
         const std::string& chan = channels[i];
-        sendMsg(chan + "\n\n\n", client);
         std::string pwd;
         if (i < passwords.size())
             pwd = passwords[i];
@@ -93,6 +92,8 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
             if (chan.size() <= 50)
                 cmdJoin(client, chan, true);
         }
+        if (this->_listChannel[chan]->isMember(client) == true)
+            continue ;  
         else
         {
             bool *modes = this->_listChannel[chan]->whichMod();
@@ -109,12 +110,11 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
 				sendMsg(ERR_CHANNELISFULL("server", client.getNick(), chan), client);
                 continue ;
             }
-            if (modes[PASSWORD] && !pwd.empty())
+            if (modes[PASSWORD])
             {
-                if (this->_listChannel[chan]->getPassword() != pwd)
+                if (pwd.empty() || this->_listChannel[chan]->getPassword() != pwd)
                 {
 					sendMsg(ERR_BADCHANNELKEY("server", client.getNick(), chan), client);
-                    i++;
                     continue ;
                 }
             }
@@ -135,29 +135,32 @@ int Server::parserCmdPart(const std::vector<std::string> &tokens, const Client& 
     return (0);
 }
 
-int Server::parserCmdPartMulti(const std::vector<std::string> &tokens, Client &client)
+std::vector<std::string> Server::parserCmdPartMulti(std::vector<std::string> &tokens, Client &client)
 {
-    if (tokens.size() < 2)
+    std::vector<std::string> chan = tokenComma(tokens[1]);
+    std::vector<std::string> chanVal;
+    for (size_t i = 0; i < chan.size(); i++)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
-        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "PART"), client);
-        return (-1);
-    }
-    std::vector<std::string> channels = tokenComma(tokens[1]);
-    for (size_t i = 0; i < channels.size(); i++)
-    {
-        std::vector<std::string> chan;
-        chan.push_back(channels[i]);
-        if (chan[0].empty() || chan[0][0] != '#')
+        if (chan[i].empty() || chan[i][0] != '#')
             continue ;
-        if (checkChannelExist(chan[0]) == false)
-			sendMsg(ERR_NOSUCHCHANNEL("server", chan[0]), client);
-        else if (this->_listChannel[chan[0]]->isMember(client) == false)
-            sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan[0]), client);
+        else if (checkChannelExist(chan[i]) == false)
+			sendMsg(ERR_NOSUCHCHANNEL("server", chan[i]), client);
+        else if (this->_listChannel[chan[i]]->isMember(client) == false)
+            sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan[i]), client);
         else
-            cmdPart(client, chan, 1);
+            chanVal.push_back(chan[i]);
     }
-    return (0);
+    if (tokens.size() > 2)
+    {
+        std::string reason = tokens[2];
+        for (size_t i = 3; i < tokens.size(); i++)
+            reason += " " + tokens[i];
+        tokens.clear();
+        tokens.push_back(reason);
+    }
+    else
+        tokens.clear();
+    return (chanVal);
 }
 
 int Server::parserCmdPrivMsg(const std::vector<std::string> &tokens)
@@ -211,7 +214,7 @@ int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client
 		return -1;
 	else if (checkChannelExist(tokens[1]) == false)
         return (-2);
-	else if (getChannel(tokens[1]).isMember(client) == false)
+	else if (getChannel(tokens[1]).isMember(client) == false || checkUserExist(tokens[2]) == false)
 		return -3;
 	else if (getChannel(tokens[1]).isMember(getClient(tokens[2])) == false)
 		return -4;
@@ -226,37 +229,48 @@ int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client
     }
 }
 
-int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client)
+int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client, bool multiUser)
 {
     if (tokens.size() < 3)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
-        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
         return (-1);
     }
-    std::vector<std::string> channels = tokenComma(tokens[1]);
-    std::vector<std::string> users = tokenComma(tokens[2]);
-    for (size_t i = 0; i < channels.size(); i++)
+    std::vector<std::string> channels = tokenComma(tokens[2]);
+    std::vector<std::string> users = tokenComma(tokens[1]);
+    if (multiUser == false)
     {
-        const std::string& chan = channels[i];
-        if (chan.empty() || chan[0] != '#')
-            continue ;
-        if (checkChannelExist(chan) == false)
+        if (channels.size() != users.size())
         {
-            sendMsg(ERR_NOSUCHCHANNEL("server", chan), client);
-            continue ;
+            sendMsg(ERR_NEEDMOREPARAMS("server", client.getNick(), "KICK"), client);
+            return (-1);
         }
-        if (this->_listChannel[chan]->isMember(client) == false)
+        for (size_t i = 0; i < channels.size(); i++)
         {
-            sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan), client);
-            continue ;
-        }
-        for (size_t j = 0; j < users.size(); j++)
-        {
-            const std::string& user = users[j];
-            if (user.empty())
+            const std::string& chan = channels[i];
+            const std::string& user = users[i];
+            if (chan.empty() || chan[0] != '#')
                 continue ;
-            if (checkUserExist(user) == false)
+            if (checkChannelExist(chan) == false)
+            {   
+                sendMsg(ERR_NOSUCHCHANNEL("server", chan), client);
+                continue ;
+            }
+            if (this->_listChannel[chan]->isMember(client) == false)
+            {
+                sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan), client);
+                continue ;
+            }
+            if (this->_listChannel[chan]->getStatusClient(client) != OP)
+            {
+                sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), chan), client);
+                continue ;
+            }
+            if (user.empty() || checkUserExist(user) == false)
             {
                 sendMsg(ERR_NOSUCHNICK("server", user), client);
                 continue ;
@@ -266,9 +280,41 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
                 sendMsg(ERR_USERNOTINCHANNEL("server", user, chan), client);
                 continue ;
             }
+            cmdKick(tokens, getClient(user), *this->_listChannel[chan], false);
+        }
+    }
+    else
+    {
+        const std::string& user = users[0];
+        if (user.empty() || checkUserExist(user) == false)
+        {
+            sendMsg(ERR_NOSUCHNICK("server", user), client);
+            return (-2);
+        }
+        for (size_t i = 0; i < channels.size(); i++)
+        {
+            const std::string& chan = channels[i];
+
+            if (chan.empty() || chan[0] != '#')
+                continue ;
+            if (checkChannelExist(chan) == false)
+            {
+                sendMsg(ERR_NOSUCHCHANNEL("server", chan), client);
+                continue ;
+            }
+            if (this->_listChannel[chan]->isMember(client) == false)
+            {
+                sendMsg(ERR_NOTONCHANNEL("server", client.getNick(), chan), client);
+                continue ;
+            }
             if (this->_listChannel[chan]->getStatusClient(client) != OP)
             {
                 sendMsg(ERR_CHANOPRIVSNEEDED("server", client.getNick(), chan), client);
+                continue ;
+            }
+            if (this->_listChannel[chan]->isMember(getClient(user)) == false)
+            {
+                sendMsg(ERR_USERNOTINCHANNEL("server", user, chan), client);
                 continue ;
             }
             cmdKick(tokens, getClient(user), *this->_listChannel[chan], false);
@@ -279,10 +325,8 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
 
 int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &client)
 {
-	if (tokens.size() == 1)
-		return 1;
-	if (tokens.size() == 2)
-		return (-1);
+	if (tokens.size() < 3)
+		return -1;
 	else if (checkUserExist(tokens[1]) == false)
         return (-2);
 	else if (checkChannelExist(tokens[2]) == false)
@@ -293,7 +337,7 @@ int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &clie
     else if(channel->getModList()[INVITE_ONLY] && channel->getStatusClient(client) != OP )
         return(-5);
 	else if (channel->isMember(getClient(tokens[1])))
-		return -6;
+		return (-6);
     else
     {
         this->_listChannel[tokens[2]]->setStatusClient(getClient(tokens[1]), INVITED);
@@ -343,8 +387,8 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     if (!channel.isOp(client))
         return (-3);
     std::string modes = tokens[2];
-    size_t paramIndex = 3;
     char sign = 0;
+    size_t paramIndex = 3;
     for (size_t i = 0; i < modes.size(); i++)
     {
         if (modes[i] == '+' || modes[i] == '-')
@@ -357,19 +401,31 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
         char mode = modes[i];
         if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'l' && mode != 'o')
             return (-4);
-
         std::string param;
-
-        if (mode == 'o' || mode == 'k' || mode == 'l')
+        bool needsParam = (mode == 'o') || (sign == '+' && (mode == 'k' || mode == 'l'));
+        if (needsParam)
         {
-            if (paramIndex >= tokens.size())
-                return (-2);
+            if (paramIndex >= tokens.size() || tokens[paramIndex].empty())
+                return (-5);
             param = tokens[paramIndex++];
+            if (mode == 'o')
+            {
+                if (!checkUserExist(param) || !channel.isMember(getClient(param)))
+                    return (-5);
+            }
+            else if (mode == 'l')
+            {
+                for (size_t j = 0; j < param.size(); j++)
+                {
+                    if (!std::isdigit(static_cast<unsigned char>(param[j])))
+                        return (-5);
+                }
+            }
         }
         if (sign == '+')
-            addMode(&channel, mode, param, client);
+            addMode(channel, mode, param);
         else if (sign == '-')
-            removeMode(&channel, mode, client);
+            removeMode(channel, mode, param);
         else
             return (-5);
     }
