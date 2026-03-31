@@ -137,3 +137,17 @@ void Server::broadcastMsg(const std::string &msg)
 	for (std::map<int, Client*>::const_iterator i = _listClient.begin(); i != _listClient.end(); ++i)
 		sendMsg(msg, *i->second);
 }
+
+int Server::findChanForKick(const std::vector<std::string> &tokens)
+{
+	for (size_t i = 0; i < tokens.size(); i++)
+	{
+		if (tokens[i][0] == '#')
+		{
+			if (tokens[i + 1].empty() == false)
+				return (i);
+			return (-1);
+		}
+	}
+	return (-1);
+}

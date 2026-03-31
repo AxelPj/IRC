@@ -154,29 +154,53 @@ void    Server::processParser(Client &client)
                                 }
                                 break ;
                             case 4: //KICK
-                                if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') != std::string::npos)
-                                    parserCmdKickMulti(tokens, client, true);
-                                else if (tokens[1].find(',') != std::string::npos && tokens[2].find(',') == std::string::npos)
-                                    parserCmdKickMulti(tokens, client, false);
-                                else if (tokens[1].find(',') == std::string::npos && tokens[2].find(',') != std::string::npos)
-                                    sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
-                                else
                                 {
-                                    flag = parserCmdKick(tokens, client);
-                                    if (flag == -1)
+                                    int chanval = findChanForKick(tokens);
+                                    if (chanval != -1)
+                                    {
+                                        std::vector<std::string> tokenSub(tokens.begin() + chanval, tokens.end());
+                                        if (tokenSub.size() < 2)
+                                        {
+                                            std::cout << "je suis la numeros 1\n\n\n";
+                                            sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
+                                            break;
+                                        }
+                                        if (tokenSub[0].find(',') != std::string::npos && tokenSub[1].find(',') != std::string::npos)
+                                            parserCmdKickMulti(tokenSub, client, true);
+                                        else if (tokenSub[0].find(',') != std::string::npos && tokenSub[1].find(',') == std::string::npos)
+                                            parserCmdKickMulti(tokenSub, client, false);
+                                        else if (tokenSub[0].find(',') == std::string::npos && tokenSub[1].find(',') != std::string::npos)
+                                        {
+                                            std::cout << "je suis la numeros 2\n\n\n";
+                                            sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
+                                        }
+                                        else
+                                        {
+                                            flag = parserCmdKick(tokenSub, client);
+                                            if (flag == -1)
+                                            {  
+                                                std::cout << "je suis la numeros 3\n\n\n";
+                                                sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
+                                            }
+                                            else if (flag == -2)
+                                                sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, tokenSub[0]), client);
+                                            else if (flag == -3)
+                                                sendMsg(ERR_NOTONCHANNEL(SERVER_NAME, client.getNick(), tokenSub[0]), client);
+                                            else if (flag == -4)
+                                                sendMsg(ERR_USERNOTINCHANNEL(SERVER_NAME, tokenSub[1], tokenSub[0]), client);
+                                            else if (flag == -5)
+                                                sendMsg(ERR_CHANOPRIVSNEEDED(SERVER_NAME, client.getNick(), tokenSub[0]), client);
+                                            if (flag == 0)
+                                                cmdKick(client, tokenSub, getClient(tokenSub[1]), *this->_listChannel[tokenSub[0]], false);
+                                            else if (flag == 1)
+                                                cmdKick(client, tokenSub, getClient(tokenSub[1]), *this->_listChannel[tokenSub[0]], true);
+                                        }
+                                    }
+                                    else
+                                    {
+                                                                                    std::cout << "je suis pas pas la numeros 1\n\n\n";
                                         sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
-                                    else if (flag == -2) 
-                                        sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, tokens[1]), client);
-                                    else if (flag == -3) 
-                                        sendMsg(ERR_NOTONCHANNEL(SERVER_NAME, client.getNick(), tokens[1]), client);
-                                    else if (flag == -4)
-                                        sendMsg(ERR_USERNOTINCHANNEL(SERVER_NAME, tokens[2], tokens[1]), client);
-                                    else if (flag == -5)
-                                        sendMsg(ERR_CHANOPRIVSNEEDED(SERVER_NAME, client.getNick(), tokens[1]), client);
-                                    if (flag == 0)
-                                        cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], false);
-                                    else if (flag == 1)
-                                        cmdKick(tokens, getClient(tokens[2]), *this->_listChannel[tokens[1]], true);
+                                    }
                                 }
                                 break ;
                             case 5: //INVITE
