@@ -58,7 +58,7 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
 {
 	if (all == true)
 	{
-		for (std::map<std::string, Channel*>::const_iterator i = this->_listChannel.begin(); i != _listChannel.end(); i++)
+		for (std::map<std::string, Channel*>::iterator i = this->_listChannel.begin(); i != _listChannel.end();)
 		{
 			if (i->second->isMember(client))
 			{
@@ -68,10 +68,13 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
                 if (i->second->isEmpty())
                 {
                     delete i->second;
-                    i = _listChannel.erase(i);
+                    _listChannel.erase(i++);
                     continue ;
                 }
+				i++;
 			}
+			else
+				i++;
 		}
 		return (0);
 	}
@@ -83,9 +86,11 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
             delete _listChannel[chan[i]];
             _listChannel.erase(chan[i]);
         }
-        sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), client);
-        sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
-    
+        else
+        {
+            sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), client);
+            sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
+        }
     }
     return (0);
 }
@@ -170,7 +175,7 @@ int Server::cmdQuit(Client& client, const std::string& reason)
 {
     std::string host = client.getAddress();
     std::string reasonStr = reason.empty() ? "Quit" : reason;
-    for (std::map<std::string, Channel*>::iterator it = this->_listChannel.begin(); it != this->_listChannel.end(); it++)
+    for (std::map<std::string, Channel*>::iterator it = this->_listChannel.begin(); it != this->_listChannel.end();)
     {
         if (it->second->isMember(client))
         {
@@ -179,10 +184,11 @@ int Server::cmdQuit(Client& client, const std::string& reason)
             if (it->second->isEmpty())
             {
                 delete it->second;
-                it = _listChannel.erase(it);
+                _listChannel.erase(it++);
                 continue ;
             }
         }
+        it++;
     }
     return (0);
 }
