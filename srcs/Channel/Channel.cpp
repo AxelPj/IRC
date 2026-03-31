@@ -133,14 +133,13 @@ std::string Channel::namesReply(const Client& client)
 	std::string namesList = "";
     for (std::map<const Client*, ClientStatus>::iterator it = _memberList.begin(); it != _memberList.end(); it++)
 	{
-		Client c = *it->first;
 		if (it->second != INVITED)
 		{
 			if (!namesList.empty())
 				namesList += " ";
 			if (it->second == OP)
 				namesList += "@";
-			namesList += c.getNick();
+			namesList += it->first->getNick();
 		}
 	}
 	return RPL_NAMREPLY(SERVER_NAME, client.getNick(), _name, namesList);

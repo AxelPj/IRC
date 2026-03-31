@@ -195,11 +195,7 @@ void    Server::processParser(Client &client)
                                 else if (flag == -6)
                                     sendMsg(ERR_USERONCHANNEL(SERVER_NAME, client.getNick(), tokens[1], tokens[2]), client);
                                 else
-								{
-									std::cout << "INVITING" << std::endl;
                                     cmdInvite(client, tokens);
-									std::cout << "INVITE OK" << std::endl;
-								}
                                 break ;
                             case 6: //TOPIC
                                 flag = parserCmdTopic(tokens, client);

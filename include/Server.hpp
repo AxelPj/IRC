@@ -19,7 +19,7 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-#define SERVER_NAME "DyingStar"
+#define SERVER_NAME "DyingStar.localhost"
 
 class Client;
 class channel;
