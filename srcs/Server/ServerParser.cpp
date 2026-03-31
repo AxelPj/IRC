@@ -221,7 +221,9 @@ void    Server::processParser(Client &client)
                                 flag = parserCmdMode(tokens, client);
                                 if (flag == 0)
                                 {
-                                    std::string modes = (tokens.size() > 2) ? tokens[2] : "+";
+                                    std::string modes = "+";
+									if (tokens.size() > 2)
+										modes = tokens[2];
                                     sendMsg(RPL_CHANNELMODEIS("server", client.getNick(), tokens[1], modes), client);
                                 }
                                 else if (flag == -1)

@@ -14,7 +14,7 @@
 
 #define MSG_JOIN(nick, user, host, channel) (std::string(":") + nick + "!" + user + "@" + host + " JOIN " + channel + "\r\n")
 #define MSG_PART(nick, user, host, channel, reason) (std::string(":") + nick + "!" + user + "@" + host + " PART " + channel + " :" + reason + "\r\n")
-    #define MSG_QUIT(nick, user, host, reason) (std::string(":") + nick + "!" + user + "@" + host + " QUIT :" + reason + "\r\n")
+#define MSG_QUIT(nick, user, host, reason) (std::string(":") + nick + "!" + user + "@" + host + " QUIT :" + reason + "\r\n")
 #define MSG_NICK(oldNick, user, host, newNick) (std::string(":") + oldNick + "!" + user + "@" + host + " NICK :" + newNick + "\r\n")
 
 #define RPL_NOTOPIC(server, client, channel) (std::string(":") + server + " 331 " + client + " " + channel + " :No topic is set\r\n")

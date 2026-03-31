@@ -57,9 +57,9 @@ int Server::parserCmdJoin(const std::vector<std::string> &tokens, Client &client
             if (modes[INVITE_ONLY])
                 if (this->_listChannel[tokens[1]]->isInvited(client) == false)
                     return (-2);
-            if (modes[PASSWORD] && tokens.size() > 2 && tokens[2].empty() == false)
+            if (modes[PASSWORD])
             {
-                if (this->_listChannel[tokens[1]]->getPassword() != tokens[2])
+                if (tokens.size() <= 2 || tokens[2].empty() || this->_listChannel[tokens[1]]->getPassword() != tokens[2])
                     return (-3);
             }
             return (0);
@@ -110,12 +110,11 @@ int Server::parserCmdJoinMulti(const std::vector<std::string> &tokens, Client &c
 				sendMsg(ERR_CHANNELISFULL("server", client.getNick(), chan), client);
                 continue ;
             }
-            if (modes[PASSWORD] && !pwd.empty())
+            if (modes[PASSWORD])
             {
-                if (this->_listChannel[chan]->getPassword() != pwd)
+                if (pwd.empty() || this->_listChannel[chan]->getPassword() != pwd)
                 {
 					sendMsg(ERR_BADCHANNELKEY("server", client.getNick(), chan), client);
-                    i++;
                     continue ;
                 }
             }
@@ -388,8 +387,8 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     if (!channel.isOp(client))
         return (-3);
     std::string modes = tokens[2];
-    size_t paramIndex = 3;
     char sign = 0;
+    size_t paramIndex = 3;
     for (size_t i = 0; i < modes.size(); i++)
     {
         if (modes[i] == '+' || modes[i] == '-')
@@ -404,17 +403,31 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
             return (-4);
 
         std::string param;
-
-        if (mode == 'o' || mode == 'k' || mode == 'l')
+        bool needsParam = (mode == 'o') || (sign == '+' && (mode == 'k' || mode == 'l'));
+        if (needsParam)
         {
-            if (paramIndex >= tokens.size())
-                return (-2);
+            if (paramIndex >= tokens.size() || tokens[paramIndex].empty())
+                return (-5);
             param = tokens[paramIndex++];
+            if (mode == 'o')
+            {
+                if (!checkUserExist(param) || !channel.isMember(getClient(param)))
+                    return (-5);
+            }
+            else if (mode == 'l')
+            {
+                for (size_t j = 0; j < param.size(); j++)
+                {
+                    if (!std::isdigit(static_cast<unsigned char>(param[j])))
+                        return (-5);
+                }
+            }
         }
+
         if (sign == '+')
-            addMode(&channel, mode, param, client);
+            addMode(channel, mode, param);
         else if (sign == '-')
-            removeMode(&channel, mode, client);
+            removeMode(channel, mode, param);
         else
             return (-5);
     }
