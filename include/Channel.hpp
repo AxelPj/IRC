@@ -3,6 +3,8 @@
 
 #include <string>
 #include <map>
+#include <ctime>
+#include <sstream>
 
 class Server;
 class Client;
@@ -31,6 +33,7 @@ class Channel
 		std::string                             _name;
 		std::string                             _password;
 		std::string                             _topic;
+		std::time_t								_creationTime;
 		int                                     _userLimit;
 		bool                                    _modList[LIST_MODE];
 		std::map<const Client*, ClientStatus>   _memberList;
@@ -56,6 +59,7 @@ class Channel
 		bool                                    *getModList();
 		int                                     getStatusClient(const Client &client) const;
 		std::map<const Client*, ClientStatus>   &getMemberList();
+		std::string								getCreationTimeAsString() const;
 
 		// setters
 		void    						        setName(const std::string &name);

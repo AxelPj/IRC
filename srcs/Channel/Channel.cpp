@@ -4,7 +4,8 @@
 Channel::Channel() : _userLimit(-1)
 {
     for (int i = 0; i < LIST_MODE; i++)
-        this->_modList[i] = false;
+		this->_modList[i] = false;
+	this->_creationTime = std::time(NULL);
 }
 
 Channel::Channel(const Client &cli, const std::string &name)
@@ -13,6 +14,7 @@ Channel::Channel(const Client &cli, const std::string &name)
     for (int i = 0; i < LIST_MODE; i++)
         this->_modList[i] = false;
     this->_memberList[&cli] = OP;
+	this->_creationTime = std::time(NULL);
 }
 
 Channel::~Channel(){}
@@ -55,6 +57,15 @@ int Channel::getStatusClient(const Client &client) const
 std::map<const Client*, ClientStatus> &Channel::getMemberList()
 {
     return (this->_memberList);
+}
+
+std::string Channel::getCreationTimeAsString() const
+{
+	std::string res;
+	std::stringstream ss(res);
+	ss << this->_creationTime;
+	ss >> res;
+	return (res);
 }
 
 // ─── SETTERS ────────────────────────────────────────────────────────────────
