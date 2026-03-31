@@ -379,7 +379,7 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
     Channel &channel = getChannel(tokens[1]);
 	if (tokens.size() == 2)
 	{
-        sendMsg(RPL_CHANNELMODEIS(SERVER_NAME, client.getNick(), tokens[1], "+"), client);
+        sendMsg(RPL_CHANNELMODEIS(SERVER_NAME, client.getNick(), tokens[1], channel.getModeString()), client);
         sendMsg(RPL_CREATIONTIME(SERVER_NAME, client.getNick(), tokens[1], channel.getCreationTimeAsString()), client);
 		return (1);
 	}

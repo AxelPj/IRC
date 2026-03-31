@@ -59,7 +59,9 @@ class Channel
 		bool                                    *getModList();
 		int                                     getStatusClient(const Client &client) const;
 		std::map<const Client*, ClientStatus>   &getMemberList();
+
 		std::string								getCreationTimeAsString() const;
+		std::string								getModeString() const;
 
 		// setters
 		void    						        setName(const std::string &name);

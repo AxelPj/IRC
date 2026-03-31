@@ -68,6 +68,28 @@ std::string Channel::getCreationTimeAsString() const
 	return (res);
 }
 
+std::string Channel::getModeString() const
+{
+	std::string res = "+";
+	if (_modList[INVITE_ONLY])
+		res += "i";
+	if (_modList[PASSWORD])
+		res += "k";
+	if (_modList[LIMIT])
+		res += "l";
+	if (_modList[TOPIC_OPE])
+		res += "t";
+
+	//Mode args
+	if (_modList[LIMIT])
+	{
+		std::ostringstream s;
+		s << _userLimit;
+		res += " " + s.str() + " ";
+	}
+	return (res);
+}
+
 // ─── SETTERS ────────────────────────────────────────────────────────────────
 
 void Channel::setName(const std::string &name)
