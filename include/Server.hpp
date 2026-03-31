@@ -80,22 +80,26 @@ class Server
         int                         parserCmdMode(const std::vector<std::string> &tokens, Client &client);
         int                         parserCmdQuit(const std::vector<std::string> &tokens);
         int                         parserCmdReconnect(const std::vector<std::string> &tokens);
+		int							parserCmdWho(const std::vector<std::string> &tokens);
+
         // commands
-        int                         cmdUser(Client &client, const std::vector<std::string> &token);
-        int                         cmdJoin(const Client &client, const std::string &channel, bool setOps);
-        int                         cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
-        int                         cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all);
-        int                         cmdNick(Client &client, const std::vector<std::string> &token);
-        int                         cmdPrivMsg(Client &client, const std::vector<std::string> &token);
-        int                         cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
-        int                         cmdInvite(Client &client, const std::vector<std::string> &token);
-        int                         cmdTopic(const std::vector<std::string> &token, const Client& client);
-        int                         cmdMode(Client &client, const std::vector<std::string> &token);
+        void                        cmdUser(Client &client, const std::vector<std::string> &token);
+        void                        cmdJoin(const Client &client, const std::string &channel, bool setOps);
+        void                        cmdPart(Client &client, const std::vector<std::string> &token, bool reason);
+        void                        cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all);
+        void                        cmdNick(Client &client, const std::vector<std::string> &token);
+        void                        cmdPrivMsg(Client &client, const std::vector<std::string> &token);
+        void                        cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
+        void                        cmdInvite(Client &client, const std::vector<std::string> &token);
+        void                        cmdTopic(const std::vector<std::string> &token, const Client& client);
+        void                        cmdMode(Client &client, const std::vector<std::string> &token);
         void                        cmdPing(Client &client, const std::vector<std::string> &token);
         void                        cmdPong(Client &client, const std::vector<std::string> &token);
-        int                         cmdQuit(Client& client, const std::string& reason);
-        int                         cmdReconnect(Client &client, const std::vector<std::string> &token);
-        int                         parserCmdUser(const std::vector<std::string> &tokens);
+        void                        cmdQuit(Client& client, const std::string& reason);
+        void                        cmdReconnect(Client &client, const std::vector<std::string> &token);
+        void                        cmdWhoUser(Client &client, const std::string &nick);
+        void                        cmdWhoChannel(Client &client, const std::string &chanName);
+
         // others
         void                        sendMsg(const std::string& msg, const Client& client);
         void                        sendMsgChan(const std::string& msg, Channel& channel, int senderFd);

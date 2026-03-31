@@ -16,6 +16,8 @@ Messages directs, Keepalive*/
 #include <iostream>
 #include "Server.hpp"
 
+class Channel;
+
 class Client {
 	public :
 		Client(const sockaddr_in addrClient, const pollfd Socketclient);
@@ -26,11 +28,11 @@ class Client {
 		std::string getPassword()const;
 		std::string getAddress()const;
 		std::string getNick()const;
-		std::string getSecond()const;
-		std::string getThird()const;
 		std::string getUser()const;
+		std::string getRealName()const;
 		std::string	getBuffer()const;
 		int			getFd() const;
+		bool		isAway() const;
 		bool		getRegistered() const;
 		//Setters//
 		void		setNick(const std::string &nick);
@@ -38,8 +40,13 @@ class Client {
 		void		setRemoveBuffer();
 		void		setBuffer(const std::string &buffer);
 		void		setUser(const std::string& user);
+		void		setRealName(const std::string& name);
+		void		setAway(bool away);
 		void		setRegistered(bool registered);
-
+		//Utils
+		bool		canSee(const Client& client);
+		bool		canSee(const Channel& channel);
+		char		getAwayStatus();
 
 	private :
 		Client();
@@ -47,9 +54,9 @@ class Client {
 		std::string _password;
 		std::string _address;
 		std::string _nick;
-		std::string _second;
-		std::string _third;
 		std::string _username;
+		std::string _realName;
 		std::string _buffer;
 		bool		_registered;
+		bool		_isAway;
 };

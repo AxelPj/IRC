@@ -237,7 +237,8 @@ int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &c
         if (client.getNick().empty())
             nick = "*";
         else
-            nick = client.getNick();        sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
+            nick = client.getNick();
+		sendMsg(ERR_NEEDMOREPARAMS("server", nick, "KICK"), client);
         return (-1);
     }
     std::vector<std::string> channels = tokenComma(tokens[2]);
@@ -438,4 +439,15 @@ int Server::parserCmdQuit(const std::vector<std::string> &tokens)
         return(0);
     else
         return(1);
+}
+
+int Server::parserCmdWho(const std::vector<std::string> &tokens)
+{
+	if (tokens.size() < 2)
+		return -1;
+	if (checkUserExist(tokens[1]))
+		return (0);
+	if (checkChannelExist(tokens[1]))
+		return (1);
+	return -2;
 }

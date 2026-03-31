@@ -2,7 +2,7 @@
 #include "IRCNumerics.hpp"
 int    Server::choiceParser(const std::vector<std::string> &tokens)
 {
-    std::string cmdString[12] =
+    std::string cmdString[13] =
     {
         "NICK",
         "JOIN",
@@ -15,10 +15,11 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
         "QUIT",
         "PING",
         "PONG",
-        "USER"
+        "USER",
+		"WHO"
     };
 
-    for(int i = 0; i < 12; i++)
+    for(int i = 0; i < cmdString.size(); i++)
     {
         if (tokens[0] == cmdString[i])
             return (i);
@@ -261,6 +262,17 @@ void    Server::processParser(Client &client)
                                 else if (flag == -3)
                                     sendMsg(ERR_INVALIDUSERNAME("server", nick), client);
                                 break;
+							case 12: //WHO
+								flag = parserCmdWho(tokens);
+								if (flag == 0)
+									cmdWhoUser(client, tokens[1]);
+								else if (flag == 1)
+									cmdWhoChannel(client, tokens[1]);
+								else if (flag == -1)
+                                    sendMsg(ERR_NEEDMOREPARAMS("server", nick, "WHO"), client);
+								else if (flag == -2)
+									sendMsg(RPL_ENDOFWHO("server", nick, tokens[1]), client);
+								break;
                             default: //UNKNOWN
                                 sendMsg(ERR_UNKNOWNCOMMAND("server", tokens[0]), client);
                                 break;

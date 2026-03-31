@@ -11,6 +11,7 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	std::cout << "Client port: " << ntohs(addrClient.sin_port) << std::endl;
 	this->_buffer = "";
 	this->_username = "";
+	this->_realName = "";
 	this->_nick = "";
 	this->_registered = false;
 }
@@ -22,8 +23,7 @@ Client &Client::operator=(const Client &other) {
 		this->_password = other._password;
 		this->_address = other._address;
 		this->_nick = other._nick;
-		this->_second = other._second;
-		this->_third = other._third;
+		this->_realName = other._realName;
 		this->_username = other._username;
 		this->_registered = other._registered;
 	}
@@ -45,14 +45,6 @@ std::string Client::getNick() const {
 	return this->_nick;
 }
 
-std::string Client::getSecond() const {
-	return this->_second;
-}
-
-std::string Client::getThird() const {
-	return this->_third;
-}
-
 std::string Client::getUser() const {
 	return this->_username;
 }
@@ -62,9 +54,19 @@ std::string	Client::getBuffer() const
 	return(this->_buffer);
 }
 
+std::string Client::getRealName() const
+{
+	return(this->_realName);
+}
+
 int	Client::getFd() const
 {
 	return(this->_fd);
+}
+
+bool Client::isAway() const
+{
+	return (this->_isAway);
 }
 
 bool	Client::getRegistered() const
@@ -100,7 +102,34 @@ void	Client::setUser(const std::string& user)
 	this->_username = user;
 }
 
+void	Client::setRealName(const std::string& name)
+{
+	this->_realName = name;
+}
+
 void	Client::setRegistered(bool registered)
 {
 	this->_registered = registered;
+}
+
+char	Client::getAwayStatus()
+{
+	if (_isAway)
+		return 'G';
+	else
+		return 'H';
+}
+
+//This function implemented in prevision for the addition of secret channels and user modes
+bool	Client::canSee(const Client &client)
+{
+	(void) client;
+	return true;
+}
+
+//This function implemented in prevision for the addition of secret channels and user modes
+bool	Client::canSee(const Channel& channel)
+{
+	(void) channel;
+	return true;
 }

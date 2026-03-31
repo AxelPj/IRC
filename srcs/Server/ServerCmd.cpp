@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include "IRCNumerics.hpp"
 
-int Server::cmdNick(Client &client, const std::vector<std::string> &token)
+void Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
     std::string oldNick = client.getNick();
     std::string newNick = token[1];
@@ -17,12 +17,13 @@ int Server::cmdNick(Client &client, const std::vector<std::string> &token)
         sendMsg(RPL_YOURHOST("server", client.getNick(), "1.0"), client);
         sendMsg(RPL_CREATED("server", client.getNick(), "28 Mar 2026"), client);
     }
-    return (0);
+    return ;
 }
 
-int Server::cmdUser(Client &client, const std::vector<std::string> &token)
+void Server::cmdUser(Client &client, const std::vector<std::string> &token)
 {
     client.setUser(token[1]);
+	client.setRealName(token[4]);
     if (client.getNick().empty() == false && client.getRegistered() == false)
     {
         client.setRegistered(true);
@@ -32,10 +33,10 @@ int Server::cmdUser(Client &client, const std::vector<std::string> &token)
     }
     //sendMsg(RPL_MYINFO("server", client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAddress());
     //sendMsg(ERR_NOMOTD("server", client.getNick()), client.getFd(), client.getAddress());
-    return (0);
+    return ;
 }
 
-int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
+void Server::cmdPart(Client &client, const std::vector<std::string> &token, bool reason)
 {
     _listChannel[token[1]]->removeMember(client);
     std::string msg = "";
@@ -51,10 +52,10 @@ int Server::cmdPart(Client &client, const std::vector<std::string> &token, bool 
         delete _listChannel[token[1]];
         this->_listChannel.erase(token[1]);
     }
-    return (0);
+    return ;
 }
 
-int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all)
+void Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all)
 {
 	if (all == true)
 	{
@@ -76,7 +77,7 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
 			else
 				i++;
 		}
-		return (0);
+		return ;
 	}
     for (size_t i = 0; i < chan.size(); i++)
     {
@@ -92,10 +93,10 @@ int Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, c
             sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
         }
     }
-    return (0);
+    return ;
 }
 
-int Server::cmdJoin(const Client &client, const std::string &channel, bool setOps)
+void Server::cmdJoin(const Client &client, const std::string &channel, bool setOps)
 {
     std::string host = client.getAddress();
     if (setOps == true)
@@ -114,10 +115,10 @@ int Server::cmdJoin(const Client &client, const std::string &channel, bool setOp
 		sendMsg(RPL_NOTOPIC("server", client.getNick(), channel), client);
 	sendMsg(chan.namesReply(client), client);
 	sendMsg(RPL_ENDOFNAMES("server", client.getNick(), channel), client);
-    return (0);
+    return ;
 }
 
-int Server::cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
+void Server::cmdKick(const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
 {
     std::string host = client.getAddress();
     std::string msg = "";
@@ -129,7 +130,7 @@ int Server::cmdKick(const std::vector<std::string> token, Client &client, Channe
     sendMsg(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), client);
     sendMsgChan(MSG_KICK(token[0], client.getUser(), host, channel.getName(), token[2], msg), channel, INVALID_SOCKET);
     channel.removeMember(client);
-    return (0);
+    return ;
 }
 
 void Server::cmdPong(Client &client, const std::vector<std::string> &token)
@@ -142,16 +143,16 @@ void Server::cmdPing(Client &client, const std::vector<std::string> &token)
     sendMsg(std::string("PING :") + token[1] + "\r\n", client);
 }
 
-int Server::cmdTopic(const std::vector<std::string> &tokens, const Client& client)
+void Server::cmdTopic(const std::vector<std::string> &tokens, const Client& client)
 {
     Channel &chan = getChannel(tokens[1]);
     chan.setTopic(tokens[2]);
     sendMsg(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), client);
 	sendMsgChan(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
-    return(0);
+    return ;
 }
 
-int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
+void Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 {
 	if (token.size() == 1)
 	{
@@ -161,17 +162,17 @@ int Server::cmdInvite(Client &client, const std::vector<std::string> &token)
 				sendMsg(RPL_INVITELIST("server", client.getNick(), i->first), client);
 		}
 		sendMsg(RPL_ENDOFINVITELIST("server", client.getNick()), client);
-		return 0;
+		return ;
 	}
     Client invitedClient = getClient(token[1]);
     Channel &chan = getChannel(token[2]);
 	chan.invite(invitedClient);
     sendMsg(RPL_INVITING("server", client.getNick(), token[1], token[2]), client);
 	sendMsg(MSG_INVITE(client.getNick(), client.getUser(), client.getAddress(), token[1], token[2]), invitedClient);
-    return (0);
+    return ;
 }
 
-int Server::cmdQuit(Client& client, const std::string& reason)
+void Server::cmdQuit(Client& client, const std::string& reason)
 {
     std::string host = client.getAddress();
     std::string reasonStr = reason.empty() ? "Quit" : reason;
@@ -190,5 +191,30 @@ int Server::cmdQuit(Client& client, const std::string& reason)
         }
         it++;
     }
-    return (0);
+    return ;
+}
+
+void Server::cmdWhoUser(Client &client, const std::string& nick)
+{
+	Client target = getClient(nick);
+	if (client.canSee(target))
+		sendMsg(RPL_WHOREPLY("server", client.getNick(), "*", target.getUser(), target.getAddress(), nick, target.getAwayStatus(), target.getRealName()), client);
+	sendMsg(RPL_ENDOFWHO("server", client.getNick(), nick), client);
+}
+
+void Server::cmdWhoChannel(Client &client, const std::string& chanName)
+{
+	Channel &chan = getChannel(chanName);
+	if (client.canSee(chan))
+	{
+		for (std::map<const Client*, ClientStatus>::iterator it = chan.getMemberList().begin(); it != chan.getMemberList().end(); it++)
+		{
+			if (it->second != INVITED && client.canSee(*it->first))
+			{
+				Client target = *it->first;
+				sendMsg(RPL_WHOREPLY("server", client.getNick(), chanName, target.getUser(), target.getAddress(), target.getNick(), target.getAwayStatus(), target.getRealName()), client);
+			}
+		}
+	}
+	sendMsg(RPL_ENDOFWHO("server", client.getNick(), chanName), client);
 }
