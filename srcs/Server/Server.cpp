@@ -51,7 +51,7 @@ Client* Server::acceptClient(sockaddr_in *addr, pollfd *newSocketclient)
         return(NULL);
     newSocketclient->events = POLLIN;
     newSocketclient->revents = 0;
-    return (new Client(*addr, *newSocketclient));
+    return (new Client(*addr, *newSocketclient, this->_password));
 }
 
 bool    Server::recvClient(const pollfd &socketclient, Client &client)
@@ -93,6 +93,14 @@ void Server::removeClient(int fdClient, int i)
     _socketIrc.erase(_socketIrc.begin() + i);
     delete _listClient[fdClient];
     _listClient.erase(fdClient);
+}
+
+void Server::removeClient(Client &client)
+{
+	int	i = 0;
+	for (std::vector<pollfd>::iterator it = _socketIrc.begin(); it->fd != client.getFd(); it ++)
+		i++;
+	removeClient(client.getFd(), i);
 }
 
 void    Server::run()
@@ -181,6 +189,11 @@ Server::~Server()
 int Server::getPort() const
 {
     return (this->_port);
+}
+
+const std::string& Server::getPassword() const
+{
+	return this->_password;
 }
 
 int Server::getSockfd() const

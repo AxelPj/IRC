@@ -1,6 +1,11 @@
 #include "Server.hpp"
 #include "IRCNumerics.hpp"
 
+void Server::cmdPass(Client &client, const std::string &pass)
+{
+	client.setAuth(pass == this->_password);
+}
+
 void Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
     std::string oldNick = client.getNick();
@@ -31,8 +36,6 @@ void Server::cmdUser(Client &client, const std::vector<std::string> &token)
         sendMsg(RPL_YOURHOST(SERVER_NAME, client.getNick(), "1.0"), client);
         sendMsg(RPL_CREATED(SERVER_NAME, client.getNick(), "28 Mar 2026"), client);
     }
-    //sendMsg(RPL_MYINFO(SERVER_NAME, client.getNick(), "1.0", "", "itkol"), client.getFd(), client.getAddress());
-    //sendMsg(ERR_NOMOTD(SERVER_NAME, client.getNick()), client.getFd(), client.getAddress());
     return ;
 }
 

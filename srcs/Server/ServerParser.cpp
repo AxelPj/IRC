@@ -2,7 +2,7 @@
 #include "IRCNumerics.hpp"
 int    Server::choiceParser(const std::vector<std::string> &tokens)
 {
-    std::string cmdString[13] =
+    std::string cmdString[14] =
     {
         "NICK",
         "JOIN",
@@ -16,10 +16,11 @@ int    Server::choiceParser(const std::vector<std::string> &tokens)
         "PING",
         "PONG",
         "USER",
-		"WHO"
+		"WHO",
+		"PASS"
     };
 
-    for(int i = 0; i < 13; i++)
+    for(int i = 0; i < 14; i++)
     {
         if (tokens[0] == cmdString[i])
             return (i);
@@ -44,17 +45,23 @@ void    Server::processParser(Client &client)
             std::vector<std::string> tokens = tokenSpace(processBuffer);
             if (!tokens.empty())
             {
+				for (size_t i = 0; i < tokens.size(); i++)
+					std::cout << tokens[i] << std::endl;
                 for (size_t i = 0; i < tokens[0].size(); i++)
                     tokens[0][i] = toupper(tokens[0][i]);
                 std::string nick = client.getNick().empty() ? "*" : client.getNick();
                 if (!(tokens.size() == 1 && tokens[0] != "TOPIC" && tokens[0] != "QUIT"))
                 {
-                    if(client.getRegistered() == false && tokens[0] != "NICK" && tokens[0] != "USER" && tokens[0] != "CAP")
-                        sendMsg(ERR_NOTREGISTERED(SERVER_NAME, nick), client);
-                    else
+                    if(!client.getRegistered() && tokens[0] != "NICK" && tokens[0] != "USER" && tokens[0] != "CAP" && tokens[0] != "PASS")
+						sendMsg(ERR_NOTREGISTERED(SERVER_NAME, nick), client);
+                    else if (!client.isAuth() && (tokens[0] == "NICK" || tokens[0] == "USER"))
                     {
-                        for (size_t i = 0; i < tokens.size(); i++)
-                            std::cout << tokens[i] << std::endl;
+						sendMsg(std::string("ERROR: ") + SERVER_NAME + " (Bad Password)\r\n", client);
+						removeClient(client);
+						return;
+					}
+					else
+					{
                         switch(choiceParser(tokens))
                         {
                             case 0: //NICK
@@ -284,6 +291,13 @@ void    Server::processParser(Client &client)
 								else if (flag == -2)
 									sendMsg(RPL_ENDOFWHO(SERVER_NAME, nick, tokens[1]), client);
 								break;
+							case 13: //PASS
+								if (tokens.size() < 2)
+									sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, nick, tokens[1]), client);
+								else if (client.getRegistered())
+									sendMsg(ERR_ALREADYREGISTERED(SERVER_NAME, nick), client);
+								else
+									cmdPass(client, tokens[1]);
                             default: //UNKNOWN
                                 sendMsg(ERR_UNKNOWNCOMMAND(SERVER_NAME, tokens[0]), client);
                                 break;

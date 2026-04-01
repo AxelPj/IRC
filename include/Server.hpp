@@ -59,6 +59,7 @@ class Server
         pollfd                      getpollfd(int i) const;
         Client&                     getClient(const std::string &nameClient);
         Channel&                    getChannel(const std::string &name);
+		const std::string&			getPassword() const;
 
         // Parser general
         void                        processParser(Client &client);
@@ -85,6 +86,7 @@ class Server
 		int							parserCmdWho(const std::vector<std::string> &tokens);
 
         // commands
+		void						cmdPass(Client &client, const std::string &pass);
         void                        cmdUser(Client &client, const std::vector<std::string> &token);
         void                        cmdJoin(const Client &client, const std::string &channel, bool setOps);
         void                        cmdPart(Client &client, const std::vector<std::string> &token, bool reason);

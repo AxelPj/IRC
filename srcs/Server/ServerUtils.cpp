@@ -45,9 +45,6 @@ std::vector<std::string> Server::tokenSpace(const std::string &buffer)
 		if (token[0] == ':')
 		{
 			std::string tmp = token + 1;
-			token = strtok(NULL, "\r\n");
-			if (token != NULL)
-				tmp += token;
 			tokens.push_back(tmp);
 			free(bufCpy);
 			return (tokens);

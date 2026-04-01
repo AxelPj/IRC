@@ -3,7 +3,7 @@
 
 Client::Client() : _fd(-1) {}
 
-Client::Client(sockaddr_in addrClient, pollfd Socketclient)
+Client::Client(sockaddr_in addrClient, pollfd Socketclient, const std::string &pass)
 	: _fd(Socketclient.fd) {
 	this->_address = inet_ntoa(addrClient.sin_addr);
 	std::cout << "New client connected: " << this->_address << std::endl;
@@ -15,6 +15,7 @@ Client::Client(sockaddr_in addrClient, pollfd Socketclient)
 	this->_nick = "";
 	this->_isAway = false;
 	this->_registered = false;
+	this->_authentified = (pass == "");
 }
 
 Client &Client::operator=(const Client &other) {
@@ -27,6 +28,7 @@ Client &Client::operator=(const Client &other) {
 		this->_realName = other._realName;
 		this->_username = other._username;
 		this->_registered = other._registered;
+		this->_authentified = other._authentified;
 	}
 	return *this;
 }
@@ -70,6 +72,11 @@ bool Client::isAway() const
 	return (this->_isAway);
 }
 
+bool Client::isAuth() const
+{
+	return this->_authentified;
+}
+
 bool	Client::getRegistered() const
 {
 	return (this->_registered);
@@ -111,6 +118,11 @@ void	Client::setRealName(const std::string& name)
 void	Client::setRegistered(bool registered)
 {
 	this->_registered = registered;
+}
+
+void	Client::setAuth(bool auth)
+{
+	this->_authentified = auth;
 }
 
 char	Client::getAwayStatus()
