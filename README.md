@@ -15,6 +15,10 @@ where `<port>` is the port your server will be listening onto (typically 6667) a
 Once the server is up and running, you can connect to it using an IRC client or `nc` command.
 Hexchat was the client we used as reference during developpement and testing and thus the only one that is officially supported. Other clients may be able to connect and send/receive message but we cannot guarantee that you encounter no issues with them.
 
+To connect to the server, you have to launch <Hexchat.app>, enter your informations (at least `Nick name` and `User name`), click on <Add> then <Edit...>.
+Now you have to modify the server name to `DyingStar.localhost/6667` (name of the server/port of the server). If the password is set, enter it in <Password>.
+Once that is done, you can <close> the window, go back to the main menu and <connect> your Hexchat client to the server.
+
 ## Resources
 
 ### IRC Protocol Documentation:
@@ -34,3 +38,5 @@ Hexchat was the client we used as reference during developpement and testing and
 - We used a Miro board to keep things organized during the whole developpement process, centralizing brainstormings, external resources, kanbans and UML diagrams in one place that was accessible to everyone
 
 ### AI usage
+- We occasionally used AI assistance to speed up the completion of repetitive code patterns, especially when the structure was already defined and only mechanical implementation work remained.
+- AI was also used as a support tool to clarify the meaning of some compiler errors and a few IRC protocol messages encountered during development and testing.
