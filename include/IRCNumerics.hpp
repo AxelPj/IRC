@@ -60,13 +60,8 @@
 //user mode
 #define ERR_USERSDONTMATCH(server, client) (std::string(":") + server + " 502 " + client + " :Cant change mode for other users\r\n")
 
-
 // Additional ERR responses  
-#define ERR_NOSUCHSERVER(server, servername) (std::string(":") + server + " 402 " + servername + " :No such server\r\n")
 #define ERR_TOOMANYCHANNELS(server, client, channel) (std::string(":") + server + " 405 " + client + " " + channel + " :You have joined too many channels\r\n")
-#define ERR_TOOMANYTARGETS(server, client, target) (std::string(":") + server + " 407 " + client + " " + target + " :Too many recipients\r\n")
-#define ERR_NOCOMMANDGIVEN(server, client) (std::string(":") + server + " 409 " + client + " :No origin specified\r\n")
-#define ERR_RESTRICTED(server, client) (std::string(":") + server + " 499 " + client + " :Your connection is restricted!\r\n")
 
 // Additional messages
 #define MSG_JOIN(nick, user, host, channel) (std::string(":") + nick + "!" + user + "@" + host + " JOIN " + channel + "\r\n")
