@@ -15,9 +15,14 @@ where `<port>` is the port your server will be listening onto (typically 6667) a
 Once the server is up and running, you can connect to it using an IRC client or `nc` command.
 Hexchat was the client we used as reference during developpement and testing and thus the only one that is officially supported. Other clients may be able to connect and send/receive message but we cannot guarantee that you encounter no issues with them.
 
-To connect to the server, you have to launch <Hexchat.app>, enter your informations (at least `Nick name` and `User name`), click on <Add> then <Edit...>.
-Now you have to modify the server name to `DyingStar.localhost/6667` (name of the server/port of the server). If the password is set, enter it in <Password>.
-Once that is done, you can <close> the window, go back to the main menu and <connect> your Hexchat client to the server.
+To connect to the server, you have to launch _Hexchat.app_, enter your informations (at least `Nick name` and `User name`), click on _Add_ then _Edit..._.
+Now you have to modify the server name to `localhost/6667` (name of the server/port of the server). If the password is set, enter it in _Password_.
+Once that is done, click _close_, go back to the main menu and _connect_ your Hexchat client to the server.
+
+To connect to the server through the terminal, launch the server, then execute the following command:
+```nc -C 127.0.0.1 6667```
+
+You will then be able to send messages to the client by simply pressing enter
 
 ## Resources
 
@@ -26,7 +31,7 @@ Once that is done, you can <close> the window, go back to the main menu and <con
 - https://modern.ircdocs.horse
 
 ### Hexchat Documentation:
-- 
+- https://hexchat.readthedocs.io/en/latest/
 ### Why did we choose Hexchat as our reference client ?
 - We love open source: As developpers, we firmly believe that it is important to keep as much of our tools and product open-source. This is why we chose Hexchat as reference when developping this project.
 
