@@ -94,7 +94,7 @@ class Server
         void                        cmdKick(Client &kicker, const std::vector<std::string> token, Client &client, Channel &channel, bool reason);
         void                        cmdInvite(Client &client, const std::vector<std::string> &token);
         void                        cmdTopic(const std::vector<std::string> &token, const Client& client);
-        void                        cmdMode(Client &client, const std::vector<std::string> &token);
+        void                        cmdModeChannel(Client &client, const std::vector<std::string> &token);
         void                        cmdPing(Client &client, const std::vector<std::string> &token);
         void                        cmdPong(Client &client, const std::vector<std::string> &token);
         void                        cmdQuit(Client& client, const std::string& reason);

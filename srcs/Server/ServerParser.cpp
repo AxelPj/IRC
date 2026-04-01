@@ -224,13 +224,7 @@ void    Server::processParser(Client &client)
                             case 6: //TOPIC
                                 flag = parserCmdTopic(tokens, client);
                                 if (flag == 0)
-                                {
                                     cmdTopic(tokens, client);
-                                    if (tokens.size() > 2)
-                                        sendMsg(RPL_TOPIC(SERVER_NAME, client.getNick(), tokens[1], tokens[2]), client);
-                                    else
-                                        sendMsg(RPL_NOTOPIC(SERVER_NAME, client.getNick(), tokens[1]), client);
-                                }
                                 else if (flag == -1)
                                     sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
                                 else if (flag == -2)
@@ -241,12 +235,7 @@ void    Server::processParser(Client &client)
                             case 7: //MODE
                                 flag = parserCmdMode(tokens, client);
                                 if (flag == 0)
-                                {
-                                    std::string modes = "+";
-									if (tokens.size() > 2)
-										modes = tokens[2];
-                                    sendMsg(RPL_CHANNELMODEIS(SERVER_NAME, client.getNick(), tokens[1], modes), client);
-                                }
+									cmdModeChannel(client, tokens);
                                 else if (flag == -1)
                                     sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
                                 else if (flag == -2)

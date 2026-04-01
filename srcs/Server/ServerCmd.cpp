@@ -118,6 +118,38 @@ void Server::cmdJoin(const Client &client, const std::string &channel, bool setO
     return ;
 }
 
+void Server::cmdModeChannel( Client &client, const std::vector<std::string> &tokens)
+{
+    Channel &channel = getChannel(tokens[1]);
+	std::string modes = tokens[2];
+	std::string param;
+
+	char sign = modes[0];
+    size_t paramIndex = 3;
+    for (size_t i = 1; i < modes.size(); i++)
+    {
+        if (modes[i] == '+' || modes[i] == '-')
+        {
+            sign = modes[i];
+            continue;
+        }
+        char mode = modes[i];
+        if ((mode == 'o') || (sign == '+' && (mode == 'k' || mode == 'l')))
+			param = tokens[paramIndex++];
+		else
+			param = "";
+        if (sign == '+')
+		{
+			std::cout << "CHANNEL " << channel.getName() << " MODE " << mode << " PARAM |" << param << std::endl;
+            addMode(channel, mode, param);
+		}
+        else
+            removeMode(channel, mode, param);
+			sendMsg(MSG_MODE(client.getNick(), client.getUser(), client.getAddress(), channel.getName(), sign + mode, param), client);
+			sendMsgChan(MSG_MODE(client.getNick(), client.getUser(), client.getAddress(), channel.getName(), sign + mode, param), channel, client.getFd());
+    }
+}
+
 void Server::cmdKick(Client &kicker, const std::vector<std::string> token, Client &client, Channel &channel, bool reason)
 {
     std::string host = kicker.getAddress();

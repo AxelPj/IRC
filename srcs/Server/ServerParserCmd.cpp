@@ -339,7 +339,7 @@ int Server::parserCmdInvite(const std::vector<std::string> &tokens, Client &clie
 
 int Server::parserCmdTopic(const std::vector<std::string> &tokens, const Client& client)
 {
-	if (tokens.size() <= 1)
+	if (tokens.size() == 1)
 		return -1;
     if (channelExists(tokens[1]) == false)
         return -2;
@@ -350,7 +350,8 @@ int Server::parserCmdTopic(const std::vector<std::string> &tokens, const Client&
 		{
             if (Chan.getTopic().empty())
 				sendMsg(RPL_NOTOPIC(SERVER_NAME, client.getNick(), tokens[1]), client);
-			sendMsg(RPL_TOPIC(SERVER_NAME, client.getNick(), tokens[1], Chan.getTopic()), client);
+			else
+				sendMsg(RPL_TOPIC(SERVER_NAME, client.getNick(), tokens[1], Chan.getTopic()), client);
 			return (1);
 		}
         bool    *tab = Chan.getModList();
@@ -414,11 +415,7 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
                 }
             }
         }
-        if (sign == '+')
-            addMode(channel, mode, param);
-        else if (sign == '-')
-            removeMode(channel, mode, param);
-        else
+        if (sign != '+' && sign != '-')
             return (-5);
     }
     return (0);
