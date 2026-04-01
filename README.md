@@ -17,7 +17,7 @@ Hexchat was the client we used as reference during developpement and testing and
 
 To connect to the server, you have to launch <Hexchat.app>, enter your informations (at least `Nick name` and `User name`), click on <Add> then <Edit...>.
 Now you have to modify the server name to `DyingStar.localhost/6667` (name of the server/port of the server). If the password is set, enter it in <Password>.
-Once this is done, you can <close> the window and go back to the main menu and <connect> your Hexchat client to the server.
+Once that is done, you can <close> the window, go back to the main menu and <connect> your Hexchat client to the server.
 
 ## Resources
 
