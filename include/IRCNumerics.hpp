@@ -10,6 +10,7 @@
 
 #define RPL_UMODEIS(server, nick, modes) (std::string(":") + server + " 221 " + nick + " +" + modes + "\r\n")
 
+#define RPL_ENDOFWHO(server, client, channel) (std::string(":") + server + " 315 " + client + " " + channel + " :End of /WHO list\r\n")
 #define RPL_CHANNELMODEIS(server, client, channel, modes) (std::string(":") + server + " 324 " + client + " " + channel + " " + modes + "\r\n")
 #define RPL_CREATIONTIME(server, client, channel, timestamp) (std::string(":") + server + " 329 " + client + " " + channel + " " + timestamp + "\r\n")
 #define RPL_NOTOPIC(server, client, channel) (std::string(":") + server + " 331 " + client + " " + channel + " :No topic is set\r\n")
@@ -39,6 +40,7 @@
 #define ERR_NOTREGISTERED(server, client) (std::string(":") + server + " 451 " + client + " :You have not registered\r\n")
 #define ERR_NEEDMOREPARAMS(server, client, command) (std::string(":") + server + " 461 " + client + " " + command + " :Not enough parameters\r\n")
 #define ERR_ALREADYREGISTERED(server, client) (std::string(":") + server + " 462 " + client + " :You may not reregister\r\n")
+#define ERR_KEYSET(server, client, channel) (std::string(":") + server + " 467 " + client + " " + channel + " :Channel key already set\r\n")
 #define ERR_INVALIDUSERNAME(server, client) (std::string(":") + server + " 468 " + client + " :Erroneous username\r\n")
 #define ERR_CHANNELISFULL(server, client, channel) (std::string(":") + server + " 471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_UNKNOWNMODE(server, client, mode) (std::string(":") + server + " 472 " + client + " " + mode + " :is unknown mode char to me\r\n")
@@ -47,29 +49,24 @@
 #define ERR_BADCHANNELKEY(server, client, channel) (std::string(":") + server + " 475 " + client + " " + channel + " :Cannot join channel (+k)\r\n")
 #define ERR_BADCHANMASK(server, channel) (std::string(":") + server + " 476 " + channel + " :Bad Channel Mask\r\n")
 #define ERR_CHANOPRIVSNEEDED(server, client, channel) (std::string(":") + server + " 482 " + client + " " + channel + " :You're not channel operator\r\n")
-#define ERR_INVALIDMODEPARAM() (std::string(":server 696 :Invalid mode parameter\r\n"))
+#define ERR_INVALIDMODEPARAM(server) (std::string(":") + server + " 696 :Invalid mode parameter\r\n")
 
 //A VERIFIER SI ON A BESOIN DE CES NUMERICS
 
-// AWAY: Bonus pas trop dur a faire
+//away
 #define RPL_AWAY(server, nick, message) (std::string(":") + server + " 306 " + nick + " :" + message + "\r\n")
 #define RPL_UNAWAY(server, nick) (std::string(":") + server + " 305 " + nick + " :You are no longer marked as being away\r\n")
 
-#define RPL_ENDOFWHO(server, client, channel) (std::string(":") + server + " 315 " + client + " " + channel + " :End of /WHO list\r\n")
-#define RPL_LIST(server, client, channel, usercount, topic) (std::string(":") + server + " 322 " + client + " " + channel + " " + usercount + " :" + topic + "\r\n")
-#define RPL_LISTEND(server, client) (std::string(":") + server + " 323 " + client + " :End of /LIST\r\n")
-#define RPL_KICKOUT(nick, user, host, channel, reason) (std::string(":") + nick + "!" + user + "@" + host + " KICK " + channel + " :" + reason + "\r\n")
-#define RPL_KILL(nick, user, host, reason) (std::string(":") + nick + "!" + user + "@" + host + " KILL :" + reason + "\r\n")
+//user mode
+#define ERR_USERSDONTMATCH(server, client) (std::string(":") + server + " 502 " + client + " :Cant change mode for other users\r\n")
+
 
 // Additional ERR responses  
 #define ERR_NOSUCHSERVER(server, servername) (std::string(":") + server + " 402 " + servername + " :No such server\r\n")
 #define ERR_TOOMANYCHANNELS(server, client, channel) (std::string(":") + server + " 405 " + client + " " + channel + " :You have joined too many channels\r\n")
 #define ERR_TOOMANYTARGETS(server, client, target) (std::string(":") + server + " 407 " + client + " " + target + " :Too many recipients\r\n")
 #define ERR_NOCOMMANDGIVEN(server, client) (std::string(":") + server + " 409 " + client + " :No origin specified\r\n")
-#define ERR_NOADMININFO(server, servername) (std::string(":") + server + " 423 " + servername + " :No administrative info available\r\n")
-#define ERR_USERSDONTMATCH(server, client) (std::string(":") + server + " 502 " + client + " :Cant change mode for other users\r\n")
 #define ERR_RESTRICTED(server, client) (std::string(":") + server + " 499 " + client + " :Your connection is restricted!\r\n")
-#define ERR_KEYSET(server, client, channel) (std::string(":") + server + " 467 " + client + " " + channel + " :Channel key already set\r\n")
 
 // Additional messages
 #define MSG_JOIN(nick, user, host, channel) (std::string(":") + nick + "!" + user + "@" + host + " JOIN " + channel + "\r\n")

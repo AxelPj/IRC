@@ -245,7 +245,9 @@ void    Server::processParser(Client &client)
                                 else if (flag == -4)
                                     sendMsg(ERR_UNKNOWNMODE(SERVER_NAME, client.getNick(), tokens[2]), client);
                                 else if (flag == -5)
-                                    sendMsg(ERR_INVALIDMODEPARAM(), client);
+                                    sendMsg(ERR_INVALIDMODEPARAM(SERVER_NAME), client);
+								else if (flag == -6)
+									sendMsg(ERR_KEYSET(SERVER_NAME, client.getNick(), tokens[1]), client);
                                 break;
                             case 8: //QUIT
                                 flag = parserCmdQuit(tokens);

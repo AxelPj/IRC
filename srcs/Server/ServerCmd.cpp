@@ -139,10 +139,7 @@ void Server::cmdModeChannel( Client &client, const std::vector<std::string> &tok
 		else
 			param = "";
         if (sign == '+')
-		{
-			std::cout << "CHANNEL " << channel.getName() << " MODE " << mode << " PARAM |" << param << std::endl;
             addMode(channel, mode, param);
-		}
         else
             removeMode(channel, mode, param);
 			sendMsg(MSG_MODE(client.getNick(), client.getUser(), client.getAddress(), channel.getName(), sign + mode, param), client);

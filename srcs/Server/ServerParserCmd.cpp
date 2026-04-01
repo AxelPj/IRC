@@ -391,9 +391,13 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
         }
 		else if (i == 0)
 			return (-5);
+        if (sign != '+' && sign != '-')
+            return (-5);
         char mode = modes[i];
         if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'l' && mode != 'o')
             return (-4);
+		if (sign == '+' && mode == 'k' && channel.getModList()[PASSWORD])
+			return (-6);
         std::string param;
         bool needsParam = (mode == 'o') || (sign == '+' && (mode == 'k' || mode == 'l'));
         if (needsParam)
@@ -415,8 +419,6 @@ int Server::parserCmdMode(const std::vector<std::string> &tokens, Client &client
                 }
             }
         }
-        if (sign != '+' && sign != '-')
-            return (-5);
     }
     return (0);
 }
