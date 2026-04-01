@@ -38,3 +38,5 @@ Once that is done, you can <close> the window, go back to the main menu and <con
 - We used a Miro board to keep things organized during the whole developpement process, centralizing brainstormings, external resources, kanbans and UML diagrams in one place that was accessible to everyone
 
 ### AI usage
+- We occasionally used AI assistance to speed up the completion of repetitive code patterns, especially when the structure was already defined and only mechanical implementation work remained.
+- AI was also used as a support tool to clarify the meaning of some compiler errors and a few IRC protocol messages encountered during development and testing.
