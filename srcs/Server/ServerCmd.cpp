@@ -3,7 +3,10 @@
 
 void Server::cmdPass(Client &client, const std::string &pass)
 {
-	client.setAuth(pass == this->_password);
+	if (this->_password == "" || this->_password.empty())
+		client.setAuth(true);
+	else
+		client.setAuth(pass == this->_password);
 }
 
 void Server::cmdNick(Client &client, const std::vector<std::string> &token)
