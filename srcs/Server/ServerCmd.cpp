@@ -11,8 +11,13 @@ void Server::cmdPass(Client &client, const std::string &pass)
 
 void Server::cmdNick(Client &client, const std::vector<std::string> &token)
 {
-    std::string oldNick = client.getNick();
     std::string newNick = token[1];
+    if (both(newNick) > 0)
+    {
+        sendMsg(ERR_ERRONEUSNICKNAME(SERVER_NAME, "*"), client);
+        return ;
+    }
+    std::string oldNick = client.getNick();
     if (newNick.size() > 30)
         newNick = newNick.substr(0, 30);
     std::string host = client.getAddress();
@@ -30,7 +35,13 @@ void Server::cmdNick(Client &client, const std::vector<std::string> &token)
 
 void Server::cmdUser(Client &client, const std::vector<std::string> &token)
 {
-    client.setUser(token[1]);
+    std::string user = token[1];
+    if (both(user))
+    {
+        sendMsg(ERR_ERRONEUSNICKNAME(SERVER_NAME, "*"), client);
+        return ;
+    }
+    client.setUser(user);
 	client.setRealName(token[4]);
     if (client.getNick().empty() == false && client.getRegistered() == false)
     {
@@ -50,6 +61,7 @@ void Server::cmdPart(Client &client, const std::vector<std::string> &token, bool
     {
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
+        both(msg);
     }
     sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), token[1], msg), client);
     sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), token[1], msg), getChannel(token[1]), client.getFd());
@@ -63,14 +75,16 @@ void Server::cmdPart(Client &client, const std::vector<std::string> &token, bool
 
 void Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, const std::string &reason, bool all)
 {
+    std::string msg = reason;
+    both(msg);
 	if (all == true)
 	{
 		for (std::map<std::string, Channel*>::iterator i = this->_listChannel.begin(); i != _listChannel.end();)
 		{
 			if (i->second->isMember(client))
 			{
-                sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, ""), client);
-				sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, ""), *i->second, client.getFd());
+                sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, msg), client);
+				sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), i->first, msg), *i->second, client.getFd());
 				i->second->removeMember(client);
                 if (i->second->isEmpty())
                 {
@@ -95,8 +109,8 @@ void Server::cmdPartMulti(Client &client, const std::vector<std::string> &chan, 
         }
         else
         {
-            sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), client);
-            sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], reason), getChannel(chan[i]), client.getFd());
+            sendMsg(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], msg), client);
+            sendMsgChan(MSG_PART(client.getNick(), client.getUser(), client.getAddress(), chan[i], msg), getChannel(chan[i]), client.getFd());
         }
     }
     return ;
@@ -161,6 +175,7 @@ void Server::cmdKick(Client &kicker, const std::vector<std::string> token, Clien
     {
         for (size_t i = 2; i < token.size(); i++)
             msg += token[i];
+        both(msg);
     }
     sendMsg(MSG_KICK(kicker.getNick(), kicker.getUser(), host, channel.getName(), token[1], msg), client);
     sendMsgChan(MSG_KICK(kicker.getNick(), kicker.getUser(), host, channel.getName(), token[1], msg), channel, INVALID_SOCKET);
@@ -179,10 +194,12 @@ void Server::cmdPing(Client &client, const std::vector<std::string> &token)
 
 void Server::cmdTopic(const std::vector<std::string> &tokens, const Client& client)
 {
+    std::string topic = tokens[2];
     Channel &chan = getChannel(tokens[1]);
-    chan.setTopic(tokens[2]);
-    sendMsg(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), client);
-	sendMsgChan(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), getChannel(tokens[1]), client.getFd());
+    both(topic);
+    chan.setTopic(topic);
+    sendMsg(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], topic), client);
+	sendMsgChan(MSG_TOPIC(client.getNick(), client.getUser(), client.getAddress(), tokens[1], topic), getChannel(tokens[1]), client.getFd());
     return ;
 }
 

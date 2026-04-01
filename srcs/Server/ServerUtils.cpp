@@ -135,16 +135,39 @@ void Server::broadcastMsg(const std::string &msg)
 		sendMsg(msg, *i->second);
 }
 
-int Server::findChanForKick(const std::vector<std::string> &tokens)
+int Server::		findChanForKick(const std::vector<std::string> &tokens)
 {
 	for (size_t i = 0; i < tokens.size(); i++)
 	{
 		if (tokens[i][0] == '#')
 		{
-			if (tokens[i + 1].empty() == false)
+			if (tokens[i + 1].empty() == false && tokens[i + 1][0] != '#')
 				return (i);
 			return (-1);
 		}
 	}
 	return (-1);
+}
+
+int Server::both(std::string &msg)
+{
+	std::ifstream flux("./srcs/Server/forbiddenWord.txt");
+	int forbidden = 0;
+    if (!flux.is_open())
+    {
+        std::cerr << "Erreur ouverture fichier" << std::endl;
+        return (forbidden);
+    }
+    std::string forbiddenWord;
+    while (std::getline(flux, forbiddenWord))
+    {
+        size_t firstOcc = msg.find(forbiddenWord);
+        if (firstOcc != std::string::npos)
+        {
+            msg = msg.substr(0, firstOcc) + "****" + msg.substr(firstOcc + forbiddenWord.size());
+            forbidden++;
+        }
+    }
+    flux.close();
+    return (forbidden);
 }

@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include <iostream>
+#include <fstream>
 #include <list>
 #include <map>
 #include <string>
@@ -113,6 +114,7 @@ class Server
         void                        removeMode(Channel &channel, char mode, const std::string &param);
         void                        removeClient(Client &client);
         int                         findChanForKick(const std::vector<std::string> &tokens);
+        int                 both(std::string& msg);
 };
 
 #endif

@@ -180,17 +180,27 @@ int Server::parserCmdPrivMsgMulti(const std::vector<std::string> &tokens, Client
 {
     if (tokens.size() < 2)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NORECIPIENT(SERVER_NAME, nick), client);
         return (-1);
     }
     if (tokens.size() < 3)
     {
-        std::string nick = client.getNick().empty() ? std::string("*") : client.getNick();
+        std::string nick;
+        if (client.getNick().empty())
+            nick = "*";
+        else
+            nick = client.getNick();
         sendMsg(ERR_NOTEXTOSEND(SERVER_NAME, nick), client);
         return (-2);
     }
     std::vector<std::string> targets = tokenComma(tokens[1]);
+    std::string msg = tokens[2];
+    both(msg);
     for (size_t i = 0; i < targets.size(); i++)
     {
         const std::string& target = targets[i];
@@ -210,19 +220,18 @@ int Server::parserCmdKick(const std::vector<std::string> &tokens, Client &client
 {
 	if (channelExists(tokens[0]) == false)
         return (-2);
-	else if (getChannel(tokens[0]).isMember(client) == false || userExists(tokens[1]) == false)
-		return -3;
+	else if (getChannel(tokens[0]).isMember(client) == false)
+		return (-3);
+    else if (userExists(tokens[1]) == false)
+        return (-4);
 	else if (getChannel(tokens[0]).isMember(getClient(tokens[1])) == false)
-		return -4;
+		return (-4);
+    else if (this->_listChannel[tokens[0]]->getStatusClient(client) != OP)
+        return (-5);
+    else if (tokens.size() == 2)
+        return (0);
     else
-    {
-        if (this->_listChannel[tokens[0]]->getStatusClient(client) == OP && tokens.size() == 2)
-            return (0);
-        else if (this->_listChannel[tokens[0]]->getStatusClient(client) == OP && tokens.size() > 2)
-            return (1);
-        else
-            return (-5);
-    }
+        return (1);
 }
 
 int Server::parserCmdKickMulti(const std::vector<std::string> &tokens, Client &client, bool multiUser)

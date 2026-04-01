@@ -141,7 +141,9 @@ void    Server::processParser(Client &client)
                                             for (size_t i = 2; i < tokens.size(); i++)
                                                 tokens[2] += tokens[i];
                                         }
-                                        sendMsg(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), getClient(tokens[1]));
+                                        std::string msg = tokens[2];
+                                        both(msg);
+                                        sendMsg(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], msg), getClient(tokens[1]));
                                     }
                                     else if (flag == 1)
                                     {
@@ -150,7 +152,9 @@ void    Server::processParser(Client &client)
                                             for (size_t i = 2; i < tokens.size(); i++)
                                                 tokens[2] += tokens[i];
                                         }
-                                        sendMsgChan(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], tokens[2]), *this->_listChannel[tokens[1]], client.getFd());
+                                        std::string msg = tokens[2];
+                                        both(msg);
+                                        sendMsgChan(MSG_PRIVMSG(client.getNick(), client.getUser(), client.getAddress(), tokens[1], msg), *this->_listChannel[tokens[1]], client.getFd());
                                     }
                                     else if (flag == -1)
                                         sendMsg(ERR_NORECIPIENT(SERVER_NAME, client.getNick()), client);
@@ -168,7 +172,6 @@ void    Server::processParser(Client &client)
                                         std::vector<std::string> tokenSub(tokens.begin() + chanval, tokens.end());
                                         if (tokenSub.size() < 2)
                                         {
-                                            std::cout << "je suis la numeros 1\n\n\n";
                                             sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
                                             break;
                                         }
@@ -177,18 +180,12 @@ void    Server::processParser(Client &client)
                                         else if (tokenSub[0].find(',') != std::string::npos && tokenSub[1].find(',') == std::string::npos)
                                             parserCmdKickMulti(tokenSub, client, false);
                                         else if (tokenSub[0].find(',') == std::string::npos && tokenSub[1].find(',') != std::string::npos)
-                                        {
-                                            std::cout << "je suis la numeros 2\n\n\n";
                                             sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
-                                        }
                                         else
                                         {
                                             flag = parserCmdKick(tokenSub, client);
                                             if (flag == -1)
-                                            {  
-                                                std::cout << "je suis la numeros 3\n\n\n";
                                                 sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
-                                            }
                                             else if (flag == -2)
                                                 sendMsg(ERR_NOSUCHCHANNEL(SERVER_NAME, tokenSub[0]), client);
                                             else if (flag == -3)
@@ -204,15 +201,11 @@ void    Server::processParser(Client &client)
                                         }
                                     }
                                     else
-                                    {
-                                                                                    std::cout << "je suis pas pas la numeros 1\n\n\n";
                                         sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
-                                    }
                                 }
                                 break ;
                             case 5: //INVITE
                                 flag = parserCmdInvite(tokens, client);
-								std::cout << "FLAGS OK" << std::endl;
 								if (flag == -1)
 									sendMsg(ERR_NEEDMOREPARAMS(SERVER_NAME, client.getNick(), tokens[0]), client);
 								else if (flag == -2)

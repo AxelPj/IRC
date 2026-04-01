@@ -41,7 +41,7 @@
 #define ERR_NEEDMOREPARAMS(server, client, command) (std::string(":") + server + " 461 " + client + " " + command + " :Not enough parameters\r\n")
 #define ERR_ALREADYREGISTERED(server, client) (std::string(":") + server + " 462 " + client + " :You may not reregister\r\n")
 #define ERR_KEYSET(server, client, channel) (std::string(":") + server + " 467 " + client + " " + channel + " :Channel key already set\r\n")
-#define ERR_INVALIDUSERNAME(server, client) (std::string(":") + server + " 468 " + client + " :Erroneous username\r\n")
+#define ERR_INVALIDUSERNAME(server, client) (std::string(":") + server + " 468 " + client + " :Errone ous username\r\n")
 #define ERR_CHANNELISFULL(server, client, channel) (std::string(":") + server + " 471 " + client + " " + channel + " :Cannot join channel (+l)\r\n")
 #define ERR_UNKNOWNMODE(server, client, mode) (std::string(":") + server + " 472 " + client + " " + mode + " :is unknown mode char to me\r\n")
 #define ERR_INVITEONLYCHAN(server, client, channel) (std::string(":") + server + " 473 " + client + " " + channel + " :Cannot join channel (+i)\r\n")
