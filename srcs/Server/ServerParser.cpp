@@ -34,7 +34,7 @@ void    Server::processParser(Client &client)
     size_t pos = 0;
     int flag;
 
-    while ((pos = buffer.find("\r\n")) != std::string::npos)
+    while ((pos = buffer.find("\r\n")) != std::string::npos || (pos = buffer.find("\n")) != std::string::npos)
     {
         std::string line = buffer.substr(0, pos);
         if (!line.empty())
@@ -62,6 +62,7 @@ void    Server::processParser(Client &client)
 					}
 					else
 					{
+                        std::cout << "je suis dans la boucle    ";
                         switch(choiceParser(tokens))
                         {
                             case 0: //NICK
