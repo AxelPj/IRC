@@ -1,2 +1,8 @@
+# Exécutable
 ircserv
-objs/*
+
+# Fichiers compilés
+objs/
+build/
+*.o
+*.a
